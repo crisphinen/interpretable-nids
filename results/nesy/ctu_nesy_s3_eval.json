@@ -1,0 +1,78 @@
+{
+  "dataset": "ctu",
+  "model": "nesy",
+  "seed": 3,
+  "known_f1": 0.933582004714552,
+  "ood_auroc": 0.87639338,
+  "tpr_at_5fpr": 0.4818,
+  "mean_crispness": 1.0,
+  "gate_alpha": 0.3563936650753021,
+  "crispness_per_rule": {
+    "ddos_high_rate": 1.0,
+    "cc_heartbeat_beaconing": 1.0,
+    "benign_single_probe": 1.0,
+    "okiru_low_rate": 1.0,
+    "asymmetric_flood": 1.0,
+    "persistent_connection": 1.0,
+    "incomplete_handshake": 1.0,
+    "ddos_short_burst": 1.0
+  },
+  "editing_results": {
+    "ddos_high_rate": {
+      "base_acc": 0.9340579509735107,
+      "acc_forced_hi": 0.9340579509735107,
+      "acc_forced_lo": 0.9340579509735107,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "cc_heartbeat_beaconing": {
+      "base_acc": 0.9340579509735107,
+      "acc_forced_hi": 0.9340579509735107,
+      "acc_forced_lo": 0.9340579509735107,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "benign_single_probe": {
+      "base_acc": 0.9340579509735107,
+      "acc_forced_hi": 0.9340579509735107,
+      "acc_forced_lo": 0.9340579509735107,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "okiru_low_rate": {
+      "base_acc": 0.9340579509735107,
+      "acc_forced_hi": 0.9340579509735107,
+      "acc_forced_lo": 0.9340579509735107,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "asymmetric_flood": {
+      "base_acc": 0.9340579509735107,
+      "acc_forced_hi": 0.9340579509735107,
+      "acc_forced_lo": 0.9340579509735107,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "persistent_connection": {
+      "base_acc": 0.9340579509735107,
+      "acc_forced_hi": 0.9340579509735107,
+      "acc_forced_lo": 0.9340579509735107,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "incomplete_handshake": {
+      "base_acc": 0.9340579509735107,
+      "acc_forced_hi": 0.9340579509735107,
+      "acc_forced_lo": 0.9340579509735107,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "ddos_short_burst": {
+      "base_acc": 0.9340579509735107,
+      "acc_forced_hi": 0.9340579509735107,
+      "acc_forced_lo": 0.9340579509735107,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    }
+  }
+}

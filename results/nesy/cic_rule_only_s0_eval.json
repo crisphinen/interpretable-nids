@@ -1,0 +1,78 @@
+{
+  "dataset": "cic",
+  "model": "rule_only",
+  "seed": 0,
+  "known_f1": 0.7560998720409767,
+  "ood_auroc": 0.69258084,
+  "tpr_at_5fpr": 0.2698,
+  "mean_crispness": 0.6645133333333333,
+  "gate_alpha": NaN,
+  "crispness_per_rule": {
+    "syn_flood_ddos": 0.95856,
+    "udp_mirai_flood": 0.8894933333333334,
+    "recon_port_scan": 0.9934133333333334,
+    "vuln_scan": 0.9047466666666667,
+    "benign_low_rate": 0.22397333333333333,
+    "large_payload_flood": 0.96416,
+    "high_entropy_scan": 0.14213333333333333,
+    "short_connection_flood": 0.23962666666666665
+  },
+  "editing_results": {
+    "syn_flood_ddos": {
+      "base_acc": 0.7587733268737793,
+      "acc_forced_hi": 0.39717334508895874,
+      "acc_forced_lo": 0.55677330493927,
+      "delta_hi": -0.36159998178482056,
+      "delta_lo": -0.20200002193450928
+    },
+    "udp_mirai_flood": {
+      "base_acc": 0.7587733268737793,
+      "acc_forced_hi": 0.6841866374015808,
+      "acc_forced_lo": 0.5349599719047546,
+      "delta_hi": -0.07458668947219849,
+      "delta_lo": -0.22381335496902466
+    },
+    "recon_port_scan": {
+      "base_acc": 0.7587733268737793,
+      "acc_forced_hi": 0.5960266590118408,
+      "acc_forced_lo": 0.7460799813270569,
+      "delta_hi": -0.16274666786193848,
+      "delta_lo": -0.012693345546722412
+    },
+    "vuln_scan": {
+      "base_acc": 0.7587733268737793,
+      "acc_forced_hi": 0.654533326625824,
+      "acc_forced_lo": 0.7309066653251648,
+      "delta_hi": -0.10424000024795532,
+      "delta_lo": -0.027866661548614502
+    },
+    "benign_low_rate": {
+      "base_acc": 0.7587733268737793,
+      "acc_forced_hi": 0.6677600145339966,
+      "acc_forced_lo": 0.5991466641426086,
+      "delta_hi": -0.09101331233978271,
+      "delta_lo": -0.15962666273117065
+    },
+    "large_payload_flood": {
+      "base_acc": 0.7587733268737793,
+      "acc_forced_hi": 0.5565066933631897,
+      "acc_forced_lo": 0.5557066798210144,
+      "delta_hi": -0.2022666335105896,
+      "delta_lo": -0.2030666470527649
+    },
+    "high_entropy_scan": {
+      "base_acc": 0.7587733268737793,
+      "acc_forced_hi": 0.5719733238220215,
+      "acc_forced_lo": 0.6574133038520813,
+      "delta_hi": -0.1868000030517578,
+      "delta_lo": -0.101360023021698
+    },
+    "short_connection_flood": {
+      "base_acc": 0.7587733268737793,
+      "acc_forced_hi": 0.6908000111579895,
+      "acc_forced_lo": 0.7026933431625366,
+      "delta_hi": -0.0679733157157898,
+      "delta_lo": -0.056079983711242676
+    }
+  }
+}
