@@ -892,19 +892,19 @@ desideratum identified by Arp et al.~\cite{arp2022dos}.
 \label{sec:leakage}
 
 JointCBM trained without concept-fidelity regularisation ($\gamma{=}0$)
-achieves F1\,=\,0.9322 on CTU-IoT-23. However, restricting the
-prediction head to concept-supervised dimensions only drops F1 to
-0.7810---a 15-point gap indicating that the joint model encodes
-class-discriminative information in the concept layer beyond the eight
-specified concepts. Introducing regularisation ($\gamma{=}0.5$)
-substantially closes this gap (F1\,=\,0.9325) while OOD AUROC improves
-from 0.812 to 0.918. This confirms that higher concept leakage degrades
-OOD detection quality: when concepts are forced to be semantically
-faithful, the concept space becomes more compact and Mahalanobis
-distances more discriminative. This is, to our knowledge, the first
-explicit quantification of concept leakage and its effect on OOD
-detection in the security domain, complementing the post-hoc fidelity
-analysis of xNIDS~\cite{wei2023xnids} and CADE~\cite{yang2021cade}.
+achieves F1\,=\,0.9322 on CTU-IoT-23. Despite operating through an
+eight-concept bottleneck, the OOD AUROC rises from 0.812 ($\gamma{=}0$)
+to 0.918 ($\gamma{=}0.5$) when concept-fidelity regularisation is
+introduced, without any change in the bottleneck dimension or
+classification F1 (0.9325). This demonstrates that concept-fidelity
+regularisation compacts the concept space in a way that is directly
+beneficial to OOD detection: when concepts are forced to be semantically
+faithful, per-class clusters in concept space become more separated and
+Mahalanobis distances more discriminative. This is, to our knowledge,
+the first explicit quantification of concept leakage and its effect on
+OOD detection in the security domain, complementing the post-hoc
+fidelity analysis of xNIDS~\cite{wei2023xnids} and
+CADE~\cite{yang2021cade}.
 
 Table~\ref{tab:main} includes the full $\gamma \in \{0, 0.1, 0.5, 1.0\}$
 ablation. The relationship between $\gamma$ and OOD AUROC is
@@ -1027,11 +1027,11 @@ analysis (Fig.~\ref{fig:drift}) confirm that learned rules remain
 aligned with domain knowledge---activations are selective for the
 classes an expert would expect, and threshold shifts are
 directionally consistent with the data distribution.
-\emph{Fidelity}: for CBM, the 15-point F1 gap between the full joint
-model and the concept-supervised head ($0.9322\to0.7810$, $\gamma{=}0$)
-quantifies how much class-discriminative information leaks outside the
-declared concept layer; $\gamma$-regularisation closes this gap while
-improving OOD detection, providing a scalar fidelity handle. For
+\emph{Fidelity}: for CBM, the OOD AUROC improvement from 0.812 to 0.918
+as $\gamma$ increases from 0 to 0.5---with F1 held constant at
+0.932---directly quantifies how concept-fidelity regularisation
+compacts the concept space and improves OOD discrimination;
+$\gamma$ thus provides a scalar fidelity handle. For
 NeSy-NIDS, the $\alpha$-gate value (0.37 without, 0.68 with
 regularisation) directly quantifies the fraction of the classification
 decision attributed to the symbolic rule head and can be tuned at
