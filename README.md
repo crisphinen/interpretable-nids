@@ -132,11 +132,15 @@ model = torch.load('results/cbm/ctu_JointCBM_g0.5.pt', map_location='cpu')
 | Model | CTU F1 | CTU AUROC | CIC F1 | CIC AUROC |
 |---|---|---|---|---|
 | MLP Baseline | 0.9323 | 0.913 | 0.8188 | 0.858 |
+| SequentialCBM | 0.5731 | 0.678 | 0.7173 | **0.839** |
+| HybridCBM | 0.9322 | 0.816 | 0.8181 | 0.808 |
 | JointCBM (γ=0.5) | 0.9325 | **0.918**±0.019 | 0.8154 | 0.591 |
 | **NeSy-NIDS** | **0.9336** | 0.911±0.011 | **0.8203** | 0.616±0.013 |
-| Decision Tree† | 0.9350 | 0.335 | 0.8116 | **0.809** |
+| Decision Tree† | 0.9350 | 0.335 | 0.8116 | 0.809 |
 
-† OOD via raw-feature Mahalanobis. The DT outperforming on CIC is the central *compression failure* finding.
+† OOD via raw-feature Mahalanobis.
+
+**Central finding — task-coupling OOD penalty:** OOD detectability on CIC-IoT-2023 degrades in proportion to how strongly bottleneck training is coupled to the classification objective, not due to compression per se. SequentialCBM (concepts learned independently of the task head) achieves AUROC=0.839 on CIC — *exceeding* the Decision Tree baseline (0.809) — despite compressing 39 raw features to the same 8-dimensional concept space. JointCBM degrades monotonically from 0.627 (γ=1.0) to 0.452 (γ=0.1) as task coupling increases; NeSy-NIDS (end-to-end rule learning) reaches 0.616. On CTU-IoT-23, the DT's near-random AUROC=0.335 reflects its reliance on the Telnet port flag (35% importance) — a class-specific artefact that provides no distributional signal for OOD, confirming that raw features are not universally better.
 
 ---
 
