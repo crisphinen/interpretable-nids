@@ -69,12 +69,15 @@ CIC-IoT-2023, neither method incurs any classification accuracy cost
 (F1 within $\pm0.0015$ of an unconstrained MLP). On CTU-IoT-23,
 rule-space Mahalanobis achieves OOD AUROC\,=\,0.911
 ($\sigma$\,=\,0.011), competitive with the best CBM variant (0.918).
-On CIC-IoT-2023, both bottleneck architectures fall below the MLP
-baseline (0.616/0.591 vs.\ 0.858), a result we attribute to a
-\emph{compression-structural} effect: reducing 39 raw features to 8
-rule or concept dimensions discards information necessary to separate
-the 29 unknown attack families, as confirmed by a Decision Tree
-baseline achieving AUROC\,=\,0.809 on raw features. NeSy-NIDS
+On CIC-IoT-2023, OOD performance depends critically on how tightly
+bottleneck training is coupled to the classification objective.
+SequentialCBM, which learns concepts independently of the task head,
+achieves AUROC\,=\,0.839---exceeding the Decision Tree baseline
+(0.809)---while JointCBM degrades monotonically from 0.627
+($\gamma{=}1.0$) to 0.452 ($\gamma{=}0.1$) and NeSy-NIDS reaches
+0.616. We term this the \emph{task-coupling OOD penalty}: jointly
+optimising the bottleneck for classification collapses the
+distributional spread required for Mahalanobis OOD separation. NeSy-NIDS
 additionally provides semantically consistent threshold drift and a
 controllable interpretability-vs-OOD trade-off via
 $\alpha$-regularisation, at zero F1 cost.
@@ -141,15 +144,14 @@ human-interpretable.
 \smallskip
 \noindent\textbf{Contributions:}
 \begin{enumerate}
-  \item \textbf{Compression-induced OOD failure}: we identify and
-    geometrically explain a structural failure mode that arises when
-    compressing 39 raw features to 8 bottleneck dimensions on
-    CIC-IoT-2023.
-    The 29 unknown attack families collapse into the known-class
-    Mahalanobis region in concept/rule space (89.7\% overlap),
-    while a Decision Tree on raw features achieves AUROC\,=\,0.809,
-    confirming the failure is caused by compression, not model choice.
-    This analysis applies to any bottleneck-style architecture.
+  \item \textbf{Task-coupling OOD penalty}: we identify and explain a
+    failure mode specific to jointly trained bottleneck architectures on
+    CIC-IoT-2023. OOD AUROC degrades monotonically with task-coupling
+    strength (SequentialCBM: 0.839 $>$ DT: 0.809 $>$ JointCBM
+    $\gamma{=}1.0$: 0.627 $>$ NeSy-NIDS: 0.616 $>$ JointCBM
+    $\gamma{=}0.1$: 0.452), demonstrating that joint optimisation for
+    classification---not compression per se---destroys the distributional
+    spread required for Mahalanobis OOD separation.
   \item \textbf{Zero accuracy cost}: a first joint evaluation of CBMs
     and differentiable rule learning for IoT NIDS, demonstrating that
     neither architecture sacrifices classification accuracy relative to
@@ -917,8 +919,11 @@ maximising CTU AUROC. At $\gamma{=}1.0$ concept accuracy further
 improves (CTU: 0.927; CIC: 0.977) but CTU OOD slightly regresses
 ($0.918\to0.864$), suggesting marginal over-constraint of the concept
 bottleneck. On CIC, $\gamma{=}0.5$ and $\gamma{=}1.0$ converge
-(AUROC: 0.591 vs.\ 0.627), confirming that the structural overlap
-limit---not regularisation strength---governs OOD performance there.
+(AUROC: 0.591 vs.\ 0.627), indicating that once task coupling is
+substantial, additional regularisation within the joint training
+regime yields diminishing OOD returns; decoupled training
+(SequentialCBM: 0.839) is required to escape the task-coupling OOD
+penalty entirely.
 
 \subsection{Computational Overhead}
 \label{sec:compute}
@@ -961,10 +966,14 @@ constraints of a commodity IoT gateway or network tap.
 CTU-IoT-23 has four well-separated known classes whose traffic profiles
 map cleanly within eight expert rules. CIC-IoT-2023's 29 unknown attack
 families largely share high-level characteristics (high packet rate,
-short connections) with known attacks, causing overlap in the rule
-space. This aligns with Fort et al.~\cite{fort2021exploring}:
-the coverage of the rule or concept vocabulary is the limiting factor
-for OOD performance.
+short connections) with known attacks, causing overlap in jointly
+trained rule and concept spaces. This aligns with Fort
+et al.~\cite{fort2021exploring}: representation quality governs
+Mahalanobis OOD performance. Our results refine this
+finding---SequentialCBM's decoupled concept space achieves AUROC\,=\,0.839
+despite the same 39$\to$8 compression, demonstrating that the
+representation quality bottleneck is introduced by joint task
+optimisation, not by vocabulary size alone.
 
 \textbf{Inherent vs.\ post-hoc interpretability.}
 xNIDS~\cite{wei2023xnids} achieves high-fidelity post-hoc explanations
@@ -1051,11 +1060,12 @@ NIDS on CTU-IoT-23 and CIC-IoT-2023. Both architectures match
 unconstrained MLP classification accuracy while delivering
 human-auditable intermediate representations. On CTU-IoT-23, both
 achieve competitive OOD AUROC (up to 0.918), substantially
-outperforming classical rule-based models. On CIC-IoT-2023, a
-structural compression effect limits OOD detection: the 8-rule/concept
-vocabulary is insufficient to separate 29 heterogeneous unknown attack
-families, a failure confirmed and explained by a raw-feature Decision
-Tree baseline.
+outperforming classical rule-based models. On CIC-IoT-2023, OOD detectability is governed by task-coupling
+strength, not compression: SequentialCBM (decoupled training) achieves
+AUROC\,=\,0.839, exceeding the DT baseline (0.809), while jointly
+trained variants degrade monotonically with coupling strength---a
+\emph{task-coupling OOD penalty} that applies to any bottleneck
+architecture trained end-to-end against the classification objective.
 
 NeSy-NIDS contributes 100\% crisp binary rule activations,
 semantically consistent threshold drift, and a controllable
