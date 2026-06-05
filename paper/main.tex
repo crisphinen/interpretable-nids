@@ -66,7 +66,7 @@ by a learnable mixing coefficient $\alpha$. Both architectures
 independently use Mahalanobis distance in their respective
 representation spaces for open-set scoring. On CTU-IoT-23 and
 CIC-IoT-2023, neither method incurs any classification accuracy cost
-(F1 within $\pm0.0015$ of an unconstrained MLP). On CTU-IoT-23,
+(F1 within $\pm0.004$ of an unconstrained MLP). On CTU-IoT-23,
 rule-space Mahalanobis achieves OOD AUROC\,=\,0.909
 ($\sigma$\,=\,0.017), comparable to the unconstrained MLP baseline (0.913).
 On CIC-IoT-2023, OOD performance depends critically on how tightly
@@ -156,7 +156,7 @@ human-interpretable.
     and differentiable rule learning for IoT NIDS under open-set
     evaluation conditions, validating that neither architecture
     sacrifices classification accuracy relative to an unconstrained MLP
-    (F1 within $\pm0.0015$ across both datasets and all seeds).
+    (F1 within $\pm0.004$ across both datasets).
   \item \textbf{100\% rule crispness}: NeSy-NIDS with $k$-annealing
     and STE produces strictly binary rule activations at inference
     without a post-quantisation step, yielding syntactically
@@ -626,7 +626,7 @@ variants.
 Table~\ref{tab:main} summarises all results. Both NeSy-NIDS and
 JointCBM ($\gamma{=}0.5$) match the unconstrained MLP on both datasets.
 The F1 gap between NeSy-NIDS and MLP is $+0.0013$ on CTU-IoT-23 and
-$+0.0015$ on CIC-IoT-2023---within one standard deviation. This
+$+0.0032$ on CIC-IoT-2023---within one standard deviation. This
 validates the zero-accuracy-cost finding of~\cite{koh2020concept}
 in the IoT NIDS domain under open-set evaluation conditions, and
 demonstrates that interpretable constraints carry no performance
