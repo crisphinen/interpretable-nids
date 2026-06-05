@@ -67,8 +67,8 @@ independently use Mahalanobis distance in their respective
 representation spaces for open-set scoring. On CTU-IoT-23 and
 CIC-IoT-2023, neither method incurs any classification accuracy cost
 (F1 within $\pm0.0015$ of an unconstrained MLP). On CTU-IoT-23,
-rule-space Mahalanobis achieves OOD AUROC\,=\,0.911
-($\sigma$\,=\,0.011), the highest OOD AUROC of any model on CTU-IoT-23.
+rule-space Mahalanobis achieves OOD AUROC\,=\,0.909
+($\sigma$\,=\,0.017), comparable to the unconstrained MLP baseline (0.913).
 On CIC-IoT-2023, OOD performance depends critically on how tightly
 bottleneck training is coupled to the classification objective.
 SequentialCBM, which learns concepts independently of the task head,
@@ -338,11 +338,11 @@ class-discriminative information beyond the declared concept layer.
 \emph{SequentialCBM}: $g$ is trained and frozen first; $h$ is then
 trained on $\hat{\mathbf{c}}$, decoupling concept learning from
 classification.
-\emph{HybridCBM}: concepts are split into two groups---a supervised
-subset (with binary targets, as in JointCBM) and an unsupervised
-subset (learned freely without concept labels)---allowing the model to
-capture latent structure beyond the declared concept vocabulary while
-retaining partial interpretability.
+\emph{HybridCBM}: extends JointCBM with a skip connection---the
+encoder embedding is appended to the concept predictions before the
+classifier---allowing the model to leverage latent structure beyond the
+declared concept vocabulary while retaining interpretability at the
+concept layer.
 
 \textbf{OOD scoring.}
 Concept activation vectors from training samples are used to fit
@@ -708,8 +708,8 @@ Post-hoc CBM$^\star$
   & 0.7257 & 0.623 & 0.076 \\
 \midrule
 \textbf{NeSy-NIDS}
-  & \textbf{0.9336} & $\mathbf{0.911\pm0.011}$ & 0.514
-  & $\mathbf{0.8203\pm0.001}$ & $\mathbf{0.616\pm0.013}$ & $0.232\pm0.041$ \\
+  & \textbf{0.9336} & $\mathbf{0.909\pm0.017}$ & $0.589\pm0.101$
+  & $\mathbf{0.8220}$ & 0.613 & 0.255 \\
 NeSy + $\alpha$-reg
   & 0.9336 & $0.895\pm0.023$ & 0.505
   & 0.8205 & $0.634\pm0.021$ & 0.236 \\
@@ -745,16 +745,19 @@ structure.
 
 \textbf{CTU-IoT-23.}
 Rule-space and concept-space Mahalanobis scoring are both highly
-effective. NeSy-NIDS achieves AUROC\,=\,0.911 ($\sigma$\,=\,0.011)---the
-highest OOD AUROC of any model on CTU-IoT-23---while JointCBM
+effective. NeSy-NIDS achieves AUROC\,=\,0.909 ($\sigma$\,=\,0.017)---comparable
+to the unconstrained MLP baseline (0.913)---while JointCBM
 ($\gamma{=}0.5$) achieves 0.884. Both substantially outperform the DT
 (0.335) and RF (0.627), which apply Mahalanobis to the raw
 37-dimensional feature space. The DT AUROC of 0.335 is below random
 (0.5), indicating that greedy classification splits produce
 representations that are \emph{harder} to use for OOD separation than
-either the rule or concept space. The primary positive result is that
-interpretability does not reduce OOD detection; it improves it relative
-to classical rule-based models.
+either the rule or concept space. The MLP baseline itself achieves
+AUROC\,=\,0.913 via Mahalanobis in its learned 64-dimensional embedding,
+confirming that the interpretable bottleneck does not sacrifice OOD
+performance. The primary positive result is that
+interpretability does not reduce OOD detection; it is competitive with the
+unconstrained MLP and substantially improves it relative to classical rule-based models.
 
 \textbf{CIC-IoT-2023.}
 The CIC results reveal a strong dependence of OOD detectability on the
@@ -875,9 +878,9 @@ expert-specified rules rather than arbitrary deviation.
 Without regularisation, NeSy-NIDS converges to $\alpha{=}0.37$ on
 CTU-IoT-23 and $\alpha{=}0.27$ on CIC-IoT-2023, indicating that the
 neural fallback carries substantial weight. With $\lambda_\alpha{=}0.1$,
-the gate rises to $\alpha{=}0.68$ and $0.85$ respectively, at zero F1
-cost. On CTU-IoT-23, higher $\alpha$ incurs a minor OOD cost
-(AUROC: $0.911\to0.895$), consistent with the rule head displacing a
+the gate rises to $\alpha{=}0.68$ and $0.85$ respectively (seed~0), at
+zero F1 cost. On CTU-IoT-23, higher $\alpha$ incurs a minor OOD cost
+(AUROC: $0.909\to0.895$), consistent with the rule head displacing a
 neural head whose embedding was more OOD-compact. On CIC-IoT-2023, OOD
 AUROC marginally improves under $\alpha$-regularisation
 ($0.616\to0.634$), since the rule-dominant embedding is more tightly
@@ -1079,7 +1082,8 @@ interpretable architectures---CBMs and NeSy-NIDS---for open-set IoT
 NIDS on CTU-IoT-23 and CIC-IoT-2023. Both architectures match
 unconstrained MLP classification accuracy while delivering
 human-auditable intermediate representations. On CTU-IoT-23, both
-achieve competitive OOD AUROC (up to 0.911), substantially
+achieve competitive OOD AUROC (up to 0.909, comparable to the
+unconstrained MLP baseline of 0.913), substantially
 outperforming classical rule-based models. On CIC-IoT-2023, OOD detectability is governed by task-coupling
 strength, not compression: SequentialCBM (decoupled training) achieves
 AUROC\,=\,0.839, exceeding the DT baseline (0.809), while jointly

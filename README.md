@@ -135,12 +135,12 @@ model = torch.load('results/cbm/ctu_JointCBM_g0.5.pt', map_location='cpu')
 | SequentialCBM | 0.5731 | 0.678 | 0.7173 | **0.839** |
 | HybridCBM | 0.9322 | 0.816 | 0.8181 | 0.808 |
 | JointCBM (γ=0.5) | 0.9325 | 0.884 | 0.8154 | 0.591 |
-| **NeSy-NIDS** | **0.9336** | **0.911**±0.011 | **0.8203** | 0.616±0.013 |
-| Decision Tree† | 0.9350 | 0.335 | 0.8116 | 0.809 |
+| **NeSy-NIDS** | **0.9336** | **0.909**±0.017 | **0.8220**† | 0.613† |
+| Decision Tree‡ | 0.9350 | 0.335 | 0.8116 | 0.809 |
 
-† OOD via raw-feature Mahalanobis. CBM results are single runs; NeSy-NIDS is mean±std over 5 seeds.
+‡ OOD via raw-feature Mahalanobis. CBM results are single runs; NeSy-NIDS CTU is mean±std over 5 seeds (0–4). † CIC NeSy values are from seed 0 (seeds 1–4 require the 627 MB test split not archived in this repo).
 
-**Central finding — task-coupling OOD penalty:** OOD detectability on CIC-IoT-2023 degrades in proportion to how strongly bottleneck training is coupled to the classification objective, not due to compression per se. SequentialCBM (concepts learned independently of the task head) achieves AUROC=0.839 on CIC — *exceeding* the Decision Tree baseline (0.809) — despite compressing 39 raw features to the same 8-dimensional concept space. JointCBM degrades monotonically from 0.627 (γ=1.0) to 0.452 (γ=0.1) as task coupling increases; NeSy-NIDS (end-to-end rule learning) reaches 0.616. On CTU-IoT-23, NeSy-NIDS achieves the highest OOD AUROC of any model (0.911±0.011). The DT's near-random AUROC=0.335 reflects its reliance on the Telnet port flag (35% importance) — a class-specific artefact providing no distributional signal for OOD, confirming that raw-feature representations are not universally better than interpretable bottlenecks.
+**Central finding — task-coupling OOD penalty:** OOD detectability on CIC-IoT-2023 degrades in proportion to how strongly bottleneck training is coupled to the classification objective, not due to compression per se. SequentialCBM (concepts learned independently of the task head) achieves AUROC=0.839 on CIC — *exceeding* the Decision Tree baseline (0.809) — despite compressing 39 raw features to the same 8-dimensional concept space. JointCBM degrades monotonically from 0.627 (γ=1.0) to 0.452 (γ=0.1) as task coupling increases; NeSy-NIDS (end-to-end rule learning) reaches 0.613 (seed 0). On CTU-IoT-23, NeSy-NIDS achieves AUROC=0.909±0.017, comparable to the unconstrained MLP baseline (0.913). The DT's near-random AUROC=0.335 reflects its reliance on the Telnet port flag (35% importance) — a class-specific artefact providing no distributional signal for OOD, confirming that raw-feature representations are not universally better than interpretable bottlenecks.
 
 ---
 
