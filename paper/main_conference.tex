@@ -1,4 +1,5 @@
-\documentclass[journal]{IEEEtran}
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -27,19 +28,18 @@
 \title{Towards Trustworthy Network Security: Evaluating Concept-Based
   Interpretability and Neuro-Symbolic Out-of-Distribution Detection}
 
-\author{Crisphine~Macharia~Ngari,~Ning~Yang,~and~Ning~Weng%
-  \thanks{Manuscript submitted to IEEE Transactions on Information Forensics
-    and Security.}%
-  \thanks{C.~M.~Ngari and N.~Weng are with the School of Electrical,
-    Computer and Biomedical Engineering, Southern Illinois University
-    Carbondale, Carbondale, IL~62901~USA
-    (e-mail: c.ngari@siu.edu; nweng@siu.edu).
-    Corresponding author: C.~M.~Ngari.}%
-  \thanks{N.~Yang is with the School of Computing, Southern Illinois
-    University Carbondale, Carbondale, IL~62901~USA
-    (e-mail: nyang@siu.edu).}%
-  \thanks{Code and pre-trained models are publicly available at
-    \url{https://github.com/crisphinen/interpretable-nids}.}%
+\author{
+  \IEEEauthorblockN{Crisphine Macharia Ngari, Ning Weng}
+  \IEEEauthorblockA{\textit{School of Electrical, Computer and Biomedical Engineering}\\
+    Southern Illinois University Carbondale\\
+    Carbondale, IL 62901, USA\\
+    c.ngari@siu.edu, nweng@siu.edu}
+  \and
+  \IEEEauthorblockN{Ning Yang}
+  \IEEEauthorblockA{\textit{School of Computing}\\
+    Southern Illinois University Carbondale\\
+    Carbondale, IL 62901, USA\\
+    nyang@siu.edu}
 }
 
 \begin{document}
@@ -1067,13 +1067,9 @@ discovery, hierarchical architectures that combine concept-level and
 rule-level bottlenecks, and generalisation to enterprise-scale traffic
 where the ratio of known to unknown attack classes is less favourable.
 
-\begin{flushleft}
-\small\textbf{Declaration of Generative AI Usage.}
-During the preparation of this manuscript, the authors used a
-generative AI tool to improve readability and language clarity. All
-AI-assisted text was carefully reviewed and edited; the authors take
-full responsibility for the accuracy and integrity of the publication.
-\end{flushleft}
+\section*{Acknowledgment}
+Code and pre-trained models are available at
+\url{https://github.com/crisphinen/interpretable-nids}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
