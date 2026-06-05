@@ -3,6 +3,8 @@
 **IEEE Transactions on Information Forensics and Security (TIFS)**  
 Crisphine Macharia Ngari, Ning Yang, Ning Weng — Southern Illinois University Carbondale
 
+[![GitHub](https://img.shields.io/badge/GitHub-crisphinen%2Finterpretable--nids-blue?logo=github)](https://github.com/crisphinen/interpretable-nids)
+
 ---
 
 ## Overview
