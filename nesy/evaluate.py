@@ -57,7 +57,6 @@ def load_known_val(dataset: str, device: torch.device):
 
 
 def load_unknown_test(dataset: str, device: torch.device, n_sample: int = 10000):
-    """Load unknown (OOD) test samples. Subsample to n_sample."""
     if dataset == "ctu":
         data_dir = PROJECT_ROOT / "data"
         vocab = json.loads((data_dir / "vocab.json").read_text())
@@ -144,11 +143,7 @@ def _mahalanobis_scores(emb_known: np.ndarray, emb_unknown: np.ndarray,
 
 @torch.no_grad()
 def compute_ood_auroc(model, X_known, X_unknown):
-    """
-    OOD AUROC using Mahalanobis distance on rule activation vectors.
-    Rule activations form an interpretable embedding space; Mahalanobis on
-    this space measures how far a sample is from the known-traffic manifold.
-    """
+    """Mahalanobis OOD on rule activations: uses interpretable embedding space, not raw features."""
     emb_known  = model.get_embedding(X_known,  k=K_EVAL).cpu().numpy()
     emb_unknown = model.get_embedding(X_unknown, k=K_EVAL).cpu().numpy()
 
@@ -175,7 +170,6 @@ def compute_ood_auroc(model, X_known, X_unknown):
 
 
 def tpr_at_fpr(model, X_known, X_unknown, target_fpr=0.05):
-    """TPR@5%FPR for OOD detection using Mahalanobis on rule activations."""
     with torch.no_grad():
         emb_known  = model.get_embedding(X_known,  k=K_EVAL).cpu().numpy()
         emb_unknown = model.get_embedding(X_unknown, k=K_EVAL).cpu().numpy()

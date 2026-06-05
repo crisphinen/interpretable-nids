@@ -174,7 +174,6 @@ def tpr_at_fpr(
     X_known: np.ndarray, X_unknown: np.ndarray,
     device: torch.device, fpr_target: float = 0.05
 ) -> float:
-    """Return TPR (unknown detection rate) at a given FPR on known samples."""
     model.eval()
     with torch.no_grad():
         emb_train = model.get_embedding(

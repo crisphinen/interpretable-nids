@@ -91,7 +91,6 @@ def ood_score_proba(model, X):
 
 
 def mahalanobis_ood(X_known_train, X_known_test, X_unknown, cap=20000):
-    """Mahalanobis distance OOD score in raw feature space."""
     from numpy.linalg import pinv
     if len(X_known_train) > cap:
         idx = np.random.choice(len(X_known_train), cap, replace=False)

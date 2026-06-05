@@ -152,14 +152,6 @@ class DiffRule(nn.Module):
 
     def forward(self, x: torch.Tensor, k: float = 1.0,
                 use_ste: bool = False) -> torch.Tensor:
-        """
-        x: (N, n_features)
-        k: steepness (higher = harder gates, approaches step function)
-        use_ste: Straight-Through Estimator — binary gate in forward pass,
-                 sigmoid gradient in backward pass. Gives exact 0/1 outputs
-                 at inference without quantization loss in training.
-        returns: (N,) rule activation scores in (0, 1)
-        """
         score = torch.ones(x.shape[0], device=x.device, dtype=x.dtype)
         for i, (feat_idx, ctype) in enumerate(
             zip(self.feature_indices, self.condition_types)
@@ -194,10 +186,6 @@ class DiffRule(nn.Module):
 
 
 class RuleBank(nn.Module):
-    """
-    M differentiable rules → class logits.
-    rule_scores (N, M) → W (M, n_classes) → logits (N, n_classes)
-    """
     def __init__(self, templates: List[RuleTemplate], n_classes: int):
         super().__init__()
         self.rules = nn.ModuleList([DiffRule(t) for t in templates])
@@ -209,7 +197,6 @@ class RuleBank(nn.Module):
         self.rule_importance = nn.Parameter(torch.ones(self.n_rules))
 
     def forward(self, x: torch.Tensor, k: float = 1.0, use_ste: bool = False):
-        """Returns logits (N, n_classes) and rule_scores (N, M)."""
         scores = torch.stack(
             [rule(x, k, use_ste=use_ste) for rule in self.rules], dim=1
         )  # (N, M)
@@ -244,15 +231,7 @@ class NeuralFallback(nn.Module):
 
 
 class NeSyNIDS(nn.Module):
-    """
-    Neuro-Symbolic NIDS model.
-
-    final_logits = α·rule_logits + (1−α)·neural_logits
-    where α = sigmoid(gate_weight) is learned per-sample or globally.
-
-    OOD scoring: max_j rule_score_j (rule confidence).
-    High = known pattern; low = unseen = likely OOD.
-    """
+    """final_logits = α·rule_logits + (1−α)·neural_logits; α = sigmoid(gate_weight)."""
     def __init__(
         self,
         in_dim: int,
@@ -279,11 +258,6 @@ class NeSyNIDS(nn.Module):
             self.global_gate = False
 
     def forward(self, x: torch.Tensor, k: float = 1.0, use_ste: bool = False):
-        """
-        Returns:
-          logits (N, n_classes) — combined prediction
-          rule_scores (N, M)   — raw rule activations for OOD + analysis
-        """
         rule_logits, rule_scores = self.rule_bank(x, k, use_ste=use_ste)
         neural_logits = self.neural_fallback(x)
 
@@ -296,11 +270,7 @@ class NeSyNIDS(nn.Module):
         return logits, rule_scores
 
     def get_ood_score(self, x: torch.Tensor, k: float = 10.0) -> torch.Tensor:
-        """
-        OOD score = max rule activation at hard k.
-        Higher = more confidence = LESS likely OOD.
-        Negate for AUROC (higher score → more OOD).
-        """
+        """Negated max rule confidence: high value = OOD (sign flip for AUROC convention)."""
         with torch.no_grad():
             scores = self.rule_bank.get_rule_activations(x, k)  # (N, M)
             max_rule_conf = scores.max(dim=1).values             # (N,)
