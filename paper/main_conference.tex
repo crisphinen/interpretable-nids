@@ -75,7 +75,7 @@ SequentialCBM, which learns concepts independently of the task head,
 achieves AUROC\,=\,0.839---exceeding the Decision Tree baseline
 (0.809)---while JointCBM degrades monotonically from 0.627
 ($\gamma{=}1.0$) to 0.452 ($\gamma{=}0.1$) and NeSy-NIDS reaches
-0.616. We term this the \emph{task-coupling OOD penalty}: jointly
+0.613. We term this the \emph{task-coupling OOD penalty}: jointly
 optimising the bottleneck for classification collapses the
 distributional spread required for Mahalanobis OOD separation. NeSy-NIDS
 additionally provides semantically consistent threshold drift and a
@@ -148,7 +148,7 @@ human-interpretable.
     failure mode specific to jointly trained bottleneck architectures on
     CIC-IoT-2023. OOD AUROC degrades monotonically with task-coupling
     strength (SequentialCBM: 0.839 $>$ DT: 0.809 $>$ JointCBM
-    $\gamma{=}1.0$: 0.627 $>$ NeSy-NIDS: 0.616 $>$ JointCBM
+    $\gamma{=}1.0$: 0.627 $>$ NeSy-NIDS: 0.613 $>$ JointCBM
     $\gamma{=}0.1$: 0.452), demonstrating that joint optimisation for
     classification---not compression per se---destroys the distributional
     spread required for Mahalanobis OOD separation.
@@ -771,7 +771,7 @@ achieves 0.808. By contrast, JointCBM degrades monotonically with
 stronger task coupling: from 0.627 ($\gamma{=}1.0$) down to 0.452
 ($\gamma{=}0.1$), and NeSy-NIDS---whose binary rule thresholds are
 learned end-to-end against the classification objective---reaches
-only 0.616. The pattern is consistent: representations optimised jointly
+only 0.613. The pattern is consistent: representations optimised jointly
 for task accuracy sacrifice the distributional spread required by
 Mahalanobis separation. We term this the
 \emph{task-coupling OOD penalty}.
@@ -883,7 +883,7 @@ zero F1 cost. On CTU-IoT-23, higher $\alpha$ incurs a minor OOD cost
 (AUROC: $0.909\to0.895$), consistent with the rule head displacing a
 neural head whose embedding was more OOD-compact. On CIC-IoT-2023, OOD
 AUROC marginally improves under $\alpha$-regularisation
-($0.616\to0.634$), since the rule-dominant embedding is more tightly
+($0.613\to0.634$), since the rule-dominant embedding is more tightly
 structured.
 
 The $\alpha$-gate provides a \emph{deployable Pareto front}: an
