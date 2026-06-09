@@ -16,6 +16,10 @@ duckdb/
 *.duckdb
 data/opt/
 
+# paper and writing (kept local only)
+paper/
+writing/
+
 # misc
 junk/
 *.db
