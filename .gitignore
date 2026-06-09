@@ -23,6 +23,8 @@ writing/
 # local tooling and scratch
 .deleted/
 iot23_3.duckdb
+work
+zeek_out
 
 # misc
 junk/
