@@ -1,0 +1,68 @@
+{
+  "DecisionTree": {
+    "test_f1": 0.9331090580498945,
+    "ood_auroc": 0.58068666,
+    "tpr_at_5pct_fpr": 0.2158,
+    "depth": 10,
+    "n_leaves": 46,
+    "top10_features": [
+      "AVG",
+      "Telnet",
+      "Srate",
+      "history_id",
+      "orig_ip_bytes",
+      "orig_pkt_rate",
+      "Max",
+      "resp_pkts",
+      "orig_byte_rate",
+      "SSH"
+    ],
+    "top10_importances": [
+      0.38174251668202713,
+      0.353150149920762,
+      0.18940522577277175,
+      0.05923425117666041,
+      0.012095633167833412,
+      0.002454617291901054,
+      0.0004362283399057285,
+      0.00041601526569148503,
+      0.00036970981990615644,
+      0.00019194877220150781
+    ]
+  },
+  "SHAP_MLP": {
+    "test_f1": 0.9323196606128045,
+    "top10_features_by_shap": [
+      "Telnet",
+      "orig_byte_rate",
+      "resp_ip_bytes",
+      "Number"
+    ],
+    "top10_mean_abs_shap": [
+      0.6250743059724607,
+      0.6139680109170095,
+      0.3204830321049703,
+      0.25102442794436464
+    ],
+    "n_background": 200,
+    "n_explained": 500,
+    "note": "SHAP provides local post-hoc feature attributions. No concept bottleneck \u2014 intervention accuracy is undefined. Compare with JointCBM per-concept accuracy and intervention delta."
+  },
+  "PostHocCBM": {
+    "test_f1": 0.5782725007390168,
+    "ood_auroc": 0.8636537599999999,
+    "tpr_at_5pct_fpr": 0.4904,
+    "mean_concept_accuracy": 0.9966576086956522,
+    "concept_accuracies": {
+      "is_beaconing": 0.9845652173913043,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.9992753623188406,
+      "is_short_connection": 0.9993478260869565,
+      "is_persistent": 0.995072463768116,
+      "is_asymmetric": 0.998768115942029,
+      "is_single_packet_probe": 0.9965942028985507,
+      "is_incomplete_handshake": 0.9996376811594203
+    },
+    "note": "Post-hoc CBM: linear probes on frozen MLPBaseline embeddings. Concept accuracy reflects how well a frozen representation separates human-defined concepts vs JointCBM's end-to-end training."
+  }
+}

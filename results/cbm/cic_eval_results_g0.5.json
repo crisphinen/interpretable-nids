@@ -1,0 +1,31 @@
+{
+  "JointCBM": {
+    "model": "JointCBM",
+    "dataset": "cic",
+    "weighted_f1": 0.815688688038383,
+    "concept_accuracies": {
+      "is_high_rate": 0.96696,
+      "is_syn_flood": 0.9961333333333333,
+      "is_udp_dominant": 0.9662666666666667,
+      "is_short_connection": 0.9472266666666667,
+      "is_large_payload": 0.9968266666666666,
+      "is_port_scan": 0.9648,
+      "is_high_variance": 0.9682133333333334,
+      "is_persistent": 0.99848
+    },
+    "mean_concept_accuracy": 0.9756133333333333,
+    "ood_auroc": 0.6263006799999999,
+    "tpr_at_5pct_fpr": 0.22552923915321735,
+    "intervention_base_acc": 0.81816,
+    "intervention_deltas": {
+      "is_high_rate": -0.02069333333333334,
+      "is_syn_flood": -0.003946666666666654,
+      "is_udp_dominant": -0.04949333333333328,
+      "is_short_connection": -0.011173333333333368,
+      "is_large_payload": -0.0025333333333332764,
+      "is_port_scan": -0.046506666666666696,
+      "is_high_variance": -0.0341866666666667,
+      "is_persistent": -0.002426666666666688
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "DecisionTree": {
+    "test_f1": 0.8081472082139971,
+    "ood_auroc": 0.7998887,
+    "tpr_at_5pct_fpr": 0.5442,
+    "depth": 15,
+    "n_leaves": 3193,
+    "top10_features": [
+      "syn_flag_number",
+      "number",
+      "https",
+      "std",
+      "fin_count",
+      "max",
+      "time_to_live",
+      "rate",
+      "iat",
+      "rst_flag_number"
+    ],
+    "top10_importances": [
+      0.3418624526885952,
+      0.3328693442022036,
+      0.08446896859381478,
+      0.05144250589838646,
+      0.02465916681988632,
+      0.020697341908171556,
+      0.02015737219219225,
+      0.019737601273104255,
+      0.018529679698003135,
+      0.011747862359266559
+    ]
+  },
+  "SHAP_MLP": {
+    "test_f1": 0.8187971410145957,
+    "top10_features_by_shap": [
+      "protocol_type",
+      "time_to_live",
+      "header_length",
+      "fin_flag_number",
+      "rate"
+    ],
+    "top10_mean_abs_shap": [
+      0.6595697619491988,
+      0.5192699727781716,
+      0.2521757225128025,
+      0.1855975882105704,
+      0.1702799680311764
+    ],
+    "n_background": 200,
+    "n_explained": 500,
+    "note": "SHAP provides local post-hoc feature attributions. No concept bottleneck \u2014 intervention accuracy is undefined. Compare with JointCBM per-concept accuracy and intervention delta."
+  },
+  "PostHocCBM": {
+    "test_f1": 0.7256646124229821,
+    "ood_auroc": 0.62344132,
+    "tpr_at_5pct_fpr": 0.0756,
+    "mean_concept_accuracy": 0.9826433333333333,
+    "concept_accuracies": {
+      "is_high_rate": 0.9860266666666667,
+      "is_syn_flood": 0.9995733333333333,
+      "is_udp_dominant": 0.9898133333333333,
+      "is_short_connection": 0.9373066666666666,
+      "is_large_payload": 0.9881333333333333,
+      "is_port_scan": 0.9985066666666667,
+      "is_high_variance": 0.9885066666666666,
+      "is_persistent": 0.97328
+    },
+    "note": "Post-hoc CBM: linear probes on frozen MLPBaseline embeddings. Concept accuracy reflects how well a frozen representation separates human-defined concepts vs JointCBM's end-to-end training."
+  }
+}

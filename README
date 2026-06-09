@@ -1,0 +1,4 @@
+1. There are two datasets. We are waiting for the second one. 
+2. The IOT-23 dataset (version with pcap) comes with the zeek featurs already extracted in conn.log.labeled. 
+3. The dpkt features is extracted using the python package dpkt. We are going to extract the same features as done in the research as we are comparing our work to theirs. 
+4. To form the ful feature set we need to join both features. We expected to have 60 features per row. 

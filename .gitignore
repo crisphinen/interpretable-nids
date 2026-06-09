@@ -1,0 +1,27 @@
+venv310/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# raw data — download from CTU/CIC websites
+data/ctu/*.parquet
+data/cic/*.parquet
+
+# unrelated projects
+windows/
+results/checkpoint-800/
+results/checkpoint-1200/
+duckdb/
+data/opt/
+
+# misc
+junk/
+*.db
+sampled_part_0.parquet
+zeek_out/
+errors_csv.json
+progress*.txt
+nb_run.py
+iot23-3.ipynb
+HyperIoT_*.md
+Unknown\ Attack\ Detection*.pdf

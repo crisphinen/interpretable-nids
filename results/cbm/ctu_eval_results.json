@@ -1,0 +1,99 @@
+{
+  "MLPBaseline": {
+    "model": "MLPBaseline",
+    "dataset": "ctu",
+    "weighted_f1": 0.9323196606128045,
+    "concept_accuracies": null,
+    "mean_concept_accuracy": null,
+    "ood_auroc": 0.91323598,
+    "tpr_at_5pct_fpr": 0.5959065050704923,
+    "intervention_deltas": null
+  },
+  "JointCBM": {
+    "model": "JointCBM",
+    "dataset": "ctu",
+    "weighted_f1": 0.9322467007407086,
+    "concept_accuracies": {
+      "is_beaconing": 0.8026811594202898,
+      "is_high_rate": 0.9220289855072463,
+      "is_syn_heavy": 0.8613768115942029,
+      "is_short_connection": 0.7871739130434783,
+      "is_persistent": 0.7928985507246377,
+      "is_asymmetric": 0.9471739130434783,
+      "is_single_packet_probe": 0.8505072463768116,
+      "is_incomplete_handshake": 0.8179710144927537
+    },
+    "mean_concept_accuracy": 0.8477264492753623,
+    "ood_auroc": 0.81234156,
+    "tpr_at_5pct_fpr": 0.42613776898342814,
+    "intervention_base_acc": 0.9327536231884058,
+    "intervention_deltas": {
+      "is_beaconing": -7.246376811598232e-05,
+      "is_high_rate": -7.246376811598232e-05,
+      "is_syn_heavy": -0.003985507246376807,
+      "is_short_connection": -7.246376811598232e-05,
+      "is_persistent": 7.24637681158713e-05,
+      "is_asymmetric": -0.00036231884057968955,
+      "is_single_packet_probe": -0.00021739130434783593,
+      "is_incomplete_handshake": -0.00021739130434783593
+    }
+  },
+  "SequentialCBM": {
+    "model": "SequentialCBM",
+    "dataset": "ctu",
+    "weighted_f1": 0.5731334606842088,
+    "concept_accuracies": {
+      "is_beaconing": 0.9929710144927536,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 1.0,
+      "is_short_connection": 0.9996376811594203,
+      "is_persistent": 0.9994927536231885,
+      "is_asymmetric": 0.9996376811594203,
+      "is_single_packet_probe": 0.9998550724637681,
+      "is_incomplete_handshake": 0.999927536231884
+    },
+    "mean_concept_accuracy": 0.9989402173913043,
+    "ood_auroc": 0.67777602,
+    "tpr_at_5pct_fpr": 0.38628493692802374,
+    "intervention_base_acc": 0.6594202898550725,
+    "intervention_deltas": {
+      "is_beaconing": 0.00021739130434783593,
+      "is_high_rate": 0.0,
+      "is_syn_heavy": 0.0,
+      "is_short_connection": 0.0,
+      "is_persistent": -7.246376811598232e-05,
+      "is_asymmetric": 0.0,
+      "is_single_packet_probe": 0.0,
+      "is_incomplete_handshake": 0.0
+    }
+  },
+  "HybridCBM": {
+    "model": "HybridCBM",
+    "dataset": "ctu",
+    "weighted_f1": 0.9322471929035664,
+    "concept_accuracies": {
+      "is_beaconing": 0.9801449275362318,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.9992753623188406,
+      "is_short_connection": 0.9992028985507246,
+      "is_persistent": 0.9954347826086957,
+      "is_asymmetric": 0.9992753623188406,
+      "is_single_packet_probe": 0.9965942028985507,
+      "is_incomplete_handshake": 0.9997101449275362
+    },
+    "mean_concept_accuracy": 0.9962047101449276,
+    "ood_auroc": 0.81565118,
+    "tpr_at_5pct_fpr": 0.3580571357902548,
+    "intervention_base_acc": 0.9327536231884058,
+    "intervention_deltas": {
+      "is_beaconing": 0.0,
+      "is_high_rate": 0.0,
+      "is_syn_heavy": 0.0,
+      "is_short_connection": 0.0,
+      "is_persistent": 0.0,
+      "is_asymmetric": 0.0,
+      "is_single_packet_probe": 0.0,
+      "is_incomplete_handshake": 0.0
+    }
+  }
+}

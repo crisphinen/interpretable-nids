@@ -1,0 +1,31 @@
+{
+  "JointCBM": {
+    "model": "JointCBM",
+    "dataset": "ctu",
+    "weighted_f1": 0.9323916365264355,
+    "concept_accuracies": {
+      "is_beaconing": 0.866231884057971,
+      "is_high_rate": 0.9223913043478261,
+      "is_syn_heavy": 0.8431884057971014,
+      "is_short_connection": 0.9976086956521739,
+      "is_persistent": 0.8294202898550724,
+      "is_asymmetric": 0.9472463768115942,
+      "is_single_packet_probe": 0.9616666666666667,
+      "is_incomplete_handshake": 0.9951449275362318
+    },
+    "mean_concept_accuracy": 0.9203623188405796,
+    "ood_auroc": 0.88372636,
+    "tpr_at_5pct_fpr": 0.6082,
+    "intervention_base_acc": 0.9328985507246377,
+    "intervention_deltas": {
+      "is_beaconing": -0.0006521739130435078,
+      "is_high_rate": -7.246376811598232e-05,
+      "is_syn_heavy": -0.018478260869565166,
+      "is_short_connection": 0.0,
+      "is_persistent": -7.246376811598232e-05,
+      "is_asymmetric": -0.0023913043478260843,
+      "is_single_packet_probe": 0.0,
+      "is_incomplete_handshake": -0.00014492753623185362
+    }
+  }
+}
