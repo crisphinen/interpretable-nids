@@ -11,7 +11,9 @@ data/cic/*.parquet
 windows/
 results/checkpoint-800/
 results/checkpoint-1200/
+duckdb
 duckdb/
+*.duckdb
 data/opt/
 
 # misc
