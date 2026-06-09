@@ -20,6 +20,10 @@ data/opt/
 paper/
 writing/
 
+# local tooling and scratch
+.deleted/
+iot23_3.duckdb
+
 # misc
 junk/
 *.db
