@@ -143,6 +143,8 @@ model = torch.load('results/cbm/ctu_JointCBM_g0.5.pt', map_location='cpu')
 
 ‡ OOD via raw-feature Mahalanobis. CBM results are single runs; NeSy-NIDS values are mean±std over 5 seeds. F1 is measured on the known-class validation split; AUROC and TPR@5%FPR on held-out unknown-class test samples.
 
+> **Note on the archived checkpoints.** The `.pt` files and eval JSONs under `results/` come from an earlier run and do not reproduce the table above exactly — they give a mean CTU-IoT-23 OOD AUROC of 0.909±0.017 for NeSy-NIDS against the 0.906±0.016 reported here. The numbers in the table are from the current manuscript. Re-run the training scripts to regenerate results matching it.
+
 **Central finding — task-coupling OOD penalty:** OOD detectability on CIC-IoT-2023 is governed by how tightly bottleneck training is coupled to the classification objective rather than by compression itself. On CIC, JointCBM peaks at γ=0.5 (AUROC 0.728), the best of any interpretable model there, while NeSy-NIDS drops to 0.605 — end-to-end rule learning couples the representation to the task most tightly. On CTU-IoT-23 the ordering reverses: NeSy-NIDS reaches 0.906±0.016 and JointCBM (γ=0.1) 0.895, both above the unconstrained MLP at 0.890, at no cost to classification F1. The Decision Tree's near-random 0.335 on CTU reflects score-polarity inversion under raw-feature Mahalanobis, confirming that raw-feature representations are not universally better than interpretable bottlenecks.
 
 ---
