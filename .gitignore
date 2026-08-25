@@ -21,7 +21,6 @@ paper/
 writing/
 
 # local tooling and scratch
-.claude/
 .deleted/
 iot23_3.duckdb
 work
