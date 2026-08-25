@@ -16,6 +16,10 @@ This repository contains all code, trained models, and evaluation results for ou
 
 Both use Mahalanobis distance in their respective representation spaces for OOD scoring on **CTU-IoT-23** (4 known / 9 unknown classes) and **CIC-IoT-2023** (5 known / 29 unknown classes).
 
+![CBM and NeSy-NIDS architectures](figures/architecture.png)
+
+*Fig. 1 — (A) a concept bottleneck with test-time intervention and (B) a differentiable rule bank with a neural fallback, both scored for OOD by per-class Mahalanobis distance.*
+
 ---
 
 ## Repository Structure
@@ -114,7 +118,7 @@ Figures are written to `figures/`.
 
 ## Pre-trained Models
 
-All trained checkpoints are in `results/cbm/` and `results/nesy/`. Load with:
+All trained checkpoints are in `results/cbm/` and `results/nesy/`. They come from an earlier run than the reported results — see the [note below](#key-results). Load with:
 
 ```python
 import torch
