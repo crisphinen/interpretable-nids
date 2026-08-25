@@ -44,11 +44,7 @@ interpretable-nids/
 ├── results/
 │   ├── cbm/                # Trained CBM checkpoints (.pt) + eval JSONs
 │   └── nesy/               # Trained NeSy checkpoints (.pt) + eval JSONs (5 seeds)
-├── paper/
-│   ├── main.tex            # LaTeX source
-│   ├── refs.bib            # Bibliography
-│   ├── main.pdf            # Compiled paper
-│   └── figures/            # All paper figures (PDF + PNG)
+├── figures/                # Architecture figure (PNG) + editable SVG source
 ├── config.py               # CTU-IoT-23 dataset config
 ├── cic_config.py           # CIC-IoT-2023 dataset config
 ├── requirements.txt
@@ -112,7 +108,7 @@ python -m nesy.evaluate --dataset cic --multi_seed 5
 python -m cbm.make_figures
 ```
 
-Figures are written to `paper/figures/`.
+Figures are written to `figures/`.
 
 ---
 
