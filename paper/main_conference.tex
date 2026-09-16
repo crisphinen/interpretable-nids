@@ -598,8 +598,9 @@ CIC-IoT-2023 & 0.608 & 0.696 & 0.624 & \textbf{0.842} & 0.820 \\
 After $k$-annealing to $k{=}10$, all rule activations fall strictly into $\{0,1\}$ (100\% rule crispness). Exact binarity follows directly from the straight-through hard-threshold operation (Eq.~\ref{eq:alpha_gate}); the non-trivial property is that $k$-annealing reaches it while keeping thresholds learnable and at no accuracy cost (Table~\ref{tab:main}), yielding syntactically verifiable rules for audit without a post-hoc quantisation step. Fig.~\ref{fig:selectivity} shows mean activation rates per known class for both datasets.
 \begin{sloppypar}\hbadness=10000
 On CTU-IoT-23, rules fire selectively but not deterministically
-(\texttt{cc\_heartbeat\_beaconing} at 0.76 on C\&C-HeartBeat,
-\texttt{incomplete\_handshake} at 0.86, \texttt{asymmetric\_flood} at 0.79 on DDoS), preserving within-class variance and giving Mahalanobis the spread needed to separate known from unknown distributions. On CIC-IoT-2023, selectivity is
+(\texttt{cc\_heartbeat\_beaconing} at 0.76 and
+\texttt{incomplete\_handshake} at 0.86 on C\&C-HeartBeat,
+\texttt{asymmetric\_flood} at 0.79 on DDoS), preserving within-class variance and giving Mahalanobis the spread needed to separate known from unknown distributions. On CIC-IoT-2023, selectivity is
 near-deterministic (\texttt{syn\_flood\_ddos} at 1 on DDoS-SYN,
 \texttt{benign\_low\_rate} at 0.94 on Benign), collapsing within-class
 variance to near-zero and stripping Mahalanobis of discriminative
@@ -614,7 +615,7 @@ label per se---is what strips Mahalanobis of separating signal.
 \begin{sloppypar}\hbadness=10000
 Learned thresholds shift in domain-consistent directions across both
 datasets (Fig.~\ref{fig:threshold_drift}). On CTU-IoT-23,
-\texttt{cc\_heartbeat\_beaconing} IAT bounds relax by up to $-0.46$
+\texttt{cc\_heartbeat\_beaconing} bounds relax by up to $-0.46$
 while \texttt{incomplete\_handshake} SYN conditions tighten by $+0.19$.
 CIC-IoT-2023 exhibits larger drifts (up to $-1.15$ on
 \texttt{syn\_flood\_ddos}), consistent with its more heterogeneous
