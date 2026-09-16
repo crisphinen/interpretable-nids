@@ -1,10 +1,10 @@
 # Response to Reviewer 2
 
-We thank the reviewer for a rigorous and constructive review. The comments
-prompted a substantial strengthening of the paper: we added five new experiments
-(stronger OOD baselines, a direct concept-leakage probe, a full α-gate sweep, a
-temporal/session-respecting split, and honest single-thread latency), quantified
-the two figure claims, and repositioned the contribution honestly. Point-by-point:
+We thank the reviewer for the detailed review. In response we added five
+experiments (stronger OOD baselines, a concept-leakage probe, a full α-gate
+sweep, a temporal/session-respecting split, and single-thread batch-1 latency),
+quantified the two figure claims, and restated the contribution more precisely.
+Point-by-point:
 
 ---
 
