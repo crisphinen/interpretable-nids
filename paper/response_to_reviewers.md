@@ -1,16 +1,14 @@
 # Response to Reviewer 1
 
-We thank the reviewer for the careful and constructive review. Acting on the
-central concern about statistical rigor (Comments 4, 8), we re-ran every learned
-model over five seeds. This revealed that our originally reported "task-coupling
-OOD penalty" was a single-seed artifact: it vanishes and reverses under
-replication. We have accordingly **reframed the paper** around what the
-multi-seed evidence robustly supports — that *representation geometry and scorer
-choice*, not concept-regularization strength, govern open-set detectability — and
-retitled it "Interpretable Open-Set Intrusion Detection for IoT: What Governs
-Out-of-Distribution Detection in Concept-Bottleneck and Neuro-Symbolic Models."
-We are grateful the review pushed us here; the revised paper is substantially more
-honest and, we believe, more valuable. Point-by-point responses follow.
+We thank the reviewer for the careful review. Following the concern about
+statistical rigor (Comments 4 and 8), we re-ran every learned model over five
+seeds. This showed that the originally reported "task-coupling OOD penalty" was a
+single-seed artifact that vanishes, and reverses, under replication. We have
+therefore **reframed the paper** around what the multi-seed evidence supports:
+representation geometry and scorer choice, not concept-regularization strength,
+govern open-set detectability. The paper is retitled "Interpretable Open-Set
+Intrusion Detection for IoT: What Governs Out-of-Distribution Detection in
+Concept-Bottleneck and Neuro-Symbolic Models." Point-by-point responses follow.
 
 ---
 
