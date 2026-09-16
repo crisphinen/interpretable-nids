@@ -539,7 +539,7 @@ Here the unconstrained MLP is the strongest detector ($0.808{\pm}.007$). Among i
 A single-seed evaluation suggested a monotone ``task-coupling'' effect on CIC: JointCBM OOD AUROC rising from $\gamma{=}0$ ($0.668$) to a peak at $\gamma{=}0.5$ ($0.728$). Under five-seed evaluation this effect disappears: the $\gamma{=}0$ value is an unrepresentative draw (five-seed mean $0.718$), and $\gamma\in\{0,0.1,0.5\}$ form a flat plateau ($0.717$--$0.726$) within seed variance. A second, independent five-seed replication (seeds~5--9) not only fails to reproduce the peak but reverses its direction ($\gamma{=}0$: $0.735$; $\gamma{=}0.5$: $0.702$). Pooled over ten seeds the variants are statistically indistinguishable ($\gamma{=}0.5$: $0.714{\pm}.028$ vs.\ $\gamma{=}0$: $0.726{\pm}.032$). Concept-fidelity regularisation \emph{strength} therefore does not reliably govern OOD detectability; single-seed ablations can manufacture spurious effects, and open-set claims on interpretable NIDS require multi-seed replication.
 
 \textbf{Scorer choice must match the representation.}
-Whether Mahalanobis suffices depends on the geometry of the representation, not on regularisation (Table~\ref{tab:scorer}). On CTU the rule-activation classes are well separated and per-class Mahalanobis is decisive (NeSy $0.906$). On CIC, near-deterministic rule firing (Section~\ref{sec:crisp}) collapses within-class variance, so the Gaussian assumption fails and Mahalanobis drops to $0.605$; distance measures native to the binary simplex (Hamming, $0.522$; Jaccard, $0.519$) do no better than chance, as they too ignore what little covariance remains. A logit-space energy score sidesteps the activation geometry and recovers detection ($0.718{\pm}.031$); its $z$-normalised combination with Mahalanobis reaches $0.730{\pm}.029$, matching the best interpretable model on CIC. This is the pattern Fort et al.~\cite{fort2021exploring} describe: representation quality sets the ceiling, and when the representation is non-Gaussian the scoring rule has to match it.
+Whether Mahalanobis suffices depends on the geometry of the representation, not on regularisation (Table~\ref{tab:scorer}). On CTU the rule-activation classes are well separated and per-class Mahalanobis is decisive (NeSy $0.906$). On CIC it does not. Near-deterministic rule firing (Section~\ref{sec:crisp}) collapses within-class variance, the Gaussian assumption fails, and Mahalanobis drops to $0.605$. Distance measures native to the binary simplex do no better than chance (Hamming, $0.522$; Jaccard, $0.519$); they too ignore what little covariance remains. A logit-space energy score sidesteps the activation geometry and recovers detection ($0.718{\pm}.031$); its $z$-normalised combination with Mahalanobis reaches $0.730{\pm}.029$, matching the best interpretable model on CIC. This is the pattern Fort et al.~\cite{fort2021exploring} describe: representation quality sets the ceiling, and when the representation is non-Gaussian the scoring rule has to match it.
 
 \begin{table}[t]
 \centering\small
@@ -647,18 +647,16 @@ consistency.
 
 \subsection{The \texorpdfstring{$\alpha$}{alpha}-Gate and Interpretability Trade-Off}
 
-We characterise the full trade-off by sweeping $\lambda_\alpha$ over six
-values (three seeds each, Table~\ref{tab:alpha}). The regulariser
-\emph{monotonically} tunes the learned gate: $\alpha$ rises from $0.38$
-($\lambda_\alpha{=}0$) to $0.86$ ($\lambda_\alpha{=}1.0$) on CTU-IoT-23 and
-from $0.32$ to $0.95$ on CIC-IoT-2023, so an operator can set rule reliance
-across nearly the full range. This holds at \emph{zero F1
-cost} (F1 constant at $0.9336$ / $0.819{\pm}0.001$) and at near-zero OOD cost:
-AUROC varies by at most $0.01$ (CTU, slight decline as the rule head displaces
-a more OOD-compact neural embedding) and $0.03$ (CIC, slight rise). The
-$\alpha$-gate is therefore best described as a \emph{tunable interpretability
-control at negligible OOD cost} rather than a steep Pareto front, and
-$\lambda_\alpha$ can be adjusted via brief fine-tuning without full
+We sweep $\lambda_\alpha$ over six values, three seeds each
+(Table~\ref{tab:alpha}). The regulariser tunes the gate \emph{monotonically}.
+On CTU-IoT-23, $\alpha$ rises from $0.38$ ($\lambda_\alpha{=}0$) to $0.86$
+($\lambda_\alpha{=}1.0$); on CIC-IoT-2023, from $0.32$ to $0.95$. An operator
+can thus set rule reliance across nearly the full range. F1 does not move
+($0.9336$ / $0.819{\pm}0.001$), and OOD AUROC barely does: it varies by at
+most $0.01$ on CTU (a slight decline, as the rule head displaces a more
+OOD-compact neural embedding) and $0.03$ on CIC (a slight rise). This is a
+tunable interpretability control at negligible OOD cost, not a steep Pareto
+front. And $\lambda_\alpha$ can be set by brief fine-tuning, without
 retraining, which addresses the operator-control requirement of Arp et
 al.~\cite{arp2022dos}.
 
@@ -741,21 +739,19 @@ claim.
 \subsection{Computational Overhead}
 \label{sec:compute}
 
-The memory footprint is small: JointCBM adds only 296 parameters
-($+0.3\%$, 93{,}548 total) over the MLP (93{,}252), and NeSy-NIDS uses just
-13{,}825 parameters ($7{\times}$ fewer than the MLP; 13{,}764 in the neural
-fallback, the remainder in the rule bank and scalar gate), under
-$0.4$\,MB in \texttt{float32} and well within gateway-class memory.
-The latency picture depends on the batching regime. On a single core
-(Intel Core i9-9820X, one thread) the batched throughput is
-$1.8$--$1.9$\,$\mu$s/sample (batch~512), but the realistic per-flow
-streaming latency (batch~1) is $96$\,$\mu$s (MLP), $109$\,$\mu$s (JointCBM),
-and $\sim\!580$\,$\mu$s (NeSy-NIDS, dominated by the un-vectorised
-per-rule sigmoid loop). These are still well below typical per-flow
-inter-arrival at a small gateway, and the NeSy bottleneck is trivially
-vectorisable, but we report them as \emph{upper bounds measured on
-desktop-class hardware}: on-device validation on ARM gateway processors
-remains future work, and we do not claim measured IoT-hardware performance.
+The memory footprint is small. JointCBM adds only 296 parameters over the MLP
+($+0.3\%$; 93{,}548 vs.\ 93{,}252), and NeSy-NIDS uses 13{,}825 ($7{\times}$
+fewer than the MLP: 13{,}764 in the neural fallback, the rest in the rule bank
+and gate). Both stay under $0.4$\,MB in \texttt{float32}, well within
+gateway-class memory. Latency depends on the batching regime. On a single core
+(Intel Core i9-9820X, one thread), batched throughput is
+$1.8$--$1.9$\,$\mu$s/sample at batch~512. Per-flow streaming latency is much
+higher: $96$\,$\mu$s (MLP), $109$\,$\mu$s (JointCBM), and $\sim\!580$\,$\mu$s
+(NeSy-NIDS, whose un-vectorised per-rule sigmoid loop dominates). These still
+sit well below typical per-flow inter-arrival at a small gateway, and the NeSy
+bottleneck vectorises trivially. Even so, they are upper bounds measured on
+desktop-class hardware. On-device validation on ARM gateway processors is
+future work; we do not claim measured IoT-hardware performance.
 
 
 \subsection{Discussion}
@@ -821,10 +817,10 @@ We evaluated CBMs and NeSy-NIDS as interpretable open-set NIDS on two IoT
 datasets under a single multi-seed protocol. Both match an unconstrained MLP
 on known-class F1 ($\pm0.002$) while delivering human-auditable
 representations. Open-set detectability is governed by representation
-geometry and scorer choice: per-class Mahalanobis dominates on the
+geometry and scorer choice. Per-class Mahalanobis dominates on the
 well-separated CTU rule space (NeSy-NIDS $0.906$) but fails on the
-near-deterministic CIC space ($0.605$), where a logit-space energy score
-recovers detection ($0.730$); metrics native to the binary simplex are
+near-deterministic CIC space ($0.605$). There, a logit-space energy score
+recovers detection ($0.730$), while metrics native to the binary simplex stay
 near-random. In contrast, concept-fidelity regularisation \emph{strength}
 does not reliably affect OOD AUROC: a single-seed ``task-coupling'' effect
 vanishes and reverses across ten seeds, which shows that open-set claims on
