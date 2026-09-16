@@ -38,7 +38,7 @@ K_INIT        = 1.0   # initial gate steepness
 K_FINAL       = 10.0  # final gate steepness (hard gates)
 K_WARMUP      = 30    # epochs to ramp k from K_INIT to K_FINAL
 
-RESULTS_DIR = PROJECT_ROOT / "nesy" / "results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "nesy"
 
 
 # k-annealing schedule

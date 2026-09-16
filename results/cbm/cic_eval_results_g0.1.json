@@ -2,30 +2,34 @@
   "JointCBM": {
     "model": "JointCBM",
     "dataset": "cic",
-    "weighted_f1": 0.8154265039978777,
+    "weighted_f1": 0.818637017248523,
     "concept_accuracies": {
-      "is_high_rate": 0.99744,
-      "is_syn_flood": 0.9957066666666666,
-      "is_udp_dominant": 0.9440266666666667,
-      "is_short_connection": 0.9003466666666666,
-      "is_large_payload": 0.9366133333333333,
-      "is_port_scan": 0.9997066666666666,
-      "is_high_variance": 0.9821866666666667,
-      "is_persistent": 0.9982133333333333
+      "is_high_rate": 0.9977066666666666,
+      "is_syn_flood": 0.99632,
+      "is_udp_dominant": 0.9432533333333334,
+      "is_short_connection": 0.44848,
+      "is_large_payload": 0.9360266666666667,
+      "is_port_scan": 0.9998133333333333,
+      "is_high_variance": 0.9805333333333334,
+      "is_persistent": 0.9980533333333333
     },
-    "mean_concept_accuracy": 0.9692799999999999,
-    "ood_auroc": 0.45160274,
-    "tpr_at_5pct_fpr": 0.10839795989659749,
-    "intervention_base_acc": 0.8168266666666667,
+    "mean_concept_accuracy": 0.9125233333333334,
+    "ood_auroc": 0.6543485600000001,
+    "tpr_at_5pct_fpr": 0.2301578984140292,
+    "energy_auroc": 0.72135318,
+    "tau": 23.56704253557506,
+    "unk_rejection_rate": 0.2216,
+    "known_rejection_rate": 0.0418,
+    "intervention_base_acc": 0.8201333333333334,
     "intervention_deltas": {
-      "is_high_rate": -0.00010666666666669933,
-      "is_syn_flood": -0.0040800000000000836,
-      "is_udp_dominant": -0.04186666666666672,
-      "is_short_connection": -0.05144000000000004,
-      "is_large_payload": -0.0682666666666667,
-      "is_port_scan": -2.6666666666730343e-05,
-      "is_high_variance": -0.005840000000000067,
-      "is_persistent": -0.00013333333333331865
+      "is_high_rate": 7.999999999996898e-05,
+      "is_syn_flood": -0.0032533333333333303,
+      "is_udp_dominant": -0.04466666666666674,
+      "is_short_connection": -0.06632000000000005,
+      "is_large_payload": -0.07168000000000008,
+      "is_port_scan": 0.0,
+      "is_high_variance": -0.005786666666666718,
+      "is_persistent": -0.0001866666666666683
     }
   }
 }

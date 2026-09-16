@@ -242,14 +242,21 @@ def make_auroc_vs_f1():
                 pts.append((mname, f1, auroc))
         for sf in sorted(NESY_RES.glob(f"{ds}_nesy_s*_eval.json")):
             d = json.loads(sf.read_text())
-            pts.append((f"NeSy s{d['seed']}", d["known_f1"], d["ood_auroc"]))
+            auroc = d.get("ood_auroc_mahal") or d.get("ood_auroc")
+            if auroc is not None:
+                pts.append((f"NeSy s{d['seed']}", d["known_f1"], auroc))
         nb = json.loads((NESY_RES / f"{ds}_baselines.json").read_text())
         for mname, v in nb.items():
             f1 = v.get("f1")
             auroc = v.get("auroc_maha") or v.get("auroc")
             if f1 and auroc:
                 pts.append((mname, f1, auroc))
-        return pts
+        # deduplicate by model name, keeping last occurrence (NeSy baselines
+        # use Mahalanobis for DT/RF and are loaded last, so they take priority)
+        seen = {}
+        for name, f1, auroc in pts:
+            seen[name] = (f1, auroc)
+        return [(n, f1, a) for n, (f1, a) in seen.items()]
 
     def _col(label):
         l = label.lower()
@@ -279,6 +286,10 @@ def make_auroc_vs_f1():
         "NeSy s0": "NeSy(s0)", "DecisionTree": "DT",
         "RandomForest": "RF",
     }
+    # Per-dataset label offsets to avoid overlap (DT and MLP are near-colocated in CIC)
+    OFFSETS = {
+        "cic": {"DecisionTree": (-2, -13)},  # push DT label below the point
+    }
 
     fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.2))
     fig.subplots_adjust(wspace=0.30, left=0.07, right=0.98,
@@ -291,8 +302,9 @@ def make_auroc_vs_f1():
                        s=55, alpha=0.88, edgecolors="white",
                        linewidths=0.5, zorder=4)
             if label in ANNOTATE:
+                xytext = OFFSETS.get(ds, {}).get(label, (4, 3))
                 ax.annotate(SHORT.get(label, label), (f1, auroc),
-                            textcoords="offset points", xytext=(4, 3),
+                            textcoords="offset points", xytext=xytext,
                             fontsize=6.2, color="#333")
 
         ax.axhline(0.5, color="#ddd", lw=0.8, linestyle=":", zorder=0)
@@ -438,12 +450,20 @@ def make_f1_comparison():
 # ── rule_selectivity1_ctu / rule_selectivity1_cic ────────────────────────────
 
 def make_rule_selectivity():
-    for ds, title in [("ctu", "CTU-IoT-23"), ("cic", "CIC-IoT-2023")]:
+    # compute uniform figsize across both datasets for visual consistency
+    datasets = [("ctu", "CTU-IoT-23"), ("cic", "CIC-IoT-2023")]
+    all_data = {}
+    for ds, title in datasets:
         sel = json.loads(
             (NESY_RES / f"{ds}_nesy_s0_selectivity.json").read_text())
-
         rules   = list(sel.keys())
         classes = list(list(sel.values())[0].keys())
+        all_data[ds] = (sel, rules, classes, title)
+    max_fig_h = max(max(3.8, 0.5 * len(all_data[ds][1])) for ds, _ in datasets)
+    max_fig_w = max(max(4.5, 1.1 * len(all_data[ds][2])) for ds, _ in datasets)
+
+    for ds, title in datasets:
+        sel, rules, classes, _ = all_data[ds]
         matrix  = np.array([[sel[r].get(c, 0.0) for c in classes]
                              for r in rules])
 
@@ -461,9 +481,7 @@ def make_rule_selectivity():
              .replace("VulnerabilityScan", "VulnScan")
             for c in classes]
 
-        fig_h = max(3.8, 0.5 * len(rules))
-        fig_w = max(4.5, 1.1 * len(classes))
-        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+        fig, ax = plt.subplots(figsize=(max_fig_w, max_fig_h))
         fig.subplots_adjust(left=0.30, right=0.95, top=0.90, bottom=0.14)
 
         im = ax.imshow(matrix, aspect="auto", cmap="YlOrRd", vmin=0, vmax=1)
@@ -472,8 +490,7 @@ def make_rule_selectivity():
         ax.set_yticks(range(len(rules)))
         ax.set_yticklabels(short_rules, fontsize=7.5)
         ax.set_title(
-            f"Rule Class Selectivity — {title}  (seed 0, k=10)\n"
-            "Mean rule activation per known class after STE binarisation",
+            f"Rule Class Selectivity — {title}  (seed 0, k=10)",
             fontsize=9, fontweight="bold", pad=4)
 
         for i in range(len(rules)):
@@ -509,38 +526,37 @@ def make_threshold_drift():
                     zip(learned, tmpl.init_thresholds, tmpl.condition_types)):
                 drift = l - i
                 sym = ">" if ct == "gt" else "<"
-                labels.append(f"{rule.name}\n[cond {j+1}: {sym}]")
+                labels.append(f"{rule.name}\n[c{j+1}:{sym}]")
                 drifts.append(drift)
                 colors.append("#d62728" if drift > 0 else C_MLP)
 
-        fig, ax = plt.subplots(figsize=(8.5, max(3.5, 0.42 * len(labels))))
-        fig.subplots_adjust(left=0.38, right=0.94, top=0.92, bottom=0.08)
+        fig, ax = plt.subplots(figsize=(max(7.0, 0.55 * len(labels)), 3.6))
+        fig.subplots_adjust(left=0.07, right=0.97, top=0.88, bottom=0.38)
 
         xs   = np.arange(len(labels))
-        bars = ax.barh(xs, drifts, color=colors, alpha=0.85,
-                       edgecolor="white", lw=0.5)
-        ax.axvline(0, color="#333", lw=0.9, linestyle="--", zorder=5)
+        bars = ax.bar(xs, drifts, color=colors, alpha=0.85,
+                      edgecolor="white", lw=0.5, width=0.65)
+        ax.axhline(0, color="#333", lw=0.9, linestyle="--", zorder=5)
 
         for bar, d in zip(bars, drifts):
-            offset = 0.005 if d >= 0 else -0.005
-            ha = "left" if d >= 0 else "right"
-            ax.text(d + offset, bar.get_y() + bar.get_height() / 2,
-                    f"{d:+.3f}", ha=ha, va="center",
-                    fontsize=7.0, color="#222")
+            offset = 0.008 if d >= 0 else -0.008
+            va = "bottom" if d >= 0 else "top"
+            ax.text(bar.get_x() + bar.get_width() / 2, d + offset,
+                    f"{d:+.3f}", ha="center", va=va,
+                    fontsize=6.0, color="#222")
 
-        ax.set_yticks(xs)
-        ax.set_yticklabels(labels, fontsize=7.0, linespacing=0.88)
-        ax.invert_yaxis()
-        ax.set_xlabel("Learned − Initial threshold", fontsize=9)
+        ax.set_xticks(xs)
+        ax.set_xticklabels(labels, fontsize=6.5, linespacing=0.85,
+                           rotation=45, ha="right")
+        ax.set_ylabel("Learned − Initial threshold", fontsize=8.5)
         ax.set_title(
-            f"Threshold Drift — {title}  (seed 0)\n"
-            "Red = increased (tighter);  Blue = decreased (relaxed)",
-            fontsize=9, fontweight="bold", pad=5)
+            f"Threshold Drift — {title}  (seed 0)",
+            fontsize=8.5, fontweight="bold", pad=4)
 
         ax.legend(handles=[
             mpatches.Patch(color="#d62728", alpha=0.85, label="Increased (>0)"),
             mpatches.Patch(color=C_MLP,    alpha=0.85, label="Decreased (<0)"),
-        ], fontsize=7, loc="lower right", framealpha=0.85)
+        ], fontsize=7, loc="upper right", framealpha=0.85)
 
         _save(fig, f"threshold_drift_{ds}")
 

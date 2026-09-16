@@ -1,0 +1,36 @@
+{
+  "ctu": {
+    "MLP": {
+      "params": 93252,
+      "lat_batch1_us": 95.98,
+      "lat_batch512_us": 1.817
+    },
+    "JointCBM": {
+      "params": 93548,
+      "lat_batch1_us": 108.92,
+      "lat_batch512_us": 1.858
+    },
+    "NeSy": {
+      "params": 13825,
+      "lat_batch1_us": 592.35,
+      "lat_batch512_us": 1.868
+    }
+  },
+  "cic": {
+    "MLP": {
+      "params": 93829,
+      "lat_batch1_us": 93.97,
+      "lat_batch512_us": 1.872
+    },
+    "JointCBM": {
+      "params": 94069,
+      "lat_batch1_us": 109.25,
+      "lat_batch512_us": 1.924
+    },
+    "NeSy": {
+      "params": 14154,
+      "lat_batch1_us": 574.24,
+      "lat_batch512_us": 1.834
+    }
+  }
+}
