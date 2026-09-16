@@ -31,7 +31,7 @@ from cbm.concepts import (
 )
 from cbm.model import MLPBaseline, JointCBM, SequentialCBM, HybridCBM
 
-RESULTS_DIR = PROJECT_ROOT / "cbm" / "results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "cbm"
 EMBED_DIM = 64
 
 
@@ -66,6 +66,7 @@ def load_test_data(dataset: str):
         X_known, y_known, C_known = _load_known("test_known")
         # also load train split for mahalanobis fitting
         X_train, y_train, C_train = _load_known("train")
+        X_val_known, _, _ = _load_known("val")
         X_unknown = _load_unknown()
         concept_names = CTU_CONCEPTS
 
@@ -107,13 +108,37 @@ def load_test_data(dataset: str):
 
         X_known, y_known, C_known = _load_known("test_known")
         X_train, y_train, C_train = _load_known("train")
+        X_val_known, _, _ = _load_known("val")
         X_unknown = _load_unknown()
         concept_names = CIC_CONCEPTS
 
     else:
         raise ValueError(f"Unknown dataset: {dataset}")
 
-    return (X_known, y_known, C_known), (X_train, y_train, C_train), X_unknown, concept_names
+    return (X_known, y_known, C_known), (X_train, y_train, C_train), X_unknown, X_val_known, concept_names
+
+
+def _load_val_known(dataset: str) -> np.ndarray:
+    """Return raw feature array for val_known split (used for OOD calibration)."""
+    if dataset == "ctu":
+        data_dir = PROJECT_ROOT / "data"
+        vocab = json.loads((data_dir / "vocab.json").read_text())
+        feature_cols = vocab["feature_cols"]
+        known_ids = set(vocab["known_ids"])
+        df = pd.read_parquet(data_dir / "val.parquet")
+        df = df[df["label_id"].isin(known_ids)].reset_index(drop=True)
+        return df[feature_cols].values.astype(np.float32)
+    elif dataset == "cic":
+        data_dir = PROJECT_ROOT / "data" / "cic"
+        vocab = json.loads((data_dir / "vocab.json").read_text())
+        feature_cols = vocab["feature_cols"]
+        l2i = vocab["label_to_id"]
+        known_ids = set([l2i[c] for c in vocab["known_classes"]])
+        df = pd.read_parquet(data_dir / "val.parquet")
+        df = df[df["label_id"].isin(known_ids)].reset_index(drop=True)
+        return df[feature_cols].values.astype(np.float32)
+    else:
+        raise ValueError(dataset)
 
 
 def rebuild_model(model_name: str, n_features: int, n_classes: int, n_concepts: int):
@@ -131,17 +156,55 @@ def rebuild_model(model_name: str, n_features: int, n_classes: int, n_concepts: 
 
 # mahalanobis ood detection
 
-# compute per-class mahalanobis distance for ood detection.
-# for each test sample, return the minimum distance across classes.
-# lower distance = more in-distribution.
-def mahalanobis_scores(train_vecs: np.ndarray, test_vecs: np.ndarray) -> np.ndarray:
-    # use a single global covariance for numerical stability with small n_concepts
-    cov = EmpiricalCovariance(assume_centered=False)
-    cov.fit(train_vecs)
+# per-class Mahalanobis scorer (Lee et al. 2018).
+# fits one Gaussian per class with shared (pooled) covariance, scores each
+# test sample as the minimum squared Mahalanobis distance to any class centroid.
+def mahalanobis_scores(train_vecs: np.ndarray, test_vecs: np.ndarray,
+                        train_labels: np.ndarray = None,
+                        eps: float = 1e-4) -> np.ndarray:
+    from numpy.linalg import pinv
+    if train_labels is not None and len(np.unique(train_labels)) >= 2:
+        classes = np.unique(train_labels)
+        residuals = np.concatenate([
+            train_vecs[train_labels == c] - train_vecs[train_labels == c].mean(axis=0)
+            for c in classes if (train_labels == c).sum() >= 2
+        ], axis=0)
+        cov = np.cov(residuals.T) + eps * np.eye(residuals.shape[1])
+        cov_inv = pinv(cov)
+        mus = {c: train_vecs[train_labels == c].mean(axis=0)
+               for c in classes if (train_labels == c).sum() >= 2}
+        dists = np.stack([
+            np.sum((test_vecs - mu) @ cov_inv * (test_vecs - mu), axis=1)
+            for mu in mus.values()
+        ], axis=1)
+        return dists.min(axis=1)
+    else:
+        # global fallback (no labels available, e.g. MLP baseline)
+        cov = EmpiricalCovariance(assume_centered=False)
+        cov.fit(train_vecs)
+        return cov.mahalanobis(test_vecs)
 
-    # per-class means
-    scores = cov.mahalanobis(test_vecs)  # shape (N,)
-    return scores  # higher = more anomalous
+
+def energy_score(logits: np.ndarray) -> np.ndarray:
+    """Energy OOD score: E(x) = -log sum_c exp(l_c(x)).
+    Higher value = less evidence for any known class = more OOD."""
+    max_l = logits.max(axis=1, keepdims=True)
+    log_sum_exp = np.log(np.exp(logits - max_l).sum(axis=1)) + max_l.squeeze(1)
+    return -log_sum_exp
+
+
+def _get_embeddings_and_logits(model, X: np.ndarray, device: torch.device,
+                                cap: int = 20000):
+    """Return (embeddings, logits) for X, with optional size cap."""
+    if len(X) > cap:
+        idx = np.random.choice(len(X), cap, replace=False)
+        X = X[idx]
+    Xt = torch.tensor(X, dtype=torch.float32, device=device)
+    model.eval()
+    with torch.no_grad():
+        logits, _ = model(Xt)
+        emb = model.get_embedding(Xt)
+    return emb.cpu().numpy(), logits.cpu().numpy()
 
 
 # fit mahalanobis on train concept vectors.
@@ -164,12 +227,14 @@ def ood_auroc(
 
     # limit size for covariance fitting
     MAX_TRAIN = 20000
+    y_train_fit = y_train
     if len(emb_train) > MAX_TRAIN:
         idx = np.random.choice(len(emb_train), MAX_TRAIN, replace=False)
         emb_train = emb_train[idx]
+        y_train_fit = y_train[idx]
 
-    scores_known = mahalanobis_scores(emb_train, emb_known)
-    scores_unknown = mahalanobis_scores(emb_train, emb_unknown)
+    scores_known = mahalanobis_scores(emb_train, emb_known, train_labels=y_train_fit)
+    scores_unknown = mahalanobis_scores(emb_train, emb_unknown, train_labels=y_train_fit)
 
     MAX_EVAL = 5000
     if len(scores_known) > MAX_EVAL:
@@ -192,9 +257,90 @@ def ood_auroc(
     return auroc
 
 
+def combined_ood_scores(
+    mahal: np.ndarray, energy: np.ndarray,
+    val_mahal: np.ndarray, val_energy: np.ndarray,
+) -> np.ndarray:
+    """z-normalise Mahalanobis and energy using val in-distribution stats, then average.
+    Returns s_comb = 0.5*(s_tilde + E_tilde); higher = more OOD."""
+    mu_s, sig_s = val_mahal.mean(), val_mahal.std() + 1e-8
+    mu_e, sig_e = val_energy.mean(), val_energy.std() + 1e-8
+    return 0.5 * ((mahal - mu_s) / sig_s + (energy - mu_e) / sig_e)
+
+
+def ood_full(
+    model,
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_val_known: np.ndarray,
+    X_known: np.ndarray,
+    X_unknown: np.ndarray,
+    device: torch.device,
+    fpr_target: float = 0.05,
+    tau_percentile: float = 95.0,
+) -> dict:
+    """Compute Mahalanobis (per-class) and energy OOD scores.
+
+    Uses y_train labels for per-class Mahalanobis fitting (Lee et al. 2018).
+    Uses X_val_known to calibrate rejection threshold tau = Q_{tau_percentile}.
+
+    Returns dict with auroc and tpr@fpr_target for Mahalanobis,
+    plus tau and the open-set rejection rate on unknowns using mahal > tau.
+    """
+    CAP = 5000
+    MAX_TRAIN = 20000
+
+    # subsample training data with consistent label tracking
+    y_train_fit = y_train
+    X_train_fit = X_train
+    if len(X_train) > MAX_TRAIN:
+        idx = np.random.choice(len(X_train), MAX_TRAIN, replace=False)
+        X_train_fit = X_train[idx]
+        y_train_fit = y_train[idx]
+
+    emb_train, _ = _get_embeddings_and_logits(model, X_train_fit, device, cap=MAX_TRAIN + 1)
+    emb_val, logits_val = _get_embeddings_and_logits(model, X_val_known, device, cap=CAP)
+    emb_known, logits_known = _get_embeddings_and_logits(model, X_known, device, cap=CAP)
+    emb_unk, logits_unk = _get_embeddings_and_logits(model, X_unknown, device, cap=CAP)
+
+    # per-class mahalanobis scores
+    s_val = mahalanobis_scores(emb_train, emb_val, train_labels=y_train_fit)
+    s_known = mahalanobis_scores(emb_train, emb_known, train_labels=y_train_fit)
+    s_unk = mahalanobis_scores(emb_train, emb_unk, train_labels=y_train_fit)
+
+    # energy scores (for ablation reporting only)
+    e_known = energy_score(logits_known)
+    e_unk = energy_score(logits_unk)
+
+    # tau: 95th percentile of val Mahalanobis scores (Eq. tau in paper)
+    tau = float(np.percentile(s_val, tau_percentile))
+
+    def _auroc(scores_in, scores_out):
+        labels = np.concatenate([np.zeros(len(scores_in)), np.ones(len(scores_out))])
+        scores = np.concatenate([scores_in, scores_out])
+        try:
+            return float(roc_auc_score(labels, scores))
+        except Exception:
+            return float("nan")
+
+    def _tpr(scores_in, scores_out, fpr):
+        thr = np.percentile(scores_in, (1 - fpr) * 100)
+        return float((scores_out >= thr).mean())
+
+    return {
+        "mahal_auroc":    _auroc(s_known, s_unk),
+        "energy_auroc":   _auroc(e_known, e_unk),
+        "mahal_tpr5":     _tpr(s_known, s_unk, fpr_target),
+        "energy_tpr5":    _tpr(e_known, e_unk, fpr_target),
+        "tau":            tau,
+        "unk_rejection_rate": float((s_unk > tau).mean()),
+        "known_rejection_rate": float((s_known > tau).mean()),
+    }
+
+
 # return tpr (unknown detection rate) at a given fpr on known samples.
 def tpr_at_fpr(
-    model, X_train: np.ndarray,
+    model, X_train: np.ndarray, y_train: np.ndarray,
     X_known: np.ndarray, X_unknown: np.ndarray,
     device: torch.device, fpr_target: float = 0.05
 ) -> float:
@@ -210,13 +356,15 @@ def tpr_at_fpr(
             torch.tensor(X_unknown, dtype=torch.float32, device=device)
         ).cpu().numpy()
 
+    y_train_fit = y_train
     MAX_TRAIN = 20000
     if len(emb_train) > MAX_TRAIN:
         idx = np.random.choice(len(emb_train), MAX_TRAIN, replace=False)
         emb_train = emb_train[idx]
+        y_train_fit = y_train[idx]
 
-    scores_known = mahalanobis_scores(emb_train, emb_known)
-    scores_unknown = mahalanobis_scores(emb_train, emb_unknown)
+    scores_known = mahalanobis_scores(emb_train, emb_known, train_labels=y_train_fit)
+    scores_unknown = mahalanobis_scores(emb_train, emb_unknown, train_labels=y_train_fit)
 
     threshold = np.percentile(scores_known, (1 - fpr_target) * 100)
     tpr = (scores_unknown > threshold).mean()
@@ -294,7 +442,7 @@ def main():
     print(f"  Evaluation - dataset={args.dataset}  gamma={args.gamma}  device={device}")
     print(f"{'='*60}\n")
 
-    (X_known, y_known, C_known), (X_train, y_train, C_train), X_unknown, concept_names = \
+    (X_known, y_known, C_known), (X_train, y_train, C_train), X_unknown, X_val_known, concept_names = \
         load_test_data(args.dataset)
 
     model_names = args.models
@@ -354,14 +502,31 @@ def main():
             results["ood_auroc"] = None
             print(f"  OOD AUROC failed: {e}")
 
-        # 4. tpr at 5% fpr
+        # 4. tpr at 5% fpr + tau calibration
         try:
-            tpr = tpr_at_fpr(model, X_train, X_known, X_unknown, device, fpr_target=0.05)
+            tpr = tpr_at_fpr(model, X_train, y_train, X_known, X_unknown, device, fpr_target=0.05)
             results["tpr_at_5pct_fpr"] = float(tpr)
             print(f"  TPR @ 5% FPR: {tpr:.4f}")
         except Exception as e:
             results["tpr_at_5pct_fpr"] = None
             print(f"  TPR@5%FPR failed: {e}")
+
+        # 4b. energy OOD scoring (ablation) + tau calibration
+        try:
+            ood_res = ood_full(
+                model, X_train, y_train, X_val_known, X_known, X_unknown, device
+            )
+            results["energy_auroc"]       = ood_res["energy_auroc"]
+            results["tau"]                = ood_res["tau"]
+            results["unk_rejection_rate"] = ood_res["unk_rejection_rate"]
+            results["known_rejection_rate"] = ood_res["known_rejection_rate"]
+            print(f"  OOD AUROC (Energy, ablation): {ood_res['energy_auroc']:.4f}")
+            print(f"  Rejection threshold tau: {ood_res['tau']:.4f}  "
+                  f"(unk rejected: {ood_res['unk_rejection_rate']*100:.1f}%  "
+                  f"known rejected: {ood_res['known_rejection_rate']*100:.1f}%)")
+        except Exception as e:
+            results["energy_auroc"] = None
+            print(f"  Energy OOD failed: {e}")
 
         # 5. intervention experiment (cbm models only)
         if model_name in has_concepts:
@@ -384,17 +549,18 @@ def main():
         all_results[model_name] = results
 
     # summary table
-    print(f"\n{'='*70}")
+    print(f"\n{'='*90}")
     print(f"  SUMMARY - {args.dataset.upper()}")
-    print(f"{'='*70}")
-    print(f"  {'Model':<18}  {'F1':>7}  {'AUROC':>7}  {'TPR@5%':>7}  {'MeanConceptAcc':>14}")
-    print(f"  {'-'*65}")
+    print(f"{'='*90}")
+    print(f"  {'Model':<18}  {'F1':>7}  {'AUROC':>7}  {'TPR@5%':>7}  {'Energy':>7}  {'MCA':>7}")
+    print(f"  {'-'*72}")
     for mname, res in all_results.items():
-        f1_str = f"{res['weighted_f1']:.4f}" if res.get("weighted_f1") is not None else "   N/A"
-        auroc_str = f"{res['ood_auroc']:.4f}" if res.get("ood_auroc") is not None else "   N/A"
-        tpr_str = f"{res['tpr_at_5pct_fpr']:.4f}" if res.get("tpr_at_5pct_fpr") is not None else "   N/A"
-        mca_str = f"{res['mean_concept_accuracy']:.4f}" if res.get("mean_concept_accuracy") is not None else "           N/A"
-        print(f"  {mname:<18}  {f1_str:>7}  {auroc_str:>7}  {tpr_str:>7}  {mca_str:>14}")
+        f1_str    = f"{res['weighted_f1']:.4f}"           if res.get("weighted_f1")           is not None else "   N/A"
+        mahal_str = f"{res['ood_auroc']:.4f}"              if res.get("ood_auroc")              is not None else "   N/A"
+        tpr_str   = f"{res['tpr_at_5pct_fpr']:.4f}"       if res.get("tpr_at_5pct_fpr")       is not None else "   N/A"
+        eng_str   = f"{res['energy_auroc']:.4f}"           if res.get("energy_auroc")           is not None else "   N/A"
+        mca_str   = f"{res['mean_concept_accuracy']:.4f}"  if res.get("mean_concept_accuracy")  is not None else "   N/A"
+        print(f"  {mname:<18}  {f1_str:>7}  {mahal_str:>7}  {tpr_str:>7}  {eng_str:>7}  {mca_str:>7}")
 
     # save results json
     out_path = RESULTS_DIR / f"{args.dataset}_eval_results{gamma_tag}.json"

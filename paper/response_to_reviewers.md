@@ -1,0 +1,88 @@
+# Response to Reviewer 1
+
+We thank the reviewer for the careful and constructive review. Acting on the
+central concern about statistical rigor (Comments 4, 8), we re-ran every learned
+model over five seeds. This revealed that our originally reported "task-coupling
+OOD penalty" was a single-seed artifact: it vanishes and reverses under
+replication. We have accordingly **reframed the paper** around what the
+multi-seed evidence robustly supports — that *representation geometry and scorer
+choice*, not concept-regularization strength, govern open-set detectability — and
+retitled it "Interpretable Open-Set Intrusion Detection for IoT: What Governs
+Out-of-Distribution Detection in Concept-Bottleneck and Neuro-Symbolic Models."
+We are grateful the review pushed us here; the revised paper is substantially more
+honest and, we believe, more valuable. Point-by-point responses follow.
+
+---
+
+**C1 — Known/unknown selection not justified.**
+Added a "Known/unknown selection" paragraph (Sec. Datasets): the known set spans
+the coarse traffic archetypes an operator can realistically label early in
+deployment (benign + one representative per dominant malicious category —
+volumetric DDoS, botnet C&C/Mirai, reconnaissance), with held-out unknowns being
+predominantly sub-families/variants of those categories, i.e., the realistic
+novel-variant open-set regime. See also C8.
+
+**C2 — λ grid underspecified / limited exploration.**
+Clarified (Sec. Setup) that λ weights *concept supervision* and was selected by
+grid search over {0.1,0.5,1.0} on the criterion of known-class F1, which is
+invariant to λ (±0.002). λ was therefore fixed at the mid-value and γ studied as
+the variable of interest. New Table (λ-sensitivity, 3 seeds) reports F1, concept
+accuracy, and OOD AUROC across λ: F1 is flat; λ trades concept accuracy against
+OOD in dataset-dependent directions — an honest nuance now documented.
+
+**C3 — Mahalanobis on binary vectors not justified vs. alternatives.**
+Added a scorer ablation (new Table, 5 seeds) comparing per-class Mahalanobis,
+Hamming, Jaccard, energy, and their combination on the binary rule-activation
+space. The metrics native to the binary simplex (Hamming 0.522, Jaccard 0.519)
+are near-random because they discard per-class covariance; Mahalanobis is
+justified where activations are well separated (CTU 0.906), and a logit-space
+energy score is the effective choice where they are non-Gaussian (CIC:
+0.605→0.730). This is now a headline contribution.
+
+**C4 — CBM single-seed vs. NeSy 5-seed.**
+Fixed. All learned models (MLP, JointCBM ×4 γ, SequentialCBM, HybridCBM,
+NeSy-NIDS) now report 5-seed mean±std in Table 1. This directly surfaced the
+artifact: the single-seed γ ablation (0.838→0.895 on CTU; 0.668→0.728 on CIC) is
+within seed variance and does not replicate (see C-central below). SequentialCBM's
+prior CTU 0.707 was an unlucky seed (5-seed mean 0.898).
+
+**C5 — "Joint evaluation" novelty weak.**
+Reframed around a *unified open-set evaluation framework*: two structurally
+distinct interpretable paradigms held to one protocol (identical splits, scoring,
+thresholding, seeds). The two findings that survive — scorer–representation
+matching and the multi-seed refutation of a regularization effect — are only
+visible under this controlled design (abstract, contributions, discussion).
+
+**C6 — Exact concept definitions/thresholds.**
+Added a full concept-definition table (both datasets, all 8+8 concepts with exact
+thresholds; CTU raw units, CIC standardized units).
+
+**C7 — Why exclude TON_IoT.**
+Strengthened rationale (Sec. Datasets): TON_IoT's features are not the Zeek-style
+flow statistics our concept/rule vocabularies are defined over, so it would
+require re-deriving the entire vocabulary and confound a same-interface
+comparison; its taxonomy is also shallower (~9 vs 13/34 classes). We argue the
+effects studied are properties of the objective/representation and expect them to
+transfer.
+
+**C8 — Sensitivity to the known/unknown split.**
+Added an alternative CTU split ({Benign, DDoS, Okiru, C&C}; C&C promoted from
+unknown, C&C-HeartBeat demoted to unknown) and re-ran the CBM evaluation. The
+qualitative conclusions hold: interpretable models match the MLP on F1, and OOD
+AUROC shows no reliable γ ordering (MLP 0.899; JointCBM γ=0: 0.840, γ=1.0: 0.797),
+confirming the findings are not artifacts of the original partition.
+
+---
+
+**Central revision (arising from C4/C8) — the task-coupling penalty does not replicate.**
+The originally reported CIC penalty (JointCBM AUROC rising to a γ=0.5 peak of
+0.728) rested on one seed whose γ=0 draw was anomalously low (0.668; 5-seed mean
+0.718). Across five seeds, γ∈{0,0.1,0.5} form a flat plateau (0.717–0.726) within
+std. An independent second five-seed set (seeds 5–9) reverses the direction
+(γ=0: 0.735, γ=0.5: 0.702). Pooled over ten seeds the variants are statistically
+indistinguishable (γ=0.5: 0.714±0.028 vs γ=0: 0.726±0.032). We have removed the
+task-coupling claim and the γ-vs-AUROC figure, retitled and re-abstracted the
+paper, and now present concept-fidelity (leakage) reduction as a property of γ in
+its own right, decoupled from OOD. We report the non-replication itself as a
+methodological result: single-seed ablations can manufacture spurious open-set
+effects.

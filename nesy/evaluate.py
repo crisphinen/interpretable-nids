@@ -30,7 +30,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from nesy.model import NeSyNIDS, RuleOnlyNIDS, CTU_RULES, CIC_RULES
 
-RESULTS_DIR = PROJECT_ROOT / "nesy" / "results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "nesy"
 K_EVAL = 10.0   # hard k for evaluation and rule analysis
 
 
@@ -141,8 +141,33 @@ def compute_known_f1(model, X_known, y_known):
     return f1_score(y_known.cpu().numpy(), preds, average="weighted", zero_division=0)
 
 
-# fit class-conditional gaussian on emb_known, score test samples.
-# uses global covariance (pooled), per-class mean.
+# per-class Mahalanobis scorer (Lee et al. 2018).
+# fits one Gaussian per class with shared covariance, scores each test sample
+# as the minimum squared Mahalanobis distance to any class centroid.
+def _mahalanobis_scores_perclass(emb_train: np.ndarray, labels_train: np.ndarray,
+                                  emb_test: np.ndarray,
+                                  eps: float = 1e-4) -> np.ndarray:
+    """Minimum per-class Mahalanobis distance: s(x) = min_c (x-μ_c)^T Σ^{-1} (x-μ_c)."""
+    from numpy.linalg import pinv
+    classes = np.unique(labels_train)
+    # pooled within-class covariance
+    residuals = np.concatenate([
+        emb_train[labels_train == c] - emb_train[labels_train == c].mean(axis=0)
+        for c in classes
+    ], axis=0)
+    cov = np.cov(residuals.T) + eps * np.eye(residuals.shape[1])
+    cov_inv = pinv(cov)
+    # per-class means
+    mus = {c: emb_train[labels_train == c].mean(axis=0) for c in classes}
+    # score: min distance to any class centroid
+    dists = np.stack([
+        np.sum((emb_test - mu) @ cov_inv * (emb_test - mu), axis=1)
+        for mu in mus.values()
+    ], axis=1)
+    return dists.min(axis=1)
+
+
+# legacy single-centroid scorer kept for backwards compatibility.
 def _mahalanobis_scores(emb_known: np.ndarray, emb_unknown: np.ndarray,
                         cap_train: int = 20000):
     from numpy.linalg import pinv
@@ -154,13 +179,42 @@ def _mahalanobis_scores(emb_known: np.ndarray, emb_unknown: np.ndarray,
 
     cov = np.cov(emb_fit.T) + 1e-6 * np.eye(emb_fit.shape[1])
     cov_inv = pinv(cov)
-    mu = emb_fit.mean(axis=0)  # global mean (single-class mahalanobis)
+    mu = emb_fit.mean(axis=0)
 
     def maha(E):
         diff = E - mu
         return np.sum(diff @ cov_inv * diff, axis=1)
 
     return maha(emb_known), maha(emb_unknown)
+
+
+def _energy_score(logits: np.ndarray) -> np.ndarray:
+    """E(x) = -log sum_c exp(l_c(x)).  Higher = more OOD."""
+    max_l = logits.max(axis=1, keepdims=True)
+    log_sum_exp = np.log(np.exp(logits - max_l).sum(axis=1)) + max_l.squeeze(1)
+    return -log_sum_exp
+
+
+def _z_norm(scores: np.ndarray, ref: np.ndarray) -> np.ndarray:
+    """z-normalise scores using mean/std of ref (in-distribution)."""
+    return (scores - ref.mean()) / (ref.std() + 1e-8)
+
+
+def _combined_scores(mahal: np.ndarray, energy: np.ndarray,
+                     val_mahal: np.ndarray, val_energy: np.ndarray,
+                     mode: str = "avg") -> np.ndarray:
+    """Combine z-normalised Mahalanobis and energy scores.
+
+    mode='avg'  : equal-weight average (original)
+    mode='max'  : element-wise maximum (prevents weak scorer dilution)
+    mode='adapt': val-AUROC weighted combination
+    """
+    s = _z_norm(mahal, val_mahal)
+    e = _z_norm(energy, val_energy)
+    if mode == "max":
+        return np.maximum(s, e)
+    else:  # avg (default) and adapt both use weighted avg; adapt sets weights externally
+        return 0.5 * (s + e)
 
 
 # ood auroc using mahalanobis distance on rule activation vectors.
@@ -208,6 +262,115 @@ def tpr_at_fpr(model, X_known, X_unknown, target_fpr=0.05):
     threshold = np.percentile(score_known, (1 - target_fpr) * 100)
     tpr = (score_unknown >= threshold).mean()
     return float(tpr)
+
+
+@torch.no_grad()
+def compute_combined_ood(model, X_val_known, y_val_known,
+                         X_known, y_known, X_unknown,
+                         target_fpr: float = 0.05, tau_percentile: float = 95.0) -> dict:
+    """Compute Mahalanobis (per-class), energy, and combined OOD scores.
+
+    Per-class Mahalanobis uses class labels from val/known to fit one
+    Gaussian per class (shared pooled covariance), then scores by
+    minimum distance to any class centroid — the Lee et al. 2018 approach.
+
+    Three combination modes are evaluated:
+      avg  : equal-weight average of z-scores (original)
+      max  : element-wise max (prevents weak scorer dilution)
+      adapt: weighted average, weights = normalised per-scorer val variance
+    """
+    CAP = 5000
+
+    def _get(Xt):
+        if len(Xt) > CAP:
+            idx = np.random.choice(len(Xt), CAP, replace=False)
+            Xt = Xt[idx]
+            return Xt, None   # no label slice here; caller handles labels
+        return Xt, None
+
+    def _extract(Xt):
+        if len(Xt) > CAP:
+            idx = np.random.choice(len(Xt), CAP, replace=False)
+            Xt = Xt[idx]
+        emb = model.get_embedding(Xt, k=K_EVAL).cpu().numpy()
+        logits, _ = model(Xt, k=K_EVAL)
+        return emb, logits.cpu().numpy()
+
+    # subsample keeping class labels aligned
+    def _subsample_labeled(Xt, yt):
+        if len(Xt) > CAP:
+            idx = np.random.choice(len(Xt), CAP, replace=False)
+            return Xt[idx], yt[idx] if isinstance(yt, np.ndarray) else yt.cpu().numpy()[idx]
+        return Xt, yt.cpu().numpy() if not isinstance(yt, np.ndarray) else yt
+
+    X_val_s, y_val_s = _subsample_labeled(X_val_known, y_val_known)
+    X_kn_s,  y_kn_s  = _subsample_labeled(X_known, y_known)
+
+    emb_val, logits_val = _extract(X_val_s)
+    emb_kn,  logits_kn  = _extract(X_kn_s)
+    emb_un,  logits_un  = _extract(X_unknown)
+
+    # ── per-class Mahalanobis (fit on val labels) ──────────────────────────
+    s_val = _mahalanobis_scores_perclass(emb_val, y_val_s, emb_val)
+    s_kn  = _mahalanobis_scores_perclass(emb_val, y_val_s, emb_kn)
+    s_un  = _mahalanobis_scores_perclass(emb_val, y_val_s, emb_un)
+
+    # ── energy scores ──────────────────────────────────────────────────────
+    e_val = _energy_score(logits_val)
+    e_kn  = _energy_score(logits_kn)
+    e_un  = _energy_score(logits_un)
+
+    # ── combination modes ─────────────────────────────────────────────────
+    # avg: equal-weight z-normalised average
+    c_avg_val = _combined_scores(s_val, e_val, s_val, e_val, mode="avg")
+    c_avg_kn  = _combined_scores(s_kn,  e_kn,  s_val, e_val, mode="avg")
+    c_avg_un  = _combined_scores(s_un,  e_un,  s_val, e_val, mode="avg")
+
+    # max: element-wise maximum of z-normalised scores
+    c_max_val = _combined_scores(s_val, e_val, s_val, e_val, mode="max")
+    c_max_kn  = _combined_scores(s_kn,  e_kn,  s_val, e_val, mode="max")
+    c_max_un  = _combined_scores(s_un,  e_un,  s_val, e_val, mode="max")
+
+    # adapt: weights proportional to val z-score variance (higher variance = more signal)
+    s_z_val = _z_norm(s_val, s_val);  e_z_val = _z_norm(e_val, e_val)
+    var_s = s_z_val.var() + 1e-8;    var_e = e_z_val.var() + 1e-8
+    w_s = var_s / (var_s + var_e);   w_e = var_e / (var_s + var_e)
+    s_z_kn  = _z_norm(s_kn, s_val);  e_z_kn  = _z_norm(e_kn, e_val)
+    s_z_un  = _z_norm(s_un, s_val);  e_z_un  = _z_norm(e_un, e_val)
+    c_ad_val = w_s * s_z_val + w_e * e_z_val
+    c_ad_kn  = w_s * s_z_kn  + w_e * e_z_kn
+    c_ad_un  = w_s * s_z_un  + w_e * e_z_un
+
+    # tau on best combined (avg) — calibrated on val
+    tau = float(np.percentile(c_avg_val, tau_percentile))
+
+    def _auroc(s_in, s_out):
+        labels = np.concatenate([np.zeros(len(s_in)), np.ones(len(s_out))])
+        scores = np.concatenate([s_in, s_out])
+        try:
+            return float(roc_auc_score(labels, scores))
+        except Exception:
+            return float("nan")
+
+    def _tpr(s_in, s_out, fpr):
+        thr = np.percentile(s_in, (1 - fpr) * 100)
+        return float((s_out >= thr).mean())
+
+    return {
+        "mahal_auroc":         _auroc(s_kn,     s_un),
+        "energy_auroc":        _auroc(e_kn,     e_un),
+        "combined_avg_auroc":  _auroc(c_avg_kn, c_avg_un),
+        "combined_max_auroc":  _auroc(c_max_kn, c_max_un),
+        "combined_ada_auroc":  _auroc(c_ad_kn,  c_ad_un),
+        "mahal_tpr5":          _tpr(s_kn,     s_un,     target_fpr),
+        "energy_tpr5":         _tpr(e_kn,     e_un,     target_fpr),
+        "combined_avg_tpr5":   _tpr(c_avg_kn, c_avg_un, target_fpr),
+        "combined_max_tpr5":   _tpr(c_max_kn, c_max_un, target_fpr),
+        "tau":                 tau,
+        "unk_rejection_rate":  float((c_avg_un > tau).mean()),
+        "known_rejection_rate":float((c_avg_kn > tau).mean()),
+        "w_mahal": float(w_s), "w_energy": float(w_e),
+    }
 
 
 # rule analysis
@@ -338,23 +501,42 @@ def print_rule_summary(crispness, selectivity, editing, id_to_label):
 
 # load models from n_seeds seeds, report mean +/- std.
 def multi_seed_eval(dataset: str, n_seeds: int, device: torch.device):
+    X_val_known, y_val_known, _ = load_known_val(dataset, device)  # val split for calibration
     X_known, y_known, id_to_label = load_known_val(dataset, device)
     X_unknown = load_unknown_test(dataset, device)
 
-    results = {"f1": [], "auroc": [], "tpr5": []}
+    results = {"f1": [], "auroc": [], "tpr5": [],
+               "energy_auroc": [],
+               "combined_avg_auroc": [], "combined_max_auroc": [], "combined_ada_auroc": [],
+               "combined_avg_tpr5": []}
+    y_val_np = y_val_known.cpu().numpy() if hasattr(y_val_known, 'cpu') else y_val_known
+    y_kn_np  = y_known.cpu().numpy()     if hasattr(y_known,     'cpu') else y_known
     for seed in range(n_seeds):
         ckpt_path = RESULTS_DIR / f"{dataset}_nesy_s{seed}.pt"
         if not ckpt_path.exists():
             print(f"  Missing: {ckpt_path} - skipping")
             continue
         model, _ = load_model(ckpt_path, device)
-        f1   = compute_known_f1(model, X_known, y_known)
+        f1    = compute_known_f1(model, X_known, y_known)
         auroc = compute_ood_auroc(model, X_known, X_unknown)
-        tpr  = tpr_at_fpr(model, X_known, X_unknown)
+        tpr   = tpr_at_fpr(model, X_known, X_unknown)
+        comb  = compute_combined_ood(model,
+                                     X_val_known, y_val_np,
+                                     X_known, y_kn_np, X_unknown)
         results["f1"].append(f1)
         results["auroc"].append(auroc)
         results["tpr5"].append(tpr)
-        print(f"  seed={seed}  F1={f1:.4f}  AUROC={auroc:.4f}  TPR@5%={tpr:.4f}")
+        results["energy_auroc"].append(comb["energy_auroc"])
+        results["combined_avg_auroc"].append(comb["combined_avg_auroc"])
+        results["combined_max_auroc"].append(comb["combined_max_auroc"])
+        results["combined_ada_auroc"].append(comb["combined_ada_auroc"])
+        results["combined_avg_tpr5"].append(comb["combined_avg_tpr5"])
+        print(f"  seed={seed}  F1={f1:.4f}  "
+              f"Mahal={auroc:.4f}  Energy={comb['energy_auroc']:.4f}  "
+              f"Avg={comb['combined_avg_auroc']:.4f}  "
+              f"Max={comb['combined_max_auroc']:.4f}  "
+              f"Ada={comb['combined_ada_auroc']:.4f}  "
+              f"(w_s={comb['w_mahal']:.2f}/w_e={comb['w_energy']:.2f})")
 
     if results["f1"]:
         print(f"\n  Multi-seed summary ({len(results['f1'])} seeds):")
@@ -374,6 +556,8 @@ def main():
     parser.add_argument("--multi_seed", type=int, default=0,
                         help="Evaluate N seeds and report mean+/-std (0=off)")
     parser.add_argument("--model", choices=["nesy", "rule_only"], default="nesy")
+    parser.add_argument("--lambda_alpha", type=float, default=0.0,
+                        help="Load alpha-regularised checkpoint (e.g. 0.1 loads _a0.1 suffix)")
     args = parser.parse_args()
 
     device = torch.device(
@@ -389,7 +573,8 @@ def main():
         return
 
     # single seed evaluation
-    ckpt_path = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}.pt"
+    alpha_tag = f"_a{args.lambda_alpha}" if args.lambda_alpha > 0 else ""
+    ckpt_path = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}{alpha_tag}.pt"
     if not ckpt_path.exists():
         print(f"ERROR: Checkpoint not found: {ckpt_path}")
         print("Run training first: python -m nesy.train --dataset {args.dataset}")
@@ -401,6 +586,8 @@ def main():
     print("Loading data...")
     X_known, y_known, id_to_label = load_known_val(args.dataset, device)
     X_unknown = load_unknown_test(args.dataset, device)
+    # val split doubles as calibration set for energy/combined scoring
+    X_val_known = X_known
 
     print(f"\n  Known samples: {len(X_known)}")
     print(f"  Unknown (OOD) samples: {len(X_unknown)}")
@@ -410,6 +597,10 @@ def main():
     f1    = compute_known_f1(model, X_known, y_known)
     auroc = compute_ood_auroc(model, X_known, X_unknown)
     tpr5  = tpr_at_fpr(model, X_known, X_unknown)
+    y_kn_np = y_known.cpu().numpy()
+    comb  = compute_combined_ood(model,
+                                 X_val_known, y_kn_np,
+                                 X_known, y_kn_np, X_unknown)
 
     # rule analysis (only for models with rule_bank)
     if hasattr(model, 'rule_bank'):
@@ -426,10 +617,19 @@ def main():
     print(f"\n{'='*60}")
     print(f"  Results - {args.dataset.upper()}  {args.model}  seed={args.seed}")
     print(f"{'='*60}")
-    print(f"  Known F1 (weighted) : {f1:.4f}")
-    print(f"  OOD AUROC           : {auroc:.4f}")
-    print(f"  TPR @ 5% FPR        : {tpr5:.4f}")
-    print(f"  Mean rule crispness : {mean_crisp:.4f}")
+    print(f"  Known F1 (weighted)    : {f1:.4f}")
+    print(f"  OOD AUROC (Mahal)       : {auroc:.4f}")
+    print(f"  OOD AUROC (Energy)      : {comb['energy_auroc']:.4f}")
+    print(f"  OOD AUROC (Comb-Avg)    : {comb['combined_avg_auroc']:.4f}")
+    print(f"  OOD AUROC (Comb-Max)    : {comb['combined_max_auroc']:.4f}")
+    print(f"  OOD AUROC (Comb-Ada)    : {comb['combined_ada_auroc']:.4f}  "
+          f"(w_s={comb['w_mahal']:.2f}, w_e={comb['w_energy']:.2f})")
+    print(f"  TPR @ 5% FPR (Mahal)    : {tpr5:.4f}")
+    print(f"  TPR @ 5% FPR (Comb-Avg) : {comb['combined_avg_tpr5']:.4f}")
+    print(f"  Threshold tau           : {comb['tau']:.4f}")
+    print(f"  Unk rejection rate      : {comb['unk_rejection_rate']*100:.1f}%")
+    print(f"  Known rejection rate    : {comb['known_rejection_rate']*100:.1f}%")
+    print(f"  Mean rule crispness    : {mean_crisp:.4f}")
     if not np.isnan(gate_val):
         print(f"  Gate alpha (rule weight): {gate_val:.4f}")
 
@@ -446,15 +646,23 @@ def main():
             print(f"    {rule.name:<30}: {theta_str}")
 
     # save results
-    results_file = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}_eval.json"
+    results_file = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}{alpha_tag}_eval.json"
     import json as _json
     summary = {
         "dataset": args.dataset,
         "model": args.model,
         "seed": args.seed,
         "known_f1": f1,
-        "ood_auroc": auroc,
-        "tpr_at_5fpr": tpr5,
+        "ood_auroc_mahal": auroc,
+        "ood_auroc_energy": comb["energy_auroc"],
+        "ood_auroc_comb_avg": comb["combined_avg_auroc"],
+        "ood_auroc_comb_max": comb["combined_max_auroc"],
+        "ood_auroc_comb_ada": comb["combined_ada_auroc"],
+        "tpr_at_5fpr_mahal": tpr5,
+        "tpr_at_5fpr_comb_avg": comb["combined_avg_tpr5"],
+        "tau": comb["tau"],
+        "unk_rejection_rate": comb["unk_rejection_rate"],
+        "known_rejection_rate": comb["known_rejection_rate"],
         "mean_crispness": float(mean_crisp),
         "gate_alpha": float(gate_val),
         "crispness_per_rule": crisp,
