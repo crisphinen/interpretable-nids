@@ -24,12 +24,12 @@
   Out-of-Distribution Detection in Concept-Bottleneck and
   Neuro-Symbolic Models}
 
-\author{Ngari~Crisphine~Macharia and~Ning~Weng%
-  \thanks{N.~C.~Macharia and N.~Weng are with the School of Electrical,
+\author{Crisphine~Macharia~Ngari and~Ning~Weng%
+  \thanks{C.~M.~Ngari and N.~Weng are with the School of Electrical,
     Computer and Biomedical Engineering, Southern Illinois University
     Carbondale, IL~62901~USA
     (e-mail: c.ngari@siu.edu, nweng@siu.edu).
-    Corresponding author: N.~C.~Macharia.}%
+    Corresponding author: C.~M.~Ngari.}%
   \thanks{Code and pre-trained models will be made publicly available
     upon acceptance of this paper.}%
 }
@@ -37,16 +37,16 @@
 \begin{document}
 
 \markboth{IEEE Internet of Things Journal}%
-{Ngari \MakeLowercase{\textit{et al.}}: Interpretable Open-Set IoT Intrusion Detection via CBMs and Differentiable Rules}
+{Ngari \MakeLowercase{\textit{and}} Weng: Interpretable Open-Set IoT Intrusion Detection via CBMs and Differentiable Rules}
 
 \maketitle
 
 \begin{abstract}
-Machine-learning intrusion detection systems (NIDS) for IoT networks face two obstacles to deployment: operators cannot see why a flow was flagged, and models trained on a closed set of attack families misclassify novel ones (the open-set problem). We study two interpretable architectures under one open-set protocol. Concept Bottleneck Models (CBMs) route predictions through a layer of human-defined traffic concepts and allow test-time intervention. Neuro-Symbolic NIDS (NeSy-NIDS) turns expert attack signatures into threshold rules with learnable thresholds, trained with $k$-annealed sigmoid gates and binarised at inference, alongside a neural fallback blended through a learnable gate $\alpha$. On CTU-IoT-23 and CIC-IoT-2023, jointly trained CBMs and NeSy-NIDS match an unconstrained MLP on known-class F1 (within $\pm0.002$ over five seeds), so interpretability costs no accuracy. We then ask what governs out-of-distribution (OOD) detection. The representation decides whether a scoring rule can work: on the well-separated rule activations of CTU-IoT-23, per-class Mahalanobis distance~\cite{lee2018simple} and simpler centroid distances all reach $0.86$--$0.90$ AUROC (NeSy-NIDS $0.899\pm0.013$), while on the near-deterministic activations of CIC-IoT-2023 no activation-space scorer exceeds $0.64$ and only a logit-space energy score ($0.749\pm0.014$) restores detection. Concept-fidelity regularisation strength, by contrast, has no consistent effect: its small influence on OOD AUROC changes sign between datasets and between splits of the same dataset, and a $0.06$-AUROC ``task-coupling'' effect seen at one seed does not survive replication. Representation geometry and scorer choice, not regularisation strength, decide open-set detectability in these models, and single-seed open-set results on interpretable NIDS need replication before they are reported. NeSy-NIDS additionally yields exactly binary rule activations for audit and a gate $\alpha$ that raises rule reliance at no F1 cost.
+Machine-learning intrusion detection systems (NIDS) for IoT networks face two obstacles to deployment: operators cannot see why a flow was flagged, and models trained on a closed set of attack families misclassify novel ones (the open-set problem). We study two interpretable architectures under one open-set protocol. Concept Bottleneck Models (CBMs) route predictions through a layer of human-defined traffic concepts and allow test-time intervention. Neuro-Symbolic NIDS (NeSy-NIDS) turns expert attack signatures into threshold rules with learnable thresholds, trained with annealed sigmoid gates and binarised at inference, alongside a neural fallback blended through a learnable gate. On CTU-IoT-23 and CIC-IoT-2023, jointly trained CBMs and NeSy-NIDS match an unconstrained MLP on known-class F1 (within 0.002 over five seeds), so interpretability costs no accuracy. We then ask what governs out-of-distribution (OOD) detection. The representation, not the scoring rule, is decisive: on the well-separated activations of CTU-IoT-23, per-class Mahalanobis and simple centroid distances all reach 0.86--0.90 AUROC, whereas on the near-deterministic activations of CIC-IoT-2023 no activation-space scorer exceeds 0.64 and only a logit-space energy score restores detection. Concept-fidelity regularisation strength, by contrast, has no consistent effect: its small influence on OOD AUROC changes sign between datasets and between splits of one dataset, and a 0.06-AUROC ``task-coupling'' effect seen at a single seed does not survive replication. Representation geometry and scorer choice, not regularisation strength, decide open-set detectability, and single-seed open-set results on interpretable NIDS need replication before they are reported. NeSy-NIDS additionally emits exactly binary, auditable rule activations at no accuracy cost.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Internet of Things, network intrusion detection, concept bottleneck, open-set detection, out-of-distribution.
+Concept bottleneck models, Internet of Things, network intrusion detection, open-set recognition, out-of-distribution detection.
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -107,7 +107,7 @@ Fig.~\ref{fig:arch} shows the two architectures. \textbf{(A) Concept Bottleneck 
     \vspace{-1mm}
     \def\svgwidth{.85\textwidth}
     \fontsize{5}{5}\selectfont
-    \input{nesy_nids_cbm_architecture (1).pdf_tex}
+    \input{nesy_cbm_architecture.pdf_tex}
     \vspace{-1mm}
     \caption{The two architectures. (A) CBM: concept encoder, concept layer, linear classifier. (B) NeSy-NIDS: rule bank with learnable thresholds, neural fallback, gate $\alpha$.}
     \label{fig:arch}
@@ -149,18 +149,60 @@ $\gamma{=}1.0$: $0.727$; MLP $0.890$).
 leak device or session identity between train and test. A strict
 device-disjoint split is not feasible for the CTU attacks, which come from very
 few source hosts (Okiru: 4, DDoS: 7, C\&C-HeartBeat: 5 source IPs), so we
-instead rebuild the known-class splits in time, ordering each class by capture
-timestamp and taking the earliest 70\% for training and the latest 15\% for
-test (test strictly follows train; the held-out unknown families are
-unchanged). Under this harder protocol (three seeds) known-class F1
-drops by about $0.06$ (MLP $0.933{\to}0.871$), so the random split was mildly
-optimistic, but the central conclusions survive. Every JointCBM variant still
-matches the MLP on F1 ($0.870$--$0.872$ vs.\ $0.871$), and OOD AUROC brackets the
-MLP's $0.801$: $0.703$, $0.773$, $0.807$ and $0.836$ for
-$\gamma\in\{0,0.1,0.5,1.0\}$, with seed-std up to $0.08$. This ordering is the
-reverse of the one on the alternative CTU split above, which is one more
-indication that $\gamma$ has no consistent effect on OOD detection.
-SequentialCBM, already fragile, collapses (F1 $0.27$).
+instead rebuild the known-class splits in time: we take the same per-class
+sample as the main split, order it by capture timestamp, and assign the
+earliest 70\% to training and the latest 15\% to test (five seeds; test
+strictly follows train; the held-out unknown families are unchanged). This
+protocol exposes a property of the CTU-IoT-23 labelling: the \emph{DDoS} family
+is temporally bimodal---a high-rate flood capture (median Rate
+${\approx}9.3{\times}10^{5}$\,pps, through Dec.\ 2018) followed by a
+near-zero-rate capture (median Rate ${<}1$, thereafter). A timestamp split
+therefore trains on one DDoS regime and tests on the other, turning DDoS into a
+cross-\emph{capture} generalisation task on which \emph{every} model---MLP and
+CBM alike---scores F1 $0.00$ (Table~\ref{tab:temporal}). We therefore report the
+temporal result on the three temporally-coherent families (Benign,
+C\&C-HeartBeat, Okiru) and treat DDoS separately as a documented dataset
+property. On those three families known-class F1 falls from ${\approx}0.99$
+(random split) to $0.862$, so the random partition was optimistic; but the
+central conclusions survive. Every JointCBM variant matches the MLP on this
+coherent-family F1 ($0.862$--$0.863$ vs.\ $0.862$), and OOD AUROC rises only
+weakly with $\gamma$ ($0.765$, $0.798$, $0.831$, $0.833$ for
+$\gamma\in\{0,0.1,0.5,1.0\}$ vs.\ MLP $0.795$; seed-std up to $0.055$). This
+ordering is the reverse of the one on the alternative CTU split above, which is
+one more indication that $\gamma$ has no consistent effect on OOD detection.
+SequentialCBM, already fragile, collapses further (coherent-family F1 $0.52$).
+NeSy-NIDS, trained and scored on the identical split, behaves the same way on
+classification (coherent-family F1 $0.862$, DDoS $0.00$) but gives the
+\emph{strongest} temporal-split OOD AUROC of any model here
+($0.898{\pm}0.048$, and $0.923{\pm}0.006$ with the $\alpha$-gate penalty of
+Section~\ref{sec:alpha}); its well-separated binary rule activations remain the
+best OOD representation on CTU-IoT-23 even under the harder split, reinforcing
+that the representation, not the regularisation strength, governs detectability.
+
+\begin{table}[t]
+\centering\small
+\caption{Temporal (timestamp-ordered) split on CTU-IoT-23: per-class known F1,
+weighted F1 over the three temporally-coherent families (Coh-3; DDoS excluded),
+and OOD AUROC (5 seeds). The \emph{DDoS} label is temporally bimodal (two
+capture regimes), so a timestamp split makes it a cross-capture task on which
+every model scores $0.00$; the coherent-family F1 is the comparable number.}
+\label{tab:temporal}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Model & Benign & C\&C-HB & DDoS & Okiru & Coh-3 & AUROC \\
+\midrule
+MLP baseline        & $0.958$ & $0.777$ & $0.00$ & $0.852$ & $0.862$ & $0.795$ \\
+JointCBM $\gamma{=}0$   & $0.922$ & $0.778$ & $0.00$ & $0.889$ & $0.863$ & $0.765$ \\
+JointCBM $\gamma{=}0.1$ & $0.920$ & $0.778$ & $0.00$ & $0.889$ & $0.862$ & $0.798$ \\
+JointCBM $\gamma{=}0.5$ & $0.885$ & $0.778$ & $0.00$ & $0.924$ & $0.862$ & $0.831$ \\
+JointCBM $\gamma{=}1.0$ & $0.883$ & $0.780$ & $0.00$ & $0.925$ & $0.863$ & $0.833$ \\
+SequentialCBM       & $0.00$  & $0.991$ & $0.00$ & $0.557$ & $0.516$ & $0.853$ \\
+HybridCBM           & $0.879$ & $0.820$ & $0.00$ & $0.889$ & $0.862$ & $0.826$ \\
+NeSy-NIDS           & $0.994$ & $0.777$ & $0.00$ & $0.815$ & $0.862$ & $0.898$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 We did not use TON\_IoT~\cite{alsaedi2020toniot}. Its network features are
 not the Zeek-style bidirectional flow statistics over which our concept and
@@ -819,7 +861,7 @@ latency budget of gateway-class hardware measured on a desktop CPU
 \textbf{Limitations.} The main results use five seeds for every learned
 model (MLP, CBM variants, NeSy-NIDS), and the CIC $\gamma$ ablation is
 replicated on a second independent five-seed set. The alternative-split and
-temporal evaluations use three seeds, and Post-hoc~CBM, DT, RF, the post-hoc
+temporal evaluations also use five seeds, and Post-hoc~CBM, DT, RF, the post-hoc
 OOD baselines and the concept-accuracy table are single runs. Concept and
 rule labels are threshold functions written by us, not ground-truth
 semantics, so concept accuracy measures agreement with those thresholds.
