@@ -3,6 +3,7 @@
   "model": "nesy",
   "seed": 4,
   "known_f1": 0.9337427474138569,
+  "test_f1": 0.9324650337186037,
   "protocol": "per-class Mahalanobis fit on train; AUROC/TPR on test_known vs unknown; F1/tau on val",
   "ood_auroc_mahal": 0.8859763199999999,
   "ood_auroc_energy": 0.36420910000000006,

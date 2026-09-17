@@ -654,6 +654,7 @@ def main():
     # core metrics
     print("\nComputing metrics...")
     f1    = compute_known_f1(model, X_known, y_known)
+    f1_te = compute_known_f1(model, X_test_known, y_test_known)
     auroc = compute_ood_auroc_perclass(model, X_train, y_train, X_test_known, X_unknown)
     tpr5  = tpr_at_fpr_perclass(model, X_train, y_train, X_test_known, X_unknown)
     y_kn_np = y_known.cpu().numpy()
@@ -683,7 +684,7 @@ def main():
     print(f"\n{'='*60}")
     print(f"  Results - {args.dataset.upper()}  {args.model}  seed={args.seed}")
     print(f"{'='*60}")
-    print(f"  Known F1 (weighted)    : {f1:.4f}")
+    print(f"  Known F1 (weighted)    : {f1:.4f}  (test_known: {f1_te:.4f})")
     print(f"  OOD AUROC (Mahal)       : {auroc:.4f}")
     print(f"  OOD AUROC (Energy)      : {comb['energy_auroc']:.4f}")
     print(f"  OOD AUROC (Comb-Avg)    : {comb['combined_avg_auroc']:.4f}")
@@ -719,6 +720,7 @@ def main():
         "model": args.model,
         "seed": args.seed,
         "known_f1": f1,
+        "test_f1": f1_te,
         "protocol": "per-class Mahalanobis fit on train; AUROC/TPR on test_known vs unknown; F1/tau on val",
         "ood_auroc_mahal": auroc,
         "ood_auroc_energy": comb["energy_auroc"],
