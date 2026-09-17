@@ -24,16 +24,28 @@ single-seed CTU γ differences (0.838/0.895/0.883/0.887 for γ=0/0.1/0.5/1.0) do
 not replicate (5-seed: 0.800/0.828/0.835/0.840, std 0.023–0.044); see C-central.
 
 **C3 — No separation by device/capture session.**
-Added a temporal, session-respecting evaluation (§IV). CTU attacks originate from
-very few source hosts (Okiru 4, DDoS 7, C&C-HB 5 src_ips), so a clean
-device-disjoint attack split is infeasible; we instead split each known class by
-capture timestamp (earliest-70% train / latest-15% test; 3 seeds). Under this
-harder protocol F1 drops ≈0.06 (MLP 0.933→0.871)—confirming the random split was
-mildly optimistic—but the core claims hold: every JointCBM variant still matches
-the MLP on F1 (0.870–0.872 vs 0.871), and OOD AUROC brackets the MLP's 0.801
-(0.703/0.773/0.807/0.836 for γ=0/0.1/0.5/1.0, seed-std up to 0.08). The γ
-ordering here is the reverse of the one on the alternative CTU split (R1-C8),
-further evidence that γ has no consistent OOD effect.
+Added a temporal, session-respecting evaluation (§IV, Table `tab:temporal`). CTU
+attacks originate from very few source hosts (Okiru 4, DDoS 7, C&C-HB 5 src_ips),
+so a clean device-disjoint attack split is infeasible; we instead take the main
+per-class sample and order it by capture timestamp (earliest-70% train /
+latest-15% test; 5 seeds). This surfaced a property of the CTU labelling: the
+*DDoS* family is temporally bimodal—a high-rate flood capture (median Rate
+≈9.3e5 pps, through Dec 2018) then a near-zero-rate capture (median Rate <1)—so
+a timestamp split trains on one DDoS regime and tests on the other, and DDoS
+scores F1 0.00 for *every* model (MLP and CBM alike; it becomes a cross-*capture*
+task, not temporal drift). We therefore report the temporal result on the three
+temporally-coherent families (Benign, C&C-HeartBeat, Okiru) and document DDoS
+separately. On those families F1 drops from ≈0.99 (random) to 0.862, confirming
+the random split was optimistic, while the core claims hold: every JointCBM
+variant matches the MLP on coherent-family F1 (0.862–0.863 vs 0.862), and OOD
+AUROC rises weakly with γ (0.765/0.798/0.831/0.833 for γ=0/0.1/0.5/1.0 vs MLP
+0.795, seed-std up to 0.055). The γ ordering here is the reverse of the one on the
+alternative CTU split (R1-C8), further evidence that γ has no consistent OOD
+effect. NeSy-NIDS, trained and scored on the identical split, matches on
+coherent-family F1 (0.862) and gives the strongest temporal-split OOD AUROC of
+any model (0.898±0.048, rising to 0.923±0.006 with the α-gate penalty)—its
+well-separated binary rule activations remain the best OOD representation on CTU
+even under the harder split.
 
 **C4 — OOD baselines too limited.**
 Added Table (post-hoc detectors on the MLP): MSP, ODIN, energy, kNN, Mahalanobis.
