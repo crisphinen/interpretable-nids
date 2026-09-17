@@ -227,40 +227,40 @@ def make_architecture():
 # ── auroc_vs_f1 ───────────────────────────────────────────────────────────────
 
 def make_auroc_vs_f1():
+    """One point per model, using the same numbers as the main table:
+    five-seed mean +/- std for MLP / CBM variants (results/cbm/multiseed_*_v2.json)
+    and NeSy-NIDS (lambda_alpha=0 evals), single run for Post-hoc CBM, DT, RF
+    and rule-only."""
     def _gather(ds):
-        pts = []
-        for gfile in sorted(CBM_RES.glob(f"{ds}_eval_results*.json")):
-            data = json.loads(gfile.read_text())
-            for mname, v in data.items():
-                if isinstance(v, dict) and v.get("ood_auroc") is not None:
-                    pts.append((mname, v["weighted_f1"], v["ood_auroc"]))
+        pts = []   # (label, f1, auroc, f1_std, auroc_std)
+        ms = json.loads((CBM_RES / f"multiseed_{ds}_v2.json").read_text())["results"]
+        for mname, v in ms.items():
+            pts.append((mname, v["test_f1_mean"], v["auroc_mean"], v["test_f1_std"], v["auroc_std"]))
         base = json.loads((CBM_RES / f"{ds}_cbm_baselines.json").read_text())
-        for mname, v in base.items():
-            f1 = v.get("test_f1") or v.get("weighted_f1") if isinstance(v, dict) else None
-            auroc = v.get("ood_auroc") if isinstance(v, dict) else None
-            if f1 is not None and auroc is not None:
-                pts.append((mname, f1, auroc))
-        for sf in sorted(NESY_RES.glob(f"{ds}_nesy_s*_eval.json")):
-            d = json.loads(sf.read_text())
-            auroc = d.get("ood_auroc_mahal") or d.get("ood_auroc")
-            if auroc is not None:
-                pts.append((f"NeSy s{d['seed']}", d["known_f1"], auroc))
+        ph = base.get("PostHocCBM")
+        if ph:
+            pts.append(("PostHocCBM", ph["test_f1"], ph["ood_auroc"], 0.0, 0.0))
+        seeds = [json.loads((NESY_RES / f"{ds}_nesy_s{i}_eval.json").read_text())
+                 for i in range(5) if (NESY_RES / f"{ds}_nesy_s{i}_eval.json").exists()]
+        if seeds:
+            f1 = np.array([d.get("test_f1", d["known_f1"]) for d in seeds])
+            au = np.array([d["ood_auroc_mahal"] for d in seeds])
+            pts.append(("NeSy", f1.mean(), au.mean(), f1.std(), au.std()))
+        ro = NESY_RES / f"{ds}_rule_only_s0_eval.json"
+        if ro.exists():
+            d = json.loads(ro.read_text())
+            pts.append(("RuleOnly", d.get("test_f1", d["known_f1"]),
+                        d.get("ood_auroc_mahal", d.get("ood_auroc")), 0.0, 0.0))
         nb = json.loads((NESY_RES / f"{ds}_baselines.json").read_text())
         for mname, v in nb.items():
-            f1 = v.get("f1")
-            auroc = v.get("auroc_maha") or v.get("auroc")
+            f1 = v.get("f1"); auroc = v.get("auroc_maha") or v.get("auroc")
             if f1 and auroc:
-                pts.append((mname, f1, auroc))
-        # deduplicate by model name, keeping last occurrence (NeSy baselines
-        # use Mahalanobis for DT/RF and are loaded last, so they take priority)
-        seen = {}
-        for name, f1, auroc in pts:
-            seen[name] = (f1, auroc)
-        return [(n, f1, a) for n, (f1, a) in seen.items()]
+                pts.append((mname, f1, auroc, 0.0, 0.0))
+        return pts
 
     def _col(label):
         l = label.lower()
-        if "nesy" in l:         return C_NESY
+        if "nesy" in l or "ruleonly" in l: return C_NESY
         if "joint" in l:        return C_CBM
         if "sequential" in l:   return C_GRAY
         if "hybrid" in l:       return C_POSTH
@@ -273,18 +273,19 @@ def make_auroc_vs_f1():
     def _mk(label):
         l = label.lower()
         if "nesy" in l:       return "D"
+        if "ruleonly" in l:   return "d"
         if "joint" in l:      return "o"
         if "sequential" in l: return "s"
         if "hybrid" in l:     return "^"
         if "mlp" in l:        return "P"
         return "X"
 
-    ANNOTATE = {"MLPBaseline", "NeSy s0", "SequentialCBM", "DecisionTree",
-                "RandomForest", "PostHocCBM"}
+    ANNOTATE = {"MLPBaseline", "NeSy", "SequentialCBM", "DecisionTree",
+                "RandomForest", "PostHocCBM", "RuleOnly", "HybridCBM"}
     SHORT = {
         "MLPBaseline": "MLP", "SequentialCBM": "SeqCBM",
-        "NeSy s0": "NeSy(s0)", "DecisionTree": "DT",
-        "RandomForest": "RF",
+        "NeSy": "NeSy-NIDS", "DecisionTree": "DT",
+        "RandomForest": "RF", "RuleOnly": "Rule-only", "HybridCBM": "HybridCBM",
     }
     # Per-dataset label offsets to avoid overlap (DT and MLP are near-colocated in CIC)
     OFFSETS = {
@@ -297,7 +298,11 @@ def make_auroc_vs_f1():
 
     for ax, ds, title in zip(axes, ["ctu", "cic"],
                               ["(a) CTU-IoT-23", "(b) CIC-IoT-2023"]):
-        for label, f1, auroc in _gather(ds):
+        for label, f1, auroc, f1s, aus in _gather(ds):
+            if f1s or aus:
+                ax.errorbar(f1, auroc, xerr=f1s, yerr=aus, fmt="none",
+                            ecolor=_col(label), elinewidth=0.8, capsize=2,
+                            alpha=0.7, zorder=3)
             ax.scatter(f1, auroc, c=_col(label), marker=_mk(label),
                        s=55, alpha=0.88, edgecolors="white",
                        linewidths=0.5, zorder=4)
@@ -319,7 +324,7 @@ def make_auroc_vs_f1():
         mpatches.Patch(color=C_CBM,    label="JointCBM (all γ)"),
         mpatches.Patch(color=C_GRAY,   label="SequentialCBM"),
         mpatches.Patch(color=C_POSTH,  label="HybridCBM / PostHocCBM"),
-        mpatches.Patch(color=C_NESY,   label="NeSy-NIDS"),
+        mpatches.Patch(color=C_NESY,   label="NeSy-NIDS / Rule-only"),
         mpatches.Patch(color=C_DT,     label="Decision Tree"),
         mpatches.Patch(color=C_RF,     label="Random Forest"),
     ]

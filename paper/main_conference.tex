@@ -42,7 +42,7 @@
 \maketitle
 
 \begin{abstract}
-Machine-learning intrusion detection systems (NIDS) for IoT networks face two obstacles to deployment: operators cannot see why a flow was flagged, and models trained on a closed set of attack families misclassify novel ones (the open-set problem). We study two interpretable architectures under one open-set protocol. Concept Bottleneck Models (CBMs) route predictions through a layer of human-defined traffic concepts and allow test-time intervention. Neuro-Symbolic NIDS (NeSy-NIDS) turns expert attack signatures into threshold rules with learnable thresholds, trained with $k$-annealed sigmoid gates and binarised at inference, alongside a neural fallback blended through a learnable gate $\alpha$. On CTU-IoT-23 and CIC-IoT-2023, both architectures match an unconstrained MLP on known-class F1 (within $\pm0.002$ over five seeds), so interpretability costs no accuracy. We then ask what governs out-of-distribution (OOD) detection. The scoring rule has to fit the representation: per-class Mahalanobis distance~\cite{lee2018simple} works on well-separated activations (NeSy-NIDS CTU AUROC $0.911\pm0.014$) but fails on near-deterministic binary activations, where no activation-space scorer exceeds $0.64$ on CIC and a logit-space energy score ($0.728\pm0.029$) restores detection. Concept-fidelity regularisation strength, by contrast, has no reliable effect: a $0.06$-AUROC difference seen at one seed disappears and reverses across ten seeds. Representation geometry and scorer choice, not regularisation strength, decide open-set detectability in these models, and single-seed open-set claims about interpretable NIDS should not be trusted. NeSy-NIDS additionally yields exactly binary rule activations for audit and a gate $\alpha$ that raises rule reliance at no F1 cost.
+Machine-learning intrusion detection systems (NIDS) for IoT networks face two obstacles to deployment: operators cannot see why a flow was flagged, and models trained on a closed set of attack families misclassify novel ones (the open-set problem). We study two interpretable architectures under one open-set protocol. Concept Bottleneck Models (CBMs) route predictions through a layer of human-defined traffic concepts and allow test-time intervention. Neuro-Symbolic NIDS (NeSy-NIDS) turns expert attack signatures into threshold rules with learnable thresholds, trained with $k$-annealed sigmoid gates and binarised at inference, alongside a neural fallback blended through a learnable gate $\alpha$. On CTU-IoT-23 and CIC-IoT-2023, jointly trained CBMs and NeSy-NIDS match an unconstrained MLP on known-class F1 (within $\pm0.002$ over five seeds), so interpretability costs no accuracy. We then ask what governs out-of-distribution (OOD) detection. The representation decides whether a scoring rule can work: on the well-separated rule activations of CTU-IoT-23, per-class Mahalanobis distance~\cite{lee2018simple} and simpler centroid distances all reach $0.86$--$0.90$ AUROC (NeSy-NIDS $0.899\pm0.013$), while on the near-deterministic activations of CIC-IoT-2023 no activation-space scorer exceeds $0.64$ and only a logit-space energy score ($0.749\pm0.014$) restores detection. Concept-fidelity regularisation strength, by contrast, has no consistent effect: its small influence on OOD AUROC changes sign between datasets and between splits of the same dataset, and a $0.06$-AUROC ``task-coupling'' effect seen at one seed does not survive replication. Representation geometry and scorer choice, not regularisation strength, decide open-set detectability in these models, and single-seed open-set results on interpretable NIDS need replication before they are reported. NeSy-NIDS additionally yields exactly binary rule activations for audit and a gate $\alpha$ that raises rule reliance at no F1 cost.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -66,10 +66,10 @@ Unlike xNIDS~\cite{wei2023xnids}, which explains a black-box model after the fac
 \smallskip
 \noindent\textbf{Contributions:}
 \begin{enumerate}
-  \item \textbf{Zero accuracy cost}: CBMs and differentiable rule learning for IoT NIDS incur no known-class F1 penalty relative to an unconstrained MLP under open-set evaluation, over five seeds on both datasets.
-  \item \textbf{Scorer--representation matching}: OOD detectability depends on pairing the scoring rule with the representation geometry. On well-separated rule activations (CTU) per-class Mahalanobis is the best activation-space scorer, ahead of centroid-based Hamming and Jaccard distances; on near-deterministic activations (CIC) every activation-space scorer is weak and only a logit-space energy score restores detection.
-  \item \textbf{Regularisation strength is not the lever}: across ten seeds, concept-fidelity ($\gamma$) regularisation does not reliably change OOD AUROC. A $0.06$-AUROC ``task-coupling'' effect visible at a single seed vanishes and reverses under replication. We report this as evidence that open-set claims on interpretable NIDS need multi-seed evaluation.
-  \item \textbf{Binary rules and a controllable gate}: NeSy-NIDS learns rule thresholds through $k$-annealed sigmoid gates and binarises the activations at inference, giving exactly binary, syntactically checkable if-then rules at no accuracy cost; a penalty on the gate $\alpha$ raises rule reliance across most of its range with at most a $0.02$--$0.04$ change in OOD AUROC.
+  \item \textbf{Zero accuracy cost}: jointly trained CBMs and differentiable rule learning for IoT NIDS incur no known-class F1 penalty relative to an unconstrained MLP under open-set evaluation, over five seeds on both datasets.
+  \item \textbf{Scorer--representation matching}: OOD detectability depends on the geometry of the representation more than on the scoring rule applied to it. On well-separated rule activations (CTU) per-class Mahalanobis and centroid-based Hamming and Jaccard distances all work; on near-deterministic activations (CIC) every activation-space scorer is weak and only a logit-space energy score restores detection.
+  \item \textbf{Regularisation strength is not the lever}: concept-fidelity ($\gamma$) regularisation has no consistent effect on OOD AUROC. Its influence is small ($\le0.04$) and changes sign between datasets and between splits of the same dataset, and a $0.06$-AUROC ``task-coupling'' effect visible at a single seed does not survive replication. We report this as evidence that open-set claims on interpretable NIDS need multi-seed evaluation.
+  \item \textbf{Binary rules and a controllable gate}: NeSy-NIDS learns rule thresholds through $k$-annealed sigmoid gates and binarises the activations at inference, giving exactly binary, syntactically checkable if-then rules at no accuracy cost; a penalty on the gate $\alpha$ raises rule reliance across most of its range at no cost in F1 or OOD AUROC.
 \end{enumerate}
 
 \noindent\textbf{Scope of the contribution.} The components we combine are
@@ -95,7 +95,7 @@ Petersen et al.~\cite{petersen2022logic} train binary logic-gate networks end to
 
 The Mahalanobis detector~\cite{lee2018simple} fits class-conditional Gaussians to penultimate-layer features. Fort et al.~\cite{fort2021exploring} found that the quality of the feature representation, more than the scoring rule, sets OOD performance. Softmax-based alternatives include the maximum softmax probability~\cite{hendrycks2017baseline} and the energy score~\cite{liu2020energy}, a log-sum-exp over logits. Vaze et al.~\cite{vaze2022openset} show that a well-tuned closed-set classifier already gives strong open-set recognition. In security, OWAD~\cite{han2023owad} detects normality shift in deployed models and CADE~\cite{yang2021cade} isolates drifting samples; both operate at the system level, whereas we score individual flows at inference.
 
-N-BaIoT~\cite{meidan2018nbaiot} and Kitsune~\cite{mirsky2018kitsune} established per-device anomaly detection as the main IoT paradigm, but neither classifies attacks nor explains its decisions to an analyst. Arp et al.~\cite{arp2022dos} catalogue pitfalls in security ML, among them closed-world evaluation and the absence of auditable decisions, and Apruzzese et al.~\cite{apruzzese2022ml} identify opacity to operators as a central obstacle to deployment. De Keersmaeker et al.~\cite{dekeersmaeker2023survey} survey the public IoT security datasets, including the two we use.
+N-BaIoT~\cite{meidan2018nbaiot} and Kitsune~\cite{mirsky2018kitsune} established per-device anomaly detection as the main IoT paradigm, but neither classifies attacks nor explains its decisions to an analyst. Arp et al.~\cite{arp2022dos} catalogue pitfalls in security ML, among them closed-world evaluation and the absence of auditable decisions, and Apruzzese et al.~\cite{apruzzese2022ml} identify opacity to operators as a central obstacle to deployment. De Keersmaeker et al.~\cite{dekeersmaeker2023survey} survey the public IoT security datasets and the trade-offs between them.
 
 
 \section{Methodology}
@@ -109,7 +109,7 @@ Fig.~\ref{fig:arch} shows the two architectures. \textbf{(A) Concept Bottleneck 
     \fontsize{5}{5}\selectfont
     \input{nesy_nids_cbm_architecture (1).pdf_tex}
     \vspace{-1mm}
-    \caption{Overview of the proposed framework}
+    \caption{The two architectures. (A) CBM: concept encoder, concept layer, linear classifier. (B) NeSy-NIDS: rule bank with learnable thresholds, neural fallback, gate $\alpha$.}
     \label{fig:arch}
     \vspace{-2mm}
 \end{figure*}
@@ -129,18 +129,21 @@ reconnaissance/scanning). The held-out unknowns are mostly sub-families and
 protocol variants of these categories, which is the operational open-set case:
 a detector trained on a few labelled exemplars per category has to flag novel
 \emph{variants}. To check that the findings are not artefacts of this
-partition, we repeat the CBM evaluation (three seeds) on an alternative CTU
-known set (\{Benign, DDoS, Okiru, C\&C\}, promoting C\&C from unknown and
-demoting C\&C-HeartBeat to unknown). The conclusions hold: interpretable models
-match the MLP on F1 (all within $0.001$ of $0.930$), and $\gamma$ does not
-buy OOD detection (MLP $0.899$; JointCBM $\gamma{=}0$: $0.840$, $\gamma{=}1.0$:
-$0.797$; the decrease is within about 1.4 seed-std and runs opposite to the
-ordering under the temporal split below). The same check on CIC-IoT-2023
+partition, we repeat the CBM evaluation on an alternative CTU known set,
+\{Benign, DDoS, Okiru, C\&C\} (promoting C\&C from unknown and demoting
+C\&C-HeartBeat to unknown; five seeds). This known set is easier to
+classify (MLP F1 $0.994$) and the conclusions hold: every JointCBM variant
+is within $0.005$ of the MLP on F1, and $\gamma$ does not buy OOD detection
+(MLP $0.841$; JointCBM $\gamma{=}0$: $0.721$, $\gamma{=}0.1$: $0.713$,
+$\gamma{=}0.5$: $0.679$, $\gamma{=}1.0$: $0.667$, a decrease of about
+$1.5$ seed-std that runs opposite to the ordering on the main CTU split and
+under the temporal split below). The same check on CIC-IoT-2023
 (known set \{Benign, DDoS-ICMP\_Flood, Mirai-udpplain, Recon-PortScan,
-VulnerabilityScan\}) gives the same picture: known-class F1 is unchanged
-(every JointCBM variant within $0.002$ of the MLP's $0.811$), and OOD AUROC has
-no monotone $\gamma$ ordering (JointCBM $\gamma{=}0$: $0.876$, $\gamma{=}0.1$:
-$0.813$, $\gamma{=}0.5$: $0.849$, $\gamma{=}1.0$: $0.784$).
+VulnerabilityScan\}, five seeds) gives the same picture: known-class F1 is
+unchanged (every JointCBM variant within $0.002$ of the MLP's $0.819$), and
+OOD AUROC decreases with $\gamma$ as on the main CIC split (JointCBM
+$\gamma{=}0$: $0.752$, $\gamma{=}0.1$: $0.740$, $\gamma{=}0.5$: $0.740$,
+$\gamma{=}1.0$: $0.727$; MLP $0.890$).
 
 \textbf{Temporal (session-respecting) evaluation.} Random flow partitioning can
 leak device or session identity between train and test. A strict
@@ -148,8 +151,8 @@ device-disjoint split is not feasible for the CTU attacks, which come from very
 few source hosts (Okiru: 4, DDoS: 7, C\&C-HeartBeat: 5 source IPs), so we
 instead rebuild the known-class splits in time, ordering each class by capture
 timestamp and taking the earliest 70\% for training and the latest 15\% for
-test (test strictly follows train; the held-out unknown families come from
-separate captures). Under this harder protocol (three seeds) known-class F1
+test (test strictly follows train; the held-out unknown families are
+unchanged). Under this harder protocol (three seeds) known-class F1
 drops by about $0.06$ (MLP $0.933{\to}0.871$), so the random split was mildly
 optimistic, but the central conclusions survive. Every JointCBM variant still
 matches the MLP on F1 ($0.870$--$0.872$ vs.\ $0.871$), and OOD AUROC brackets the
@@ -207,7 +210,7 @@ is\_incomplete\_handshake & syn\_count${>}2$ $\wedge$ fin\_count${=}0$ \\
 is\_high\_rate        & rate ${>}0.15$ \\
 is\_syn\_flood        & syn\_count ${>}1.5$ \\
 is\_udp\_dominant     & tcp ${<}{-}1.0$ \\
-is\_short\_connection & iat ${<}{-}0.0037$ \\
+is\_short\_connection & iat ${<}{-}0.00316$ \\
 is\_large\_payload    & avg ${>}0.4$ \\
 is\_port\_scan        & rst\_count ${>}1.5$ \\
 is\_high\_variance    & variance ${>}0.5$ \\
@@ -221,7 +224,7 @@ is\_persistent        & fin\_count ${>}1.0$ \\
 \emph{JointCBM} at $\gamma{=}0$ is standard joint training, minimising the cross-entropy and binary concept losses together. For $\gamma{>}0$ a concept-fidelity penalty is added; we evaluate $\gamma\in\{0.1,0.5,1.0\}$:
 \begin{equation}
   \mathcal{L} = \mathcal{L}_{\mathrm{CE}} + \lambda\,\mathcal{L}_{\mathrm{BCE}}
-    + \gamma\,\|\hat{\mathbf{c}} - \mathbf{c}_{\text{gt}}\|^2,
+    + \frac{\gamma}{K}\,\|\hat{\mathbf{c}} - \mathbf{c}_{\text{gt}}\|^2,
 \end{equation}
 where $\mathbf{c}_{\text{gt}}\in\{0,1\}^K$ are the binary concept labels, $\lambda{\geq}0$ weights concept supervision, and $\gamma{\geq}0$ is a fidelity penalty intended to limit \emph{concept leakage}, the encoding of task-discriminative information in the concept scores beyond their declared meaning. In \emph{SequentialCBM}, $g$ is trained and frozen first and $h$ is then trained on $\hat{\mathbf{c}}$, which decouples concept learning from classification. \emph{HybridCBM} extends JointCBM with a skip connection: the 64-dimensional encoder embedding is concatenated with the $K$ concept predictions into a $(K{+}64)$-dimensional classifier input, so the classifier can use structure outside the concept vocabulary while the concept layer remains inspectable.
 
@@ -254,7 +257,7 @@ Algorithm~\ref{alg:cbm} summarises training and scoring.
       \Comment{class logits}
     \State $\mathcal{L} = \mathcal{L}_{\mathrm{CE}}(\hat{\mathbf{Y}},\mathbf{Y})
              + \lambda\,\mathcal{L}_{\mathrm{BCE}}(\hat{\mathbf{C}},\mathbf{C})
-             + \gamma\,\|\hat{\mathbf{C}}-\mathbf{C}\|^2$
+             + \tfrac{\gamma}{K}\,\|\hat{\mathbf{C}}-\mathbf{C}\|^2$
     \State Update $g$, $h$ via $\nabla\mathcal{L}$
   \EndFor
 \EndFor
@@ -405,16 +408,16 @@ the 95th percentile of in-distribution scores, so that about 5\% of known valida
 
 An unconstrained MLP with two hidden layers of 256 units (LayerNorm, ReLU), a 64-dimensional embedding layer and a linear classifier serves as the accuracy reference. A decision tree (DT; depth chosen from $\{5,10,15,\infty\}$ by validation F1) and a random forest (RF~\cite{breiman2001random}; 100 trees, depth 10) are the classical baselines. The DT OOD score is the Mahalanobis distance in raw feature space; the RF OOD score is $1{-}\max(\hat{p})$. The MLP is scored with Mahalanobis on its 64-dimensional embedding, the same scorer as CBM and NeSy-NIDS but in a higher-dimensional space (64 versus 8).
 
-\textbf{Metrics:} weighted F1 on the known-class validation split (also used for early stopping), and AUROC and TPR@5\%FPR for OOD detection, with the held-out unknown-class test samples as positives. For NeSy-NIDS we also report rule crispness (the fraction of soft activations at $k{=}10$ within $0.1$ of binary) and the gate value $\alpha$.
+\textbf{Metrics:} weighted F1 on the known-class validation split (also used for early stopping), and AUROC and TPR@5\%FPR for OOD detection, with known-class test flows as negatives and held-out unknown-class test flows as positives. The unknown pool is subsampled for evaluation: 10{,}000 flows on CTU-IoT-23 (of 32{,}344), and a per-family stratified sample on CIC-IoT-2023 (up to 2{,}000 per unknown family in the CBM pipeline, about 345 per family for NeSy-NIDS, out of 40M rows). AUROC and TPR are then computed on random subsets of 5{,}000 known and 5{,}000 unknown flows. For NeSy-NIDS we also report rule crispness (the fraction of soft activations at $k{=}10$ within $0.1$ of binary) and the gate value $\alpha$.
 
-\textbf{Training:} Adam ($\mathrm{lr}{=}10^{-3}$, batch 512, $\varepsilon{=}10^{-4}$ covariance ridge). CBMs train for up to 50 epochs with patience 10, five seeds (0--4), $\gamma\in\{0,0.1,0.5,1.0\}$ and $\lambda{=}0.5$. The concept-supervision weight $\lambda$ was chosen from $\{0.1,0.5,1.0\}$: known-class F1 is invariant to $\lambda$ ($\pm0.002$ on both datasets, Table~\ref{tab:lambda}), so we fixed it at the middle value and varied $\gamma$. Table~\ref{tab:lambda} also shows that $\lambda$ trades concept accuracy against OOD detectability, in opposite directions on the two datasets, without affecting classification. NeSy-NIDS trains for up to 60 epochs with patience 12, five seeds (0--4) and $\lambda_\alpha\in\{0,0.1\}$ for the main results (Table~\ref{tab:main}); Section~\ref{sec:alpha} sweeps $\lambda_\alpha\in\{0,0.05,0.1,0.2,0.5,1.0\}$.
+\textbf{Training:} Adam ($\mathrm{lr}{=}10^{-3}$, batch 512, $\varepsilon{=}10^{-4}$ covariance ridge). CBMs train for up to 50 epochs with patience 10, five seeds (0--4), $\gamma\in\{0,0.1,0.5,1.0\}$ and $\lambda{=}0.5$. The concept-supervision weight $\lambda$ was chosen from $\{0.1,0.5,1.0\}$: known-class F1 is invariant to $\lambda$ ($\pm0.002$ on both datasets, Table~\ref{tab:lambda}), so we fixed it at the middle value and varied $\gamma$. Table~\ref{tab:lambda} also shows that $\lambda$ raises concept accuracy on both datasets and moves OOD detectability in dataset-dependent directions ($+0.09$ on CTU, $-0.03$ on CIC from $\lambda{=}0.1$ to $1.0$), without affecting classification. NeSy-NIDS trains for up to 60 epochs with patience 12, five seeds (0--4) and $\lambda_\alpha\in\{0,0.1\}$ for the main results (Table~\ref{tab:main}); Section~\ref{sec:alpha} sweeps $\lambda_\alpha\in\{0,0.05,0.1,0.2,0.5,1.0\}$.
 
 \begin{table}[t]
 \centering\small
 \caption{Sensitivity to the concept-supervision weight $\lambda$
 (JointCBM, $\gamma{=}0$, mean over five seeds; AUROC $\pm$1 std). Known-class F1 is
-invariant to $\lambda$; $\lambda$ trades concept accuracy against OOD
-AUROC in opposite directions across datasets.}
+invariant to $\lambda$; raising $\lambda$ raises concept accuracy on both
+datasets, and raises OOD AUROC on CTU while lowering it slightly on CIC.}
 \label{tab:lambda}
 \setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{lccc}
@@ -425,9 +428,9 @@ CTU F1            & 0.9327 & 0.9325 & 0.9326 \\
 CTU concept-acc   & 0.650  & 0.856  & 0.905  \\
 CTU OOD AUROC     & 0.790$\pm$0.030 & 0.805$\pm$0.023 & 0.884$\pm$0.010 \\
 \midrule
-CIC F1            & 0.8198 & 0.8182 & 0.8189 \\
-CIC concept-acc   & 0.853  & 0.961  & 0.981  \\
-CIC OOD AUROC     & 0.753$\pm$0.012 & 0.720$\pm$0.024 & 0.681$\pm$0.022 \\
+CIC F1            & 0.8201 & 0.8192 & 0.8189 \\
+CIC concept-acc   & 0.872  & 0.968  & 0.981  \\
+CIC OOD AUROC     & 0.752$\pm$0.015 & 0.748$\pm$0.012 & 0.724$\pm$0.021 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -437,26 +440,25 @@ CIC OOD AUROC     & 0.753$\pm$0.012 & 0.720$\pm$0.024 & 0.681$\pm$0.022 \\
 \subsection{Classification Accuracy}
 
 \begin{sloppypar}\hbadness=10000
-Table~\ref{tab:main} shows that NeSy-NIDS and every JointCBM variant match the unconstrained MLP on both datasets. The F1 gap between NeSy-NIDS and the MLP is $+0.0008$ on CTU-IoT-23 and $-0.0009$ on CIC-IoT-2023, below $0.002$ in both cases and within seed-to-seed variation. This reproduces the zero-accuracy-cost finding of Koh et al.~\cite{koh2020concept} for IoT NIDS under open-set evaluation.
+Table~\ref{tab:main} shows that NeSy-NIDS and every JointCBM variant match the unconstrained MLP on both datasets. The F1 gap between NeSy-NIDS and the MLP is $0.0000$ on CTU-IoT-23 and $-0.0011$ on CIC-IoT-2023, and no JointCBM variant is more than $0.0011$ from the MLP; all differences are within seed-to-seed variation. This reproduces the zero-accuracy-cost finding of Koh et al.~\cite{koh2020concept} for IoT NIDS under open-set evaluation.
 \end{sloppypar}
 
-The rule-only ablation loses much of its F1 on CTU-IoT-23 ($0.564$), so the neural fallback is handling traffic the eight rule templates do not cover and the gate is routing those cases to it. The fallback matters less on CIC-IoT-2023 ($0.758$), where the rules capture more of the class structure.
+The rule-only ablation loses much of its F1 on CTU-IoT-23 ($0.564$), so the neural fallback is handling traffic the eight rule templates do not cover and the gate is routing those cases to it. The fallback matters less on CIC-IoT-2023 ($0.755$), where the rules capture more of the class structure.
 
-The decision tree and random forest reach comparable F1 but detect unknowns poorly (Section~\ref{sec:ood}). SequentialCBM and Post-hoc CBM collapse on CTU (F1 $0.572$ and $0.578$) and only partly recover on CIC ($0.684$ and $0.726$). On CTU, stage-1 concept training fits the 8-dimensional concept space to the binary threshold labels rather than to the class boundary, and once the concept head is frozen the linear classifier cannot recover the discriminative directions it lost. On CIC the class boundaries line up better with the concept vocabulary, so the frozen concept representation keeps more of what the classifier needs.
+The decision tree and random forest reach comparable F1 but detect unknowns poorly (Section~\ref{sec:ood}). SequentialCBM and Post-hoc CBM collapse on CTU (F1 $0.573$ and $0.578$) and only partly recover on CIC ($0.702$ and $0.718$). On CTU, stage-1 concept training fits the 8-dimensional concept space to the binary threshold labels rather than to the class boundary, and once the concept head is frozen the linear classifier cannot recover the discriminative directions it lost. On CIC the class boundaries line up better with the concept vocabulary, so the frozen concept representation keeps more of what the classifier needs.
 
 The four $\gamma$ variants have near-identical F1 (Table~\ref{tab:main}); $\gamma$ costs no accuracy. Its effect on concept fidelity is analysed in Section~\ref{sec:leakage}.
 
 
 \begin{table*}[!t]
 \renewcommand{\arraystretch}{1.15}
-\caption{Classification F1 on the known-class validation split; AUROC and
+\caption{Weighted F1 on the known-class test split; AUROC and
   TPR@5\%FPR on known-class test samples vs.\ held-out unknown-class test
   samples, using per-class Mahalanobis scores fitted on training
   activations. MLP, JointCBM, SequentialCBM, HybridCBM and NeSy-NIDS report
   mean$\pm$std over five seeds. \textbf{Bold} marks the
-  best interpretable model per dataset; JointCBM $\gamma$ variants are
-  statistically indistinguishable (Section~\ref{sec:leakage}) and are not
-  individually highlighted. $^\star$Post-hoc CBM (linear probes on frozen
+  best interpretable detector per dataset (NeSy-NIDS at $\lambda_\alpha{=}0$
+  on CTU; JointCBM $\gamma{=}0$ on CIC). $^\star$Post-hoc CBM (linear probes on frozen
   MLP embeddings), DT and RF are single runs.}
 \label{tab:main}
 \centering
@@ -470,40 +472,40 @@ The four $\gamma$ variants have near-identical F1 (Table~\ref{tab:main}); $\gamm
                  \textbf{F1} & \textbf{AUROC} & \textbf{TPR@5\%} \\
 \midrule
 MLP Baseline
-  & $0.9326$ & $0.891{\pm}.004$ & $0.528{\pm}.000$
-  & $0.8201$ & $0.808{\pm}.007$ & $0.542{\pm}.005$ \\
+  & $0.9326$ & $0.888{\pm}.001$ & $0.528{\pm}.000$
+  & $0.8201$ & $0.806{\pm}.002$ & $0.542{\pm}.005$ \\
 \midrule
 JointCBM ($\gamma{=}0$)
-  & $0.9326$ & $0.840{\pm}.036$ & $0.412{\pm}.142$
-  & $0.8191$ & $0.718{\pm}.028$ & $0.342{\pm}.049$ \\
+  & $0.9325$ & $0.800{\pm}.023$ & $0.335{\pm}.119$
+  & $0.8192$ & $\mathbf{0.746{\pm}.010}$ & $\mathbf{0.428{\pm}.036}$ \\
 JointCBM ($\gamma{=}0.1$)
-  & $0.9308$ & $0.837{\pm}.035$ & $0.438{\pm}.080$
-  & $0.8191$ & $0.717{\pm}.038$ & $0.368{\pm}.039$ \\
+  & $0.9325$ & $0.828{\pm}.044$ & $0.411{\pm}.177$
+  & $0.8199$ & $0.739{\pm}.010$ & $0.395{\pm}.026$ \\
 JointCBM ($\gamma{=}0.5$)
-  & $0.9326$ & $0.840{\pm}.053$ & $0.427{\pm}.145$
-  & $0.8190$ & $0.726{\pm}.022$ & $0.343{\pm}.041$ \\
+  & $0.9326$ & $0.835{\pm}.039$ & $0.419{\pm}.178$
+  & $0.8190$ & $0.727{\pm}.012$ & $0.368{\pm}.019$ \\
 JointCBM ($\gamma{=}1.0$)
-  & $0.9326$ & $0.850{\pm}.025$ & $0.449{\pm}.089$
-  & $0.8186$ & $0.713{\pm}.019$ & $0.359{\pm}.029$ \\
+  & $0.9325$ & $0.840{\pm}.023$ & $0.403{\pm}.149$
+  & $0.8190$ & $0.720{\pm}.024$ & $0.369{\pm}.048$ \\
 SequentialCBM
-  & $0.5724$ & $0.898{\pm}.007$ & $0.496{\pm}.105$
-  & $0.6835$ & $0.637{\pm}.006$ & $0.175{\pm}.006$ \\
+  & $0.5728$ & $0.885{\pm}.018$ & $0.524{\pm}.108$
+  & $0.7015$ & $0.678{\pm}.007$ & $0.169{\pm}.013$ \\
 HybridCBM
-  & $0.9326$ & $0.797{\pm}.078$ & $0.418{\pm}.133$
-  & $0.8194$ & $0.640{\pm}.013$ & $0.156{\pm}.021$ \\
+  & $0.9328$ & $0.810{\pm}.061$ & $0.443{\pm}.100$
+  & $0.8196$ & $0.674{\pm}.009$ & $0.211{\pm}.012$ \\
 Post-hoc CBM$^\star$
-  & 0.5783 & 0.864 & 0.490
-  & 0.7257 & 0.623 & 0.076 \\
+  & 0.5775 & 0.840 & 0.403
+  & 0.7175 & 0.636 & 0.085 \\
 \midrule
 \textbf{NeSy-NIDS}
-  & \textbf{0.9334} & $\mathbf{0.911\pm0.014}$ & $0.584\pm0.098$
-  & $0.8192$ & $0.631\pm0.028$ & $0.221\pm0.049$ \\
+  & $0.9326$ & $\mathbf{0.899\pm0.013}$ & $\mathbf{0.536\pm0.086}$
+  & $0.8190$ & $0.615\pm0.024$ & $0.225\pm0.049$ \\
 NeSy + $\alpha$-reg
-  & 0.9335 & $0.897\pm0.024$ & $0.536\pm0.086$
-  & 0.8192 & $0.654\pm0.032$ & $0.218\pm0.069$ \\
+  & 0.9326 & $0.902\pm0.016$ & $0.570\pm0.107$
+  & 0.8199 & $0.668\pm0.012$ & $0.262\pm0.077$ \\
 Rule-only
-  & 0.5640 & 0.884 & 0.458
-  & 0.7583 & 0.638 & 0.129 \\
+  & 0.5641 & 0.884 & 0.458
+  & 0.7551 & 0.638 & 0.129 \\
 \midrule
 DT
   & 0.9350 & 0.335 & 0.037
@@ -524,22 +526,23 @@ Fig.~\ref{fig:auroc_vs_f1} plots OOD AUROC against F1. The model families separa
   \centering
   \includegraphics[width=\textwidth]{figures/auroc_vs_f1.pdf}
   \caption{OOD AUROC vs.\ known-class weighted F1 for all models on
-  CTU-IoT-23 (left) and CIC-IoT-2023 (right). Error bars indicate
-  $\pm$1 std over 5 seeds where available.}
+  CTU-IoT-23 (left) and CIC-IoT-2023 (right), using the values of
+  Table~\ref{tab:main}. Error bars are $\pm$1 std over five seeds;
+  Post-hoc CBM, rule-only, DT and RF are single runs.}
   \label{fig:auroc_vs_f1}
 \end{figure*}
 
 \textbf{CTU-IoT-23.}
-Mahalanobis scoring works in both the rule and the concept space. NeSy-NIDS ($0.911{\pm}.014$) and SequentialCBM ($0.898{\pm}.007$) are the strongest interpretable detectors and match or exceed the MLP ($0.891{\pm}.004$). The four JointCBM $\gamma$ variants sit at $0.837$--$0.850$, within one standard deviation of one another; they trail the MLP by about $0.05$. All interpretable models are far ahead of the DT ($0.335$) and RF ($0.627$). The below-chance DT AUROC is a polarity inversion: Mahalanobis in the raw 37-dimensional feature space assigns \emph{larger} distances to known-class samples than to unknowns, because the four known classes occupy wider, more diffuse regions than the unknowns, which fall near the known centroids on superficially similar flow statistics. At 5\% FPR, NeSy-NIDS ($0.584$) is ahead of the MLP ($0.528$). On this dataset the interpretable models detect novel attacks at least as well as the black box.
+Mahalanobis scoring works in both the rule and the concept space. NeSy-NIDS ($0.899{\pm}.013$) and SequentialCBM ($0.885{\pm}.018$) are the strongest interpretable detectors and match the MLP ($0.888{\pm}.001$). The four JointCBM $\gamma$ variants sit at $0.800$--$0.840$, ordered with $\gamma$ but with seed-std of $0.02$--$0.04$, so the ordering is not resolved at five seeds; they trail the MLP by $0.05$--$0.09$. All interpretable models are far ahead of the DT ($0.335$) and RF ($0.627$). The below-chance DT AUROC is a polarity inversion: Mahalanobis in the raw 37-dimensional feature space assigns \emph{larger} distances to known-class samples than to unknowns, because the four known classes occupy wider, more diffuse regions than the unknowns, which fall near the known centroids on superficially similar flow statistics. At 5\% FPR, NeSy-NIDS ($0.536{\pm}.086$) is level with the MLP ($0.528$). On this dataset the interpretable models detect novel attacks as well as the black box.
 
 \textbf{CIC-IoT-2023.}
-Here the unconstrained MLP is the strongest detector ($0.808{\pm}.007$). Among the interpretable models, the four JointCBM $\gamma$ variants sit at $0.713$--$0.726$, within one standard deviation of one another and with no monotone $\gamma$ ordering; SequentialCBM and HybridCBM are lower ($0.637$, $0.640$), and NeSy-NIDS with Mahalanobis scoring reaches only $0.631$. The gap to the MLP is the price of compressing 39 features into 8 concepts. The DT slightly exceeds the MLP because raw-feature Mahalanobis in CIC's z-scored 39-dimensional space happens to separate the held-out unknowns well, a property the 8-dimensional bottleneck partly gives up.
+Here the unconstrained MLP is the strongest detector ($0.806{\pm}.002$). Among the interpretable models, the four JointCBM $\gamma$ variants sit at $0.720$--$0.746$, decreasing with $\gamma$ (seed-std $0.01$--$0.02$), the reverse of the CTU ordering; SequentialCBM and HybridCBM are lower ($0.678$, $0.674$), and NeSy-NIDS with Mahalanobis scoring reaches only $0.615$. The gap to the MLP is the price of compressing 39 features into 8 concepts. The DT slightly exceeds the MLP because raw-feature Mahalanobis in CIC's z-scored 39-dimensional space happens to separate the held-out unknowns well, a property the 8-dimensional bottleneck partly gives up.
 
 \textbf{Regularisation strength is not the lever.}
-A single-seed run had suggested a ``task-coupling'' effect on CIC, with JointCBM OOD AUROC rising from $0.668$ at $\gamma{=}0$ to a peak of $0.727$ at $\gamma{=}0.5$. Over five seeds the effect is gone: the $\gamma{=}0$ value was a low draw (five-seed mean $0.718$), and $\gamma\in\{0,0.1,0.5\}$ form a flat plateau ($0.717$--$0.726$) within seed variance. A second, independent five-seed replication (seeds~5--9) not only fails to reproduce the peak but reverses it ($\gamma{=}0$: $0.735$; $\gamma{=}0.5$: $0.702$). Pooled over ten seeds the two are indistinguishable ($\gamma{=}0.5$: $0.714{\pm}.028$; $\gamma{=}0$: $0.726{\pm}.031$). Concept-fidelity regularisation strength therefore does not reliably govern OOD detectability. A single-seed ablation can manufacture an effect of this size, so open-set claims on interpretable NIDS need multi-seed replication.
+A single-seed run had suggested a ``task-coupling'' effect on CIC, with JointCBM OOD AUROC rising from $0.668$ at $\gamma{=}0$ to a peak of $0.727$ at $\gamma{=}0.5$. Over five seeds there is no peak: AUROC falls monotonically from $0.746$ at $\gamma{=}0$ to $0.720$ at $\gamma{=}1.0$, with $\gamma{=}0.5$ ($0.727$) below $\gamma{=}0$. An independent five-seed replication (seeds~5--9) gives the same picture, with a shallower slope ($\gamma{=}0$: $0.749$; $\gamma{=}0.5$: $0.743$; $\gamma{=}1.0$: $0.741$); pooled over ten seeds, $\gamma{=}0$ scores $0.747{\pm}.014$ and $\gamma{=}0.5$ $0.735{\pm}.013$. On CTU the ordering is the opposite ($0.800{\to}0.840$), and on the alternative CTU split of Section~\ref{sec:datasets} it reverses again. Across four dataset/split combinations the sign of the $\gamma$ effect flips twice and its size never exceeds $0.04$; concept-fidelity regularisation strength therefore does not reliably govern OOD detectability. A single-seed ablation can manufacture an effect larger than any of these, so open-set claims on interpretable NIDS need multi-seed replication.
 
 \textbf{Scorer choice must match the representation.}
-Which scorer works depends on the geometry of the representation, not on regularisation (Table~\ref{tab:scorer}). We compare per-class Mahalanobis with two distances native to the binary simplex, each measured to the nearest known-class majority-vote centroid (Hamming distance and Jaccard distance), with a logit-space energy score $-\log\sum_c e^{l_c}$~\cite{liu2020energy}, and with a $z$-normalised average of Mahalanobis and energy. On CTU the rule-activation clusters of the known classes are well separated: every activation-space scorer works, and the covariance-aware Mahalanobis is best (NeSy-NIDS $0.911$ vs.\ $0.880$ Jaccard and $0.847$ Hamming), while the energy score is at chance ($0.533$) because the rule head is confident on unknowns too. On CIC the picture inverts. Near-deterministic rule firing (see \emph{Rule crispness and selectivity} below) leaves little within-class variance, and no activation-space scorer exceeds $0.64$ (Mahalanobis $0.631$, Hamming $0.622$, Jaccard $0.617$). The energy score bypasses the activation geometry and restores detection ($0.728{\pm}.029$); combining it with Mahalanobis adds little ($0.739{\pm}.031$). This matches the picture of Fort et al.~\cite{fort2021exploring}: the representation sets the ceiling, and the scoring rule has to be chosen to fit it.
+Whether a scorer works depends on the geometry of the representation, not on regularisation (Table~\ref{tab:scorer}). We compare per-class Mahalanobis with two distances native to the binary simplex, each measured to the nearest known-class majority-vote centroid (Hamming and Jaccard distance), with a logit-space energy score $-\log\sum_c e^{l_c}$~\cite{liu2020energy}, and with a $z$-normalised average of Mahalanobis and energy. On CTU the rule-activation clusters of the known classes are well separated, and every activation-space scorer works: Mahalanobis $0.899$, Jaccard $0.891$, Hamming $0.863$, the first two within one std of each other. The logit-space energy score is below chance ($0.474$), and averaging it with Mahalanobis only drags the score down ($0.659$). On CIC the picture inverts. Near-deterministic rule firing (see \emph{Rule crispness and selectivity} below) leaves little within-class variance, and no activation-space scorer exceeds $0.64$ (Mahalanobis $0.615$, Hamming $0.632$, Jaccard $0.629$). The energy score bypasses the activation geometry and restores detection ($0.749{\pm}.014$); combining it with Mahalanobis adds little ($0.756{\pm}.011$). The choice among activation-space metrics matters little on either dataset; what matters is whether the activation space separates known from unknown at all, and that is decided by the representation. This matches the picture of Fort et al.~\cite{fort2021exploring}: the representation sets the ceiling, and the scoring rule has to be chosen to fit it.
 
 \begin{table}[t]
 \centering\small
@@ -549,58 +552,60 @@ parentheses). Mahalanobis, Hamming and Jaccard score the binary
 rule-activation vector against per-class statistics fitted on training
 activations; Energy scores the logits; Comb.\ is the $z$-normalised average
 of Mahalanobis and Energy. On the well-separated CTU space every
-activation-space scorer works and Mahalanobis is best; on the
-near-deterministic CIC space none exceeds $0.64$ and the logit-space energy
-score is needed.}
+activation-space scorer works ($0.86$--$0.90$); on the near-deterministic CIC
+space none exceeds $0.64$ and the logit-space energy score is needed.}
 \label{tab:scorer}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{llcc}
 \toprule
 Scorer & Space & CTU-IoT-23 & CIC-IoT-2023 \\
 \midrule
-Mahalanobis (per-class) & activations & \textbf{0.911} (.014) & 0.631 (.028) \\
-Hamming to centroid     & activations & 0.847 (.014) & 0.622 (.007) \\
-Jaccard to centroid     & activations & 0.880 (.020) & 0.617 (.006) \\
-Energy                  & logits      & 0.533 (.058) & 0.728 (.029) \\
-Mahalanobis $+$ Energy  & both        & 0.759 (.043) & \textbf{0.739} (.031) \\
+Mahalanobis (per-class) & activations & \textbf{0.899} (.013) & 0.615 (.024) \\
+Hamming to centroid     & activations & 0.863 (.007) & 0.632 (.004) \\
+Jaccard to centroid     & activations & 0.891 (.009) & 0.629 (.006) \\
+Energy                  & logits      & 0.474 (.053) & 0.749 (.014) \\
+Mahalanobis $+$ Energy  & both        & 0.659 (.085) & \textbf{0.756} (.011) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Post-hoc CBM reaches AUROC $0.864$ on CTU-IoT-23 and $0.623$ on CIC-IoT-2023, but at a large F1 cost ($0.578$ and $0.726$). The high CTU AUROC despite low F1 arises because the concept probes inherit the OOD-separable structure of the frozen MLP embedding, while a linear probe on that embedding cannot recover the class boundary. This is further evidence that concept-space OOD separability comes partly from the underlying representation, not from the bottleneck alone.
+Post-hoc CBM reaches AUROC $0.840$ on CTU-IoT-23 and $0.636$ on CIC-IoT-2023, but at a large F1 cost ($0.578$ and $0.718$). The high CTU AUROC despite low F1 arises because the concept probes inherit the OOD-separable structure of the frozen MLP embedding, while a linear probe on that embedding cannot recover the class boundary. This is further evidence that concept-space OOD separability comes partly from the underlying representation, not from the bottleneck alone.
 
 \textbf{Comparison to standard OOD detectors.}
 To place the results against established open-set scoring, we run five
 post-hoc detectors on the unconstrained MLP (Table~\ref{tab:ood_baselines};
-single seed). Confidence-based scores (MSP, ODIN, energy) are weak
-(near-random on CTU, $0.46$--$0.48$; modest on CIC, $0.61$--$0.70$), while
-feature-space detectors are strong: per-class Mahalanobis reaches $0.890$ on
-CTU and deep kNN~\cite{sun2022knnood} reaches $0.842$ on CIC. These
-black-box detectors set the ceiling, and our interpretable models do not
-exceed it; we make no state-of-the-art open-set claim. What the results show
-is that interpretable rule and concept spaces keep \emph{competitive} OOD
-separability (NeSy-NIDS $0.911$ exceeds Mahalanobis on the MLP, $0.890$, on CTU) while
-remaining auditable, and that the effective scorer is set by the
+seed-0 model). Confidence-based scores (MSP, ODIN, energy) fail: on CTU
+they are inverted ($0.18$--$0.23$; the MLP is \emph{more} confident on the
+unknown families than on known traffic), and on CIC they are modest
+($0.64$--$0.75$). Feature-space detectors are strong: deep
+kNN~\cite{sun2022knnood} reaches $0.908$ on CTU and $0.846$ on CIC, and
+per-class Mahalanobis $0.890$ and $0.821$. These black-box detectors set the
+ceiling, and our interpretable models do not exceed it; we make no
+state-of-the-art open-set claim. What the results show is that interpretable
+rule and concept spaces keep \emph{competitive} OOD separability (NeSy-NIDS
+$0.899$ on CTU against $0.890$--$0.908$ for the best detectors on the MLP)
+while remaining auditable, and that the effective scorer is set by the
 representation geometry (Table~\ref{tab:scorer}).
 
 \begin{table}[t]
 \centering\small
-\caption{Post-hoc OOD detectors on the unconstrained MLP (AUROC). Confidence
-scores are weak; feature-space detectors (Mahalanobis, kNN) set the ceiling.}
+\caption{Post-hoc OOD detectors on the unconstrained MLP (AUROC, seed-0
+model). Confidence scores fail (inverted polarity on CTU); feature-space
+detectors (kNN, Mahalanobis) set the ceiling.}
 \label{tab:ood_baselines}
 \begin{tabular}{lccccc}
 \toprule
 Dataset & MSP & ODIN & Energy & kNN & Mahal. \\
 \midrule
-CTU-IoT-23   & 0.461 & 0.481 & 0.475 & 0.817 & \textbf{0.890} \\
-CIC-IoT-2023 & 0.608 & 0.696 & 0.624 & \textbf{0.842} & 0.820 \\
+CTU-IoT-23   & 0.176 & 0.234 & 0.229 & \textbf{0.908} & 0.890 \\
+CIC-IoT-2023 & 0.641 & 0.745 & 0.658 & \textbf{0.846} & 0.821 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \phantomsection\label{sec:crisp}
 \textbf{Rule crispness and selectivity.}
-The binarised activations of Eq.~\ref{eq:binarise} are exactly $\{0,1\}$ by construction, so binarity itself is not a result. What matters is how far the annealed soft activations are from binary before the cut, since that is the gap between the audited rule vector and what the classifier's logits used. We measure crispness as the fraction of (flow, rule) pairs on the known validation split whose soft activation at $k{=}10$ lies within $0.1$ of $0$ or $1$: $0.86$ on CTU-IoT-23 and $0.77$ on CIC-IoT-2023 (five-seed means). The remaining flows sit close to a threshold on at least one condition, and for them the binary rule vector is an approximation of the soft evidence the classifier saw. In practice the approximation is benign: replacing the soft activations by their binarised values changes the model's predicted class on $0.0\%$ of CTU and $1.1\%$ of CIC validation flows (five-seed means). Annealing reaches this level at no accuracy cost (Table~\ref{tab:main}). Fig.~\ref{fig:selectivity} shows mean binarised activation per known class.
+The binarised activations of Eq.~\ref{eq:binarise} are exactly $\{0,1\}$ by construction, so binarity itself is not a result. What matters is how far the annealed soft activations are from binary before the cut, since that is the gap between the audited rule vector and what the classifier's logits used. We measure crispness as the fraction of (flow, rule) pairs on the known validation split whose soft activation at $k{=}10$ lies within $0.1$ of $0$ or $1$: $0.86$ on CTU-IoT-23 and $0.78$ on CIC-IoT-2023 (five-seed means). The remaining flows sit close to a threshold on at least one condition, and for them the binary rule vector is an approximation of the soft evidence the classifier saw. In practice the approximation is benign: replacing the soft activations by their binarised values changes the model's predicted class on $0.0\%$ of CTU and $1.2\%$ of CIC validation flows (five-seed means). Annealing reaches this level at no accuracy cost (Table~\ref{tab:main}). Fig.~\ref{fig:selectivity} shows mean binarised activation per known class.
 \begin{sloppypar}\hbadness=10000
 On CTU-IoT-23 (seed 0), rules fire selectively but not deterministically
 (\texttt{cc\_heartbeat\_beaconing} at $0.76$ and
@@ -609,7 +614,7 @@ On CTU-IoT-23 (seed 0), rules fire selectively but not deterministically
 variance for Mahalanobis to work with. On CIC-IoT-2023 firing is
 near-deterministic (\texttt{syn\_flood\_ddos} at $1.00$ on DDoS-SYN,
 \texttt{benign\_low\_rate} at $0.94$ on Benign), within-class variance is close
-to zero, and Mahalanobis has little to separate on (AUROC $0.631$). Good
+to zero, and Mahalanobis has little to separate on (AUROC $0.615$). Good
 Mahalanobis detection needs rule firing that is \emph{selective but not
 certain}. This is not anecdotal: across the ten NeSy-NIDS models (five seeds
 $\times$ two datasets), mean within-class rule-activation variance correlates
@@ -652,15 +657,15 @@ read the CIC drift as systematic and the CTU pattern as indicative only.
 
 We sweep $\lambda_\alpha$ over six values, five seeds each
 (Table~\ref{tab:alpha}). The regulariser tunes the gate \emph{monotonically}.
-On CTU-IoT-23, $\alpha$ rises from $0.37$ ($\lambda_\alpha{=}0$) to $0.86$
+On CTU-IoT-23, $\alpha$ rises from $0.38$ ($\lambda_\alpha{=}0$) to $0.86$
 ($\lambda_\alpha{=}1.0$); on CIC-IoT-2023, from $0.30$ to $0.95$. An operator
 can therefore set rule reliance across most of its range. F1 does not move
-($0.9334$--$0.9337$ on CTU, $0.819$--$0.820$ on CIC), and OOD AUROC moves
-little and in opposite directions: down by $0.02$ on CTU ($0.911{\to}0.888$)
-and up by $0.04$ on CIC ($0.631{\to}0.675$) from $\lambda_\alpha{=}0$ to
-$1.0$, in both cases about one to two seed-std. $\lambda_\alpha$ is thus a
-control over interpretability with a small OOD side effect rather than a
-steep Pareto front (Fig.~\ref{fig:alpha_sweep}). Each point in the sweep was trained
+($0.9336$--$0.9337$ on CTU, $0.819$--$0.820$ on CIC). OOD AUROC is flat on CTU
+(within $0.015$ across the sweep) and rises on CIC, from $0.615$ at
+$\lambda_\alpha{=}0$ to $0.64$--$0.68$ for every $\lambda_\alpha{\ge}0.05$, a
+gain of about $0.05$ (two seed-std) that comes with the shift from neural to
+rule logits. $\lambda_\alpha$ is thus a control over interpretability at no
+accuracy cost and, on these datasets, no OOD cost (Fig.~\ref{fig:alpha_sweep}). Each point in the sweep was trained
 from scratch. Because the penalty acts only on the scalar gate, it should also
 be adjustable by fine-tuning a trained model, but we have not tested that.
 
@@ -669,16 +674,16 @@ be adjustable by fine-tuning a trained model, but we have not tested that.
 \setlength{\tabcolsep}{4pt}
 \caption{$\alpha$-gate sweep (NeSy-NIDS, mean over five seeds). $\lambda_\alpha$
 monotonically raises the learned gate $\alpha$ (rule reliance) at constant F1;
-OOD AUROC drifts down slightly on CTU and up slightly on CIC.}
+OOD AUROC is flat on CTU and rises by about $0.05$ on CIC.}
 \label{tab:alpha}
 \begin{tabular}{lcccccc}
 \toprule
 $\lambda_\alpha$ & 0 & 0.05 & 0.1 & 0.2 & 0.5 & 1.0 \\
 \midrule
-CTU $\alpha$      & 0.37 & 0.54 & 0.68 & 0.79 & 0.84 & 0.86 \\
-CTU AUROC         & 0.911 & 0.903 & 0.897 & 0.895 & 0.894 & 0.888 \\
+CTU $\alpha$      & 0.38 & 0.54 & 0.68 & 0.79 & 0.84 & 0.86 \\
+CTU AUROC         & 0.899 & 0.903 & 0.902 & 0.895 & 0.894 & 0.888 \\
 CIC $\alpha$      & 0.30 & 0.80 & 0.85 & 0.90 & 0.93 & 0.95 \\
-CIC AUROC         & 0.631 & 0.642 & 0.654 & 0.663 & 0.670 & 0.675 \\
+CIC AUROC         & 0.615 & 0.642 & 0.668 & 0.663 & 0.670 & 0.675 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -689,9 +694,9 @@ CIC AUROC         & 0.631 & 0.642 & 0.654 & 0.663 & 0.670 & 0.675 \\
   \caption{$\alpha$-gate sweep (NeSy-NIDS, mean over five seeds; error bars
     $\pm$1 std). Raising $\lambda_\alpha$ drives the learned gate $\alpha$
     (rule reliance, green) monotonically upward while known-class F1 (orange,
-    dashed) stays flat and OOD AUROC (blue) moves by at most $0.04$: a
-    control over interpretability with a small detection side effect rather
-    than a steep Pareto front.}
+    dashed) stays flat and OOD AUROC (blue) is flat on CTU and rises by
+    about $0.05$ on CIC: a control over interpretability at no accuracy or
+    detection cost rather than a steep Pareto front.}
   \label{fig:alpha_sweep}
 \end{figure}
 
@@ -699,24 +704,24 @@ CIC AUROC         & 0.631 & 0.642 & 0.654 & 0.663 & 0.670 & 0.675 \\
 \label{sec:leakage}
 
 Table~\ref{tab:cbm_concepts} reports mean concept prediction accuracy for
-each CBM variant (single seed). JointCBM without concept regularisation
-($\gamma{=}0$) reaches 84.9\% on CTU and 92.5\% on CIC. On CTU, accuracy rises
-monotonically to 92.7\% at $\gamma{=}1.0$. On CIC it stays at 90--93\% for all
-$\gamma$; the \texttt{is\_short\_connection} concept is at 45--52\% in every
-variant, a mismatch between its threshold and the z-scored CIC distribution
-rather than a regularisation failure. SequentialCBM reaches near-perfect
-concept accuracy (99.9\% on CTU, 93.1\% on CIC) because its concept head is
-trained on the concept labels alone and frozen before the classifier is
-trained. HybridCBM is similar (99.6\% / 92.9\%): its skip connection lets the
-classifier bypass the bottleneck, so the concept head is under no
-classification pressure and can minimise the BCE loss freely. Higher concept
-accuracy means closer agreement with the threshold labels; as the OOD results
-show, it does not by itself buy better detection.
+each CBM variant over five seeds. JointCBM without concept regularisation
+($\gamma{=}0$) reaches 85.6\% on CTU and 96.8\% on CIC. On CTU, accuracy rises
+monotonically to 90.7\% at $\gamma{=}1.0$; the weakest concept is
+\texttt{is\_syn\_heavy} at 76\%. On CIC it rises from 96.8\% to 98.0\%, with
+every concept above 93\%. SequentialCBM reaches near-perfect concept accuracy
+(99.9\% / 99.8\%) because its concept head is trained on the concept labels
+alone and frozen before the classifier is trained. HybridCBM is similar
+(99.7\% / 99.6\%): its skip connection lets the classifier bypass the
+bottleneck, so the concept head is under no classification pressure and can
+minimise the BCE loss freely. Higher concept accuracy means closer agreement
+with the threshold labels; as the OOD results show, it does not by itself buy
+better detection.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.1}
-\caption{Mean concept prediction accuracy (\%) per CBM variant (single
-seed, indicative; multi-seed $\lambda$ sensitivity in Table~\ref{tab:lambda}).}
+\caption{Mean concept prediction accuracy (\%) on the known-class test split
+per CBM variant (mean over five seeds; $\lambda$ sensitivity in
+Table~\ref{tab:lambda}).}
 \label{tab:cbm_concepts}
 \centering
 \small
@@ -724,30 +729,30 @@ seed, indicative; multi-seed $\lambda$ sensitivity in Table~\ref{tab:lambda}).}
 \toprule
 \textbf{Model} & \textbf{CTU-IoT-23} & \textbf{CIC-IoT-2023} \\
 \midrule
-JointCBM ($\gamma{=}0$)   & 84.9 & 92.5 \\
-JointCBM ($\gamma{=}0.1$) & 86.9 & 91.3 \\
-JointCBM ($\gamma{=}0.5$) & 91.8 & 90.2 \\
-JointCBM ($\gamma{=}1.0$) & 92.7 & 91.8 \\
-SequentialCBM             & 99.9 & 93.1 \\
-HybridCBM                 & 99.6 & 92.9 \\
+JointCBM ($\gamma{=}0$)   & 85.6 & 96.8 \\
+JointCBM ($\gamma{=}0.1$) & 85.7 & 96.6 \\
+JointCBM ($\gamma{=}0.5$) & 88.8 & 97.4 \\
+JointCBM ($\gamma{=}1.0$) & 90.7 & 98.0 \\
+SequentialCBM             & 99.9 & 99.8 \\
+HybridCBM                 & 99.7 & 99.6 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Concept regularisation raises concept \emph{accuracy}: agreement with the
-threshold labels climbs from 84.9\% ($\gamma{=}0$) to 92.7\% ($\gamma{=}1.0$)
+threshold labels climbs from 85.6\% ($\gamma{=}0$) to 90.7\% ($\gamma{=}1.0$)
 on CTU-IoT-23 (Table~\ref{tab:cbm_concepts}). Higher accuracy is easily read
 as reduced \emph{concept leakage}, but accuracy alone does not measure
-leakage. We therefore probe it directly: a linear classifier is trained to
-predict the class from (i) the soft concept scores
+leakage. We therefore probe it directly: a linear classifier is trained on the
+training split to predict the class from (i) the soft concept scores
 $\hat{\mathbf{c}}\in[0,1]^K$ and (ii) their binarised values, and leakage is
-the accuracy gap, the extra task information carried by the soft deviations
-beyond the declared concept values. Leakage is negligible on CTU-IoT-23
-(at most $0.002$ for every $\gamma$) and, on CIC-IoT-2023, stays at
-$0.05$--$0.08$ with no reliable reduction as $\gamma$ grows ($\gamma{=}0$:
-$0.067$; $\gamma{=}0.5$: $0.075$). So $\gamma$ raises concept accuracy but
-does not measurably remove leakage and, as Section~\ref{sec:ood} showed,
-does not improve open-set detection. Regularisation strength governs concept
+the test-accuracy gap, the extra task information carried by the soft
+deviations beyond the declared concept values. Leakage is negligible on
+CTU-IoT-23 (at most $0.008$ for every $\gamma$, five-seed means) and, on
+CIC-IoT-2023, sits at $0.05$--$0.07$ and, if anything, grows with $\gamma$
+($\gamma{=}0$: $0.051{\pm}.006$; $\gamma{=}1.0$: $0.068{\pm}.008$). So $\gamma$
+raises concept accuracy but does not remove leakage and, as
+Section~\ref{sec:ood} showed, does not improve open-set detection. Regularisation strength governs concept
 accuracy; representation geometry and scorer choice govern OOD detectability
 (Table~\ref{tab:scorer}). We accordingly withdraw the earlier claim that
 $\gamma$ eliminates concept leakage.
@@ -778,9 +783,10 @@ rules fire near-deterministically, within-class variance collapses, and
 every activation-space scorer fails where a logit-space energy score works
 (Table~\ref{tab:scorer}). This adds a qualification to Fort et
 al.~\cite{fort2021exploring}: the representation sets the ceiling, and the
-scoring rule has to be chosen for the geometry of that representation. The
-strength of concept regularisation, by contrast, does not reliably move OOD
-AUROC in either direction across ten seeds (Section~\ref{sec:ood}).
+scoring rule has to be chosen for the geometry of that representation; which
+activation-space metric is used matters little. The strength of concept
+regularisation, by contrast, has no consistent effect on OOD AUROC across
+datasets and splits (Section~\ref{sec:ood}).
 
 \textbf{Inherent vs.\ post-hoc interpretability.}
 Post-hoc explainers such as xNIDS~\cite{wei2023xnids} produce faithful
@@ -830,12 +836,13 @@ We evaluated CBMs and NeSy-NIDS as interpretable open-set NIDS on two IoT
 datasets under one multi-seed protocol. Both match an unconstrained MLP on
 known-class F1 ($\pm0.002$) while exposing a representation an analyst can
 read. Open-set detectability is governed by representation geometry and
-scorer choice. Per-class Mahalanobis is the best scorer on the well-separated
-CTU rule space (NeSy-NIDS $0.911$) but, like every activation-space scorer,
-fails on the near-deterministic CIC space ($0.631$), where a logit-space
-energy score ($0.728$) restores detection. Concept-fidelity
-regularisation strength, in contrast, has no reliable effect on OOD AUROC: a
-single-seed ``task-coupling'' effect vanishes and reverses across ten seeds.
+scorer choice. On the well-separated CTU rule space every activation-space scorer works
+(NeSy-NIDS with per-class Mahalanobis: $0.899$); on the near-deterministic
+CIC space every activation-space scorer fails ($0.615$) and a logit-space
+energy score ($0.749$) restores detection. Concept-fidelity regularisation
+strength, in contrast, has no consistent effect on OOD AUROC: its small
+influence changes sign across datasets and splits, and a single-seed
+``task-coupling'' effect does not survive replication.
 Open-set claims about interpretable NIDS need multi-seed replication. Future
 work includes data-driven rule and concept discovery, architectures that
 combine both bottleneck types, a study of test-time concept intervention, and

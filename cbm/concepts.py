@@ -143,9 +143,12 @@ def cic_concept_labels(df: pd.DataFrame) -> np.ndarray:
     # 2: is_udp_dominant - tcp z < -1.0 (mirai: median tcp=-1.67, uses udp instead)
     C[:, 2] = (tcp < -1.0).astype(np.float32)
 
-    # 3: is_short_connection - iat z < -0.003 (ddos-syn: iat median=-0.0038, near minimum)
-    # tight cluster at minimum value -> nearly zero inter-arrival time
-    C[:, 3] = (iat < -0.0037).astype(np.float32) if "iat" in feats else (
+    # 3: is_short_connection - iat z < -0.00316: inter-arrival time pinned at the
+    # scaled minimum (-0.00319). On the current split this fires on 99% of
+    # DDoS-SYN and 84% of Mirai flows vs 8% benign, 24% recon, 7% vuln-scan.
+    # (An earlier threshold of -0.0037 predated a re-scaling of the feature and
+    # lay below its minimum, so the concept never fired.)
+    C[:, 3] = (iat < -0.00316).astype(np.float32) if "iat" in feats else (
         np.zeros(n, dtype=np.float32)
     )
 

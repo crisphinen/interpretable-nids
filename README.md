@@ -12,7 +12,7 @@ Crisphine Macharia Ngari, Ning Weng — Southern Illinois University Carbondale
 This repository contains all code, trained models, and evaluation results for our joint study of two inherently interpretable architectures for IoT network intrusion detection and open-set (OOD) detection:
 
 - **Concept Bottleneck Models (CBMs)** — predictions routed through human-defined traffic concepts; supports test-time intervention
-- **Neuro-Symbolic NIDS (NeSy-NIDS)** — domain-expert threshold rules differentiably learned via *k*-annealing and STE; exactly binary rule activations at inference
+- **Neuro-Symbolic NIDS (NeSy-NIDS)** — domain-expert threshold rules learned through *k*-annealed sigmoid gates; activations binarised at inference for audit and OOD scoring
 
 Both use Mahalanobis distance in their respective representation spaces for OOD scoring on **CTU-IoT-23** (4 known / 9 unknown classes) and **CIC-IoT-2023** (5 known / 29 unknown classes).
 
@@ -35,7 +35,7 @@ interpretable-nids/
 │   ├── make_figures.py     # All paper figures
 │   └── run_experiments.sh  # Full experiment script
 ├── nesy/                   # NeSy-NIDS code
-│   ├── model.py            # Rule bank, alpha-gate, STE binarisation
+│   ├── model.py            # Rule bank, alpha-gate, inference-time binarisation
 │   ├── train.py            # Training with k-annealing
 │   ├── evaluate.py         # Evaluation + multi-seed aggregation
 │   └── baselines.py        # Shared baseline utilities

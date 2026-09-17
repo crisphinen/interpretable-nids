@@ -24,7 +24,7 @@ from cbm.concepts import (
 )
 from cbm.model import MLPBaseline, JointCBM
 
-RESULTS_DIR = PROJECT_ROOT / "cbm" / "results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "cbm"
 EMBED_DIM = 64
 DEVICE = torch.device("cpu")
 MAX_SHAP_BACKGROUND = 200
@@ -279,6 +279,14 @@ def run_posthoc_cbm(X_tr, y_tr, C_tr,
     concept_accs      = {}
 
     for j, cname in enumerate(concept_names):
+        if len(np.unique(C_tr[:, j])) < 2:
+            # concept is constant on the training split: a probe cannot be fitted,
+            # so predict that constant everywhere
+            const = float(C_tr[0, j])
+            concept_accs[cname] = float((C_te[:, j] == const).mean())
+            concept_preds_val[:, j] = concept_preds_te[:, j] = concept_preds_unk[:, j] = const
+            print(f"    {cname}: constant ({const:.0f}) on train - probe skipped")
+            continue
         clf = LogisticRegression(max_iter=200, C=1.0, random_state=42, n_jobs=1)
         clf.fit(E_tr, C_tr[:, j])
         probe_acc = (clf.predict(E_te) == C_te[:, j]).mean()
