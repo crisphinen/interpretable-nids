@@ -1,0 +1,86 @@
+{
+  "dataset": "ctu",
+  "model": "nesy",
+  "seed": 1,
+  "known_f1": 0.9334548022528293,
+  "ood_auroc_mahal": 0.88597782,
+  "ood_auroc_energy": 0.50186922,
+  "ood_auroc_comb_avg": 0.6887369400000001,
+  "ood_auroc_comb_max": 0.6819778400000001,
+  "ood_auroc_comb_ada": 0.6887369400000001,
+  "tpr_at_5fpr_mahal": 0.4644,
+  "tpr_at_5fpr_comb_avg": 0.4848,
+  "tau": 0.49139665858077053,
+  "unk_rejection_rate": 0.4848,
+  "known_rejection_rate": 0.0394,
+  "mean_crispness": 1.0,
+  "gate_alpha": 0.7223105430603027,
+  "crispness_per_rule": {
+    "ddos_high_rate": 1.0,
+    "cc_heartbeat_beaconing": 1.0,
+    "benign_single_probe": 1.0,
+    "okiru_low_rate": 1.0,
+    "asymmetric_flood": 1.0,
+    "persistent_connection": 1.0,
+    "incomplete_handshake": 1.0,
+    "ddos_short_burst": 1.0
+  },
+  "editing_results": {
+    "ddos_high_rate": {
+      "base_acc": 0.933912992477417,
+      "acc_forced_hi": 0.933912992477417,
+      "acc_forced_lo": 0.933912992477417,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "cc_heartbeat_beaconing": {
+      "base_acc": 0.933912992477417,
+      "acc_forced_hi": 0.9339854717254639,
+      "acc_forced_lo": 0.933912992477417,
+      "delta_hi": 7.2479248046875e-05,
+      "delta_lo": 0.0
+    },
+    "benign_single_probe": {
+      "base_acc": 0.933912992477417,
+      "acc_forced_hi": 0.9338405132293701,
+      "acc_forced_lo": 0.933912992477417,
+      "delta_hi": -7.2479248046875e-05,
+      "delta_lo": 0.0
+    },
+    "okiru_low_rate": {
+      "base_acc": 0.933912992477417,
+      "acc_forced_hi": 0.933912992477417,
+      "acc_forced_lo": 0.9339854717254639,
+      "delta_hi": 0.0,
+      "delta_lo": 7.2479248046875e-05
+    },
+    "asymmetric_flood": {
+      "base_acc": 0.933912992477417,
+      "acc_forced_hi": 0.933912992477417,
+      "acc_forced_lo": 0.9338405132293701,
+      "delta_hi": 0.0,
+      "delta_lo": -7.2479248046875e-05
+    },
+    "persistent_connection": {
+      "base_acc": 0.933912992477417,
+      "acc_forced_hi": 0.933912992477417,
+      "acc_forced_lo": 0.933912992477417,
+      "delta_hi": 0.0,
+      "delta_lo": 0.0
+    },
+    "incomplete_handshake": {
+      "base_acc": 0.933912992477417,
+      "acc_forced_hi": 0.933912992477417,
+      "acc_forced_lo": 0.9339854717254639,
+      "delta_hi": 0.0,
+      "delta_lo": 7.2479248046875e-05
+    },
+    "ddos_short_burst": {
+      "base_acc": 0.933912992477417,
+      "acc_forced_hi": 0.933768093585968,
+      "acc_forced_lo": 0.933912992477417,
+      "delta_hi": -0.0001448988914489746,
+      "delta_lo": 0.0
+    }
+  }
+}

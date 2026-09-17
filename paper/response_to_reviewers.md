@@ -24,9 +24,10 @@ novel-variant open-set regime. See also C8.
 Clarified (Sec. Setup) that λ weights *concept supervision* and was selected by
 grid search over {0.1,0.5,1.0} on the criterion of known-class F1, which is
 invariant to λ (±0.002). λ was therefore fixed at the mid-value and γ studied as
-the variable of interest. New Table (λ-sensitivity, 3 seeds) reports F1, concept
+the variable of interest. New Table (λ-sensitivity, 5 seeds) reports F1, concept
 accuracy, and OOD AUROC across λ: F1 is flat; λ trades concept accuracy against
-OOD in dataset-dependent directions — an honest nuance now documented.
+OOD in dataset-dependent directions (λ=0.1→1.0: CTU AUROC 0.790→0.884, CIC
+0.753→0.681, both beyond one seed-std) — an honest nuance now documented.
 
 **C3 — Mahalanobis on binary vectors not justified vs. alternatives.**
 Added a scorer ablation (new Table, 5 seeds) comparing per-class Mahalanobis,
@@ -59,16 +60,23 @@ thresholds; CTU raw units, CIC standardized units).
 Strengthened rationale (Sec. Datasets): TON_IoT's features are not the Zeek-style
 flow statistics our concept/rule vocabularies are defined over, so it would
 require re-deriving the entire vocabulary and confound a same-interface
-comparison; its taxonomy is also shallower (~9 vs 13/34 classes). We argue the
-effects studied are properties of the objective/representation and expect them to
-transfer.
+comparison; its taxonomy is also shallower (~9 vs 13/34 classes). Regarding whether the
+"task-coupling OOD penalty" would generalize: that claim has been withdrawn (see
+Central revision below), as it did not survive multi-seed replication, so the
+question is moot. The effects that do survive are properties of the training
+objective and representation rather than of a specific dataset, and we expect
+them to transfer.
 
 **C8 — Sensitivity to the known/unknown split.**
 Added an alternative CTU split ({Benign, DDoS, Okiru, C&C}; C&C promoted from
 unknown, C&C-HeartBeat demoted to unknown) and re-ran the CBM evaluation. The
 qualitative conclusions hold: interpretable models match the MLP on F1, and OOD
-AUROC shows no reliable γ ordering (MLP 0.899; JointCBM γ=0: 0.840, γ=1.0: 0.797),
-confirming the findings are not artifacts of the original partition.
+AUROC shows no reliable γ ordering (MLP 0.899; JointCBM γ=0: 0.840, γ=1.0: 0.797).
+We repeat the same check on CIC-IoT-2023 (known set {Benign, DDoS-ICMP_Flood,
+Mirai-udpplain, Recon-PortScan, VulnerabilityScan}) with the same outcome: F1
+within 0.001 of the MLP (0.811) and no monotone γ ordering (γ=0: 0.876, γ=0.5:
+0.849, γ=1.0: 0.784). Both datasets thus confirm the findings are not artifacts
+of the original partition.
 
 ---
 
