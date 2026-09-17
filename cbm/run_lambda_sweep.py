@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Reconstructed concept-supervision-weight (lambda) sensitivity driver (the
-# original 3-seed run was ad hoc and lost). Trains JointCBM (gamma=0) on the
+# Concept-supervision-weight (lambda) sensitivity driver.
+# Trains JointCBM (gamma=0) on the
 # standard split for each lambda x seed and reports known-class F1, mean concept
 # accuracy and per-class-Mahalanobis OOD AUROC, using the same loaders and
 # scoring as cbm.train / cbm.evaluate. Writes per-seed rows to

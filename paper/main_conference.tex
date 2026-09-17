@@ -154,12 +154,12 @@ sample as the main split, order it by capture timestamp, and assign the
 earliest 70\% to training and the latest 15\% to test (five seeds; test
 strictly follows train; the held-out unknown families are unchanged). This
 protocol exposes a property of the CTU-IoT-23 labelling: the \emph{DDoS} family
-is temporally bimodal---a high-rate flood capture (median Rate
+is temporally bimodal: a high-rate flood capture (median Rate
 ${\approx}9.3{\times}10^{5}$\,pps, through Dec.\ 2018) followed by a
 near-zero-rate capture (median Rate ${<}1$, thereafter). A timestamp split
 therefore trains on one DDoS regime and tests on the other, turning DDoS into a
-cross-\emph{capture} generalisation task on which \emph{every} model---MLP and
-CBM alike---scores F1 $0.00$ (Table~\ref{tab:temporal}). We therefore report the
+cross-\emph{capture} generalisation task on which \emph{every} model (MLP and
+CBM alike) scores F1 $0.00$ (Table~\ref{tab:temporal}). We therefore report the
 temporal result on the three temporally-coherent families (Benign,
 C\&C-HeartBeat, Okiru) and treat DDoS separately as a documented dataset
 property. On those three families known-class F1 falls from ${\approx}0.99$
@@ -748,8 +748,8 @@ CIC AUROC         & 0.615 & 0.642 & 0.668 & 0.663 & 0.670 & 0.675 \\
 Table~\ref{tab:cbm_concepts} reports mean concept prediction accuracy for
 each CBM variant over five seeds. JointCBM without concept regularisation
 ($\gamma{=}0$) reaches 85.6\% on CTU and 96.8\% on CIC. On CTU, accuracy rises
-monotonically to 90.7\% at $\gamma{=}1.0$; the weakest concept is
-\texttt{is\_syn\_heavy} at 76\%. On CIC it rises from 96.8\% to 98.0\%, with
+monotonically to 90.7\% at $\gamma{=}1.0$; at $\gamma{=}0$ the weakest concept
+is \texttt{is\_syn\_heavy} at 76\% (it rises to 92\% by $\gamma{=}1.0$). On CIC it rises from 96.8\% to 98.0\%, with
 every concept above 93\%. SequentialCBM reaches near-perfect concept accuracy
 (99.9\% / 99.8\%) because its concept head is trained on the concept labels
 alone and frozen before the classifier is trained. HybridCBM is similar
@@ -809,7 +809,7 @@ the rule bank and gate). Both are under $0.4$\,MB in \texttt{float32}. We
 report per-flow (batch-1) latency, the conservative regime for a gateway that
 scores each flow as it completes. On one thread of an Intel Core i9-9820X,
 latency is $96$\,$\mu$s (MLP), $109$\,$\mu$s (JointCBM) and about
-$580$\,$\mu$s (NeSy-NIDS, dominated by an un-vectorised per-rule sigmoid loop
+$590$\,$\mu$s (NeSy-NIDS, dominated by an un-vectorised per-rule sigmoid loop
 that could be batched). These figures come from desktop-class hardware; we
 have not measured on ARM gateway processors and make no claim about
 on-device performance.

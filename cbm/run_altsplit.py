@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Reconstructed alternative-split sensitivity driver (original was ad-hoc, lost).
+# Alternative-split sensitivity driver.
 # Re-derives train/val/test_known/test_unknown from pooled data under an
 # alternative known-class set, then trains every CBM variant across N seeds and
 # reports known-class val F1 + per-class-Mahalanobis OOD AUROC (same scoring as
