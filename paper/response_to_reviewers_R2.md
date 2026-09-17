@@ -30,7 +30,7 @@ capture timestamp (earliest-70% train / latest-15% test). Under this harder
 protocol F1 drops ≈0.06 (MLP 0.933→0.871)—confirming the random split was mildly
 optimistic—but the core claims hold: interpretable models still match the MLP at
 zero F1 cost (JointCBM γ=0.5: 0.872 vs MLP 0.871) and retain comparable OOD AUROC
-(0.807 vs 0.801).
+(0.806 vs 0.801).
 
 **C4 — OOD baselines too limited.**
 Added Table (post-hoc detectors on the MLP): MSP, ODIN, energy, kNN, Mahalanobis.
@@ -52,8 +52,9 @@ negligible on CTU (≤0.001, all γ) and flat at 0.06–0.07 on CIC with no redu
 as γ grows. We have **retracted** the "γ eliminates leakage" claim.
 
 **C7 — α-Pareto unsupported (only two λα points).**
-Added a full λα sweep over six values × 3 seeds (Table). λα monotonically tunes α
-from ~0.35 to ~0.86–0.95 at zero F1 cost and near-zero OOD cost; we now describe it
+Added a full λα sweep over six values × 5 seeds (Table). λα monotonically tunes α
+from ~0.30–0.37 to ~0.86–0.95 at zero F1 cost and near-zero OOD cost (AUROC
+varies ≤0.02 on CTU, ≤0.04 on CIC, within one seed-std); we now describe it
 as a tunable control knob rather than a steep Pareto front.
 
 **C8 — 100% crispness is trivial.**

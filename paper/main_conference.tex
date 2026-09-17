@@ -120,6 +120,7 @@ work.\textbf{(A) Concept Bottleneck Model (CBM)} has a 2-layer MLP concept encod
 \end{figure*}
 
 \subsection{Datasets}
+\label{sec:datasets}
 
 \textbf{CTU-IoT-23}~\cite{parmisano2020ctu} provides labelled network flows from IoT devices captured under controlled laboratory conditions. We use a 37-feature version pre-processed from Zeek logs (packet/byte counts, inter-arrival times, flag counts). Four classes are treated as \emph{known} (Benign, C\&C-HeartBeat, DDoS, Okiru) with nine attack families are held out as \emph{unknown} for OOD evaluation.
 
@@ -138,7 +139,12 @@ partition, we repeat the CBM evaluation on an alternative CTU known set
 (\{Benign, DDoS, Okiru, C\&C\}, promoting C\&C from unknown and demoting
 C\&C-HeartBeat to unknown); the qualitative conclusions hold: interpretable
 models match the MLP on F1, and OOD AUROC shows no reliable $\gamma$ ordering
-(MLP $0.899$; JointCBM $\gamma{=}0$: $0.840$, $\gamma{=}1.0$: $0.797$).
+(MLP $0.899$; JointCBM $\gamma{=}0$: $0.840$, $\gamma{=}1.0$: $0.797$). The same
+check on CIC-IoT-2023 (known set \{Benign, DDoS-ICMP\_Flood, Mirai-udpplain,
+Recon-PortScan, VulnerabilityScan\}) gives the same picture: known-class F1 is
+unchanged (every JointCBM variant within $0.001$ of the MLP's $0.811$), and OOD
+AUROC again shows no monotone $\gamma$ ordering (JointCBM $\gamma{=}0$: $0.876$,
+$\gamma{=}0.5$: $0.849$, $\gamma{=}1.0$: $0.784$).
 
 \textbf{Temporal (session-respecting) evaluation.} Random flow partitioning can
 leak device/session identity between train and test. A strict device-disjoint
@@ -307,6 +313,7 @@ Sigmoid steepness $k$ linearly starts from $k_0{=}1$ (smooth gradients, threshol
 To enforce \emph{exact} binary activations at inference while preserving differentiable threshold learning, we apply the Straight-Through Estimator (STE)~\cite{bengio2013ste,liu2023reinmax}. The hard binarization
 \begin{equation}
   a_r^{\mathrm{hard}} = \mathbf{1}[a_r(\mathbf{x};\,k(t)) > 0.5]
+  \label{eq:binarise}
 \end{equation} is used in the forward pass, and gradients backpropagates through the smooth surrogate $a_r$ (Eq.~\ref{eq:rule_score}). The resulting gradient in relation to threshold $\theta_i$ for a greater-than condition is
 \begin{equation}
   \frac{\partial \mathcal{L}}{\partial \theta_i} \approx
@@ -409,12 +416,12 @@ An unconstrained MLP with two hidden layers of 256 units each (LayerNorm, ReLU) 
 \textbf{Metrics:} weighted F1 in the known-class validation split (used for early stopping and model selection), AUROC and TPR@5\%FPR for OOD detection, evaluated on held-out unknown-class test samples. For
 NeSy-NIDS is crispness of the rule and the gate value $\alpha$.
 
-\textbf{Training:} Adam ($\mathrm{lr}{=}10^{-3}$, batch 512, $\varepsilon{=}10^{-4}$ covariance regulariser). CBM uses up to 50 epochs, patience 10, five seeds (0--4), $\gamma\in\{0,0.1,0.5,1.0\}$, $\lambda{=}0.5$. The concept-supervision weight $\lambda$ was selected by grid search over $\{0.1,0.5,1.0\}$: known-class F1 is invariant to $\lambda$ ($\pm0.002$ on both datasets, Table~\ref{tab:lambda}), so $\lambda$ was fixed at the mid-value and $\gamma$ studied as the variable of interest. As Table~\ref{tab:lambda} shows, $\lambda$ trades concept accuracy against OOD detectability in dataset-dependent directions, but does not affect classification. NeSy-NIDS uses up to 60 epochs, patience 12, five seeds (0 to 4) and $\lambda_\alpha\in\{0,0.1\}$.
+\textbf{Training:} Adam ($\mathrm{lr}{=}10^{-3}$, batch 512, $\varepsilon{=}10^{-4}$ covariance regulariser). CBM uses up to 50 epochs, patience 10, five seeds (0--4), $\gamma\in\{0,0.1,0.5,1.0\}$, $\lambda{=}0.5$. The concept-supervision weight $\lambda$ was selected by grid search over $\{0.1,0.5,1.0\}$: known-class F1 is invariant to $\lambda$ ($\pm0.002$ on both datasets, Table~\ref{tab:lambda}), so $\lambda$ was fixed at the mid-value and $\gamma$ studied as the variable of interest. As Table~\ref{tab:lambda} shows, $\lambda$ trades concept accuracy against OOD detectability in dataset-dependent directions, but does not affect classification. NeSy-NIDS uses up to 60 epochs, patience 12, five seeds (0 to 4) and $\lambda_\alpha\in\{0,0.1\}$ for the main results (Table~\ref{tab:main}); Section~\ref{sec:alpha} sweeps $\lambda_\alpha\in\{0,0.05,0.1,0.2,0.5,1.0\}$.
 
 \begin{table}[t]
 \centering\small
 \caption{Sensitivity to the concept-supervision weight $\lambda$
-(JointCBM, $\gamma{=}0$, mean over three seeds). Known-class F1 is
+(JointCBM, $\gamma{=}0$, mean over five seeds; AUROC $\pm$1 std). Known-class F1 is
 invariant to $\lambda$; $\lambda$ trades concept accuracy against OOD
 AUROC in opposite directions across datasets.}
 \label{tab:lambda}
@@ -422,13 +429,13 @@ AUROC in opposite directions across datasets.}
 \toprule
 & $\lambda{=}0.1$ & $\lambda{=}0.5$ & $\lambda{=}1.0$ \\
 \midrule
-CTU F1            & 0.9327 & 0.9325 & 0.9327 \\
-CTU concept-acc   & 0.650  & 0.845  & 0.914  \\
-CTU OOD AUROC     & 0.798  & 0.817  & 0.890  \\
+CTU F1            & 0.9327 & 0.9325 & 0.9326 \\
+CTU concept-acc   & 0.650  & 0.856  & 0.905  \\
+CTU OOD AUROC     & 0.790$\pm$0.030 & 0.805$\pm$0.023 & 0.884$\pm$0.010 \\
 \midrule
-CIC F1            & 0.8198 & 0.8177 & 0.8188 \\
-CIC concept-acc   & 0.869  & 0.958  & 0.981  \\
-CIC OOD AUROC     & 0.760  & 0.718  & 0.674  \\
+CIC F1            & 0.8198 & 0.8182 & 0.8189 \\
+CIC concept-acc   & 0.853  & 0.961  & 0.981  \\
+CIC OOD AUROC     & 0.753$\pm$0.012 & 0.720$\pm$0.024 & 0.681$\pm$0.022 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -594,7 +601,7 @@ CIC-IoT-2023 & 0.608 & 0.696 & 0.624 & \textbf{0.842} & 0.820 \\
 
 \phantomsection\label{sec:crisp}
 \textbf{Rule crispness and selectivity.}
-After $k$-annealing to $k{=}10$, all rule activations fall strictly into $\{0,1\}$ (100\% rule crispness). Exact binarity follows directly from the straight-through hard-threshold operation (Eq.~\ref{eq:alpha_gate}); the non-trivial property is that $k$-annealing reaches it while keeping thresholds learnable and at no accuracy cost (Table~\ref{tab:main}), yielding syntactically verifiable rules for audit without a post-hoc quantisation step. Fig.~\ref{fig:selectivity} shows mean activation rates per known class for both datasets.
+After $k$-annealing to $k{=}10$, all rule activations fall strictly into $\{0,1\}$ (100\% rule crispness). Exact binarity follows directly from the straight-through hard-threshold operation (Eq.~\ref{eq:binarise}); the non-trivial property is that $k$-annealing reaches it while keeping thresholds learnable and at no accuracy cost (Table~\ref{tab:main}), yielding syntactically verifiable rules for audit without a post-hoc quantisation step. Fig.~\ref{fig:selectivity} shows mean activation rates per known class for both datasets.
 \begin{sloppypar}\hbadness=10000
 On CTU-IoT-23, rules fire selectively but not deterministically
 (\texttt{cc\_heartbeat\_beaconing} at 0.76 and
@@ -646,24 +653,26 @@ consistency.
 \end{figure*}
 
 \subsection{The \texorpdfstring{$\alpha$}{alpha}-Gate and Interpretability Trade-Off}
+\label{sec:alpha}
 
-We sweep $\lambda_\alpha$ over six values, three seeds each
+We sweep $\lambda_\alpha$ over six values, five seeds each
 (Table~\ref{tab:alpha}). The regulariser tunes the gate \emph{monotonically}.
-On CTU-IoT-23, $\alpha$ rises from $0.38$ ($\lambda_\alpha{=}0$) to $0.86$
-($\lambda_\alpha{=}1.0$); on CIC-IoT-2023, from $0.32$ to $0.95$. An operator
+On CTU-IoT-23, $\alpha$ rises from $0.37$ ($\lambda_\alpha{=}0$) to $0.86$
+($\lambda_\alpha{=}1.0$); on CIC-IoT-2023, from $0.30$ to $0.95$. An operator
 can thus set rule reliance across nearly the full range. F1 does not move
-($0.9336$ / $0.819{\pm}0.001$), and OOD AUROC barely does: it varies by at
-most $0.01$ on CTU (a slight decline, as the rule head displaces a more
-OOD-compact neural embedding) and $0.03$ on CIC (a slight rise). This is a
+($0.9334$--$0.9337$ / $0.819$--$0.820$), and OOD AUROC barely does: it varies by at
+most $0.02$ on CTU (a slight decline, as the rule head displaces a more
+OOD-compact neural embedding) and $0.04$ on CIC (a slight rise), within one
+seed-std at every point. This is a
 tunable interpretability control at negligible OOD cost, not a steep Pareto
-front. And $\lambda_\alpha$ can be set by brief fine-tuning, without
-retraining, which addresses the operator-control requirement of Arp et
-al.~\cite{arp2022dos}.
+front (Fig.~\ref{fig:alpha_sweep}). And $\lambda_\alpha$ can be set by brief
+fine-tuning, without retraining, which addresses the operator-control
+requirement of Arp et al.~\cite{arp2022dos}.
 
 \begin{table}[t]
 \centering\small
 \setlength{\tabcolsep}{4pt}
-\caption{$\alpha$-gate sweep (NeSy-NIDS, mean over three seeds). $\lambda_\alpha$
+\caption{$\alpha$-gate sweep (NeSy-NIDS, mean over five seeds). $\lambda_\alpha$
 monotonically raises the learned gate $\alpha$ (rule reliance) at constant F1 and
 near-constant OOD AUROC.}
 \label{tab:alpha}
@@ -671,13 +680,25 @@ near-constant OOD AUROC.}
 \toprule
 $\lambda_\alpha$ & 0 & 0.05 & 0.1 & 0.2 & 0.5 & 1.0 \\
 \midrule
-CTU $\alpha$      & 0.38 & 0.53 & 0.65 & 0.78 & 0.84 & 0.86 \\
-CTU AUROC         & 0.903 & 0.910 & 0.910 & 0.903 & 0.899 & 0.896 \\
-CIC $\alpha$      & 0.32 & 0.79 & 0.86 & 0.89 & 0.93 & 0.95 \\
-CIC AUROC         & 0.598 & 0.619 & 0.623 & 0.615 & 0.612 & 0.627 \\
+CTU $\alpha$      & 0.37 & 0.54 & 0.68 & 0.79 & 0.84 & 0.86 \\
+CTU AUROC         & 0.906 & 0.895 & 0.892 & 0.894 & 0.894 & 0.887 \\
+CIC $\alpha$      & 0.30 & 0.80 & 0.85 & 0.90 & 0.93 & 0.95 \\
+CIC AUROC         & 0.605 & 0.611 & 0.623 & 0.629 & 0.625 & 0.641 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/alpha_sweep.pdf}
+  \caption{$\alpha$-gate sweep (NeSy-NIDS, mean over five seeds; error bars
+    $\pm$1 std). Raising $\lambda_\alpha$ drives the learned gate $\alpha$
+    (rule reliance, green) monotonically upward while known-class F1 (orange,
+    dashed) and OOD AUROC (blue) stay essentially flat, exposing a tunable
+    interpretability control at negligible accuracy or detection cost rather
+    than a steep Pareto front.}
+  \label{fig:alpha_sweep}
+\end{figure}
 
 \subsection{Concept Leakage and the \texorpdfstring{$\gamma$}{gamma} Ablation}
 \label{sec:leakage}
@@ -743,13 +764,12 @@ The memory footprint is small. JointCBM adds only 296 parameters over the MLP
 ($+0.3\%$; 93{,}548 vs.\ 93{,}252), and NeSy-NIDS uses 13{,}825 ($7{\times}$
 fewer than the MLP: 13{,}764 in the neural fallback, the rest in the rule bank
 and gate). Both stay under $0.4$\,MB in \texttt{float32}, well within
-gateway-class memory. Latency depends on the batching regime. On a single core
-(Intel Core i9-9820X, one thread), batched throughput is
-$1.8$--$1.9$\,$\mu$s/sample at batch~512. Per-flow streaming latency is much
-higher: $96$\,$\mu$s (MLP), $109$\,$\mu$s (JointCBM), and $\sim\!580$\,$\mu$s
-(NeSy-NIDS, whose un-vectorised per-rule sigmoid loop dominates). These still
-sit well below typical per-flow inter-arrival at a small gateway, and the NeSy
-bottleneck vectorises trivially. Even so, they are upper bounds measured on
+gateway-class memory. We report per-flow (batch-1) streaming latency, the
+conservative regime for a gateway that scores each flow as it completes. On a
+single core (Intel Core i9-9820X, one thread), latency is $96$\,$\mu$s (MLP),
+$109$\,$\mu$s (JointCBM), and $\sim\!580$\,$\mu$s (NeSy-NIDS, whose un-vectorised
+per-rule sigmoid loop dominates). These sit well below typical per-flow
+inter-arrival at a small gateway, and the NeSy bottleneck vectorises trivially. Even so, they are upper bounds measured on
 desktop-class hardware. On-device validation on ARM gateway processors is
 future work; we do not claim measured IoT-hardware performance.
 
@@ -807,9 +827,9 @@ remain single runs. Concept labels are empirical threshold functions rather
 than ground-truth semantics, and per-class Mahalanobis is only an
 approximation on the binary rule-activation space, a limitation we address
 directly via the scorer ablation (Table~\ref{tab:scorer}). We evaluate two
-flow-based IoT datasets and one alternative known/unknown split
-(Section~\ref{sec:ood}); broader dataset and split coverage, and a full
-$\lambda_\alpha$ sweep, remain future work.
+flow-based IoT datasets and an alternative known/unknown split on each dataset
+(Section~\ref{sec:datasets}); broader dataset and split coverage remain
+future work.
 
 \section{Conclusion}
 
