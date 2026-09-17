@@ -2,77 +2,87 @@
   "dataset": "cic",
   "model": "rule_only",
   "seed": 0,
-  "known_f1": 0.7560998720409767,
-  "ood_auroc": 0.69258084,
-  "tpr_at_5fpr": 0.2698,
-  "mean_crispness": 0.6645133333333333,
+  "known_f1": 0.7583314375250219,
+  "protocol": "per-class Mahalanobis fit on train; AUROC/TPR on test_known vs unknown; F1/tau on val",
+  "ood_auroc_mahal": 0.6383380000000001,
+  "ood_auroc_energy": 0.62407398,
+  "ood_auroc_comb_avg": 0.66463332,
+  "ood_auroc_comb_max": 0.6730763,
+  "ood_auroc_comb_ada": 0.66463332,
+  "tpr_at_5fpr_mahal": 0.1292,
+  "tpr_at_5fpr_comb_avg": 0.1966,
+  "tau": 1.2839537951347184,
+  "unk_rejection_rate": 0.1994,
+  "known_rejection_rate": 0.059,
+  "mean_crispness": 1.0,
+  "soft_crispness_0.1": 0.6644633412361145,
   "gate_alpha": NaN,
   "crispness_per_rule": {
-    "syn_flood_ddos": 0.95856,
-    "udp_mirai_flood": 0.8894933333333334,
-    "recon_port_scan": 0.9934133333333334,
-    "vuln_scan": 0.9047466666666667,
-    "benign_low_rate": 0.22397333333333333,
-    "large_payload_flood": 0.96416,
-    "high_entropy_scan": 0.14213333333333333,
-    "short_connection_flood": 0.23962666666666665
+    "syn_flood_ddos": 1.0,
+    "udp_mirai_flood": 1.0,
+    "recon_port_scan": 1.0,
+    "vuln_scan": 1.0,
+    "benign_low_rate": 1.0,
+    "large_payload_flood": 1.0,
+    "high_entropy_scan": 1.0,
+    "short_connection_flood": 1.0
   },
   "editing_results": {
     "syn_flood_ddos": {
-      "base_acc": 0.7587733268737793,
+      "base_acc": 0.7612266540527344,
       "acc_forced_hi": 0.39717334508895874,
-      "acc_forced_lo": 0.55677330493927,
-      "delta_hi": -0.36159998178482056,
-      "delta_lo": -0.20200002193450928
+      "acc_forced_lo": 0.5569333434104919,
+      "delta_hi": -0.36405330896377563,
+      "delta_lo": -0.20429331064224243
     },
     "udp_mirai_flood": {
-      "base_acc": 0.7587733268737793,
-      "acc_forced_hi": 0.6841866374015808,
-      "acc_forced_lo": 0.5349599719047546,
-      "delta_hi": -0.07458668947219849,
-      "delta_lo": -0.22381335496902466
+      "base_acc": 0.7612266540527344,
+      "acc_forced_hi": 0.6851999759674072,
+      "acc_forced_lo": 0.53493332862854,
+      "delta_hi": -0.07602667808532715,
+      "delta_lo": -0.22629332542419434
     },
     "recon_port_scan": {
-      "base_acc": 0.7587733268737793,
-      "acc_forced_hi": 0.5960266590118408,
-      "acc_forced_lo": 0.7460799813270569,
-      "delta_hi": -0.16274666786193848,
-      "delta_lo": -0.012693345546722412
+      "base_acc": 0.7612266540527344,
+      "acc_forced_hi": 0.5965866446495056,
+      "acc_forced_lo": 0.7487733364105225,
+      "delta_hi": -0.16464000940322876,
+      "delta_lo": -0.012453317642211914
     },
     "vuln_scan": {
-      "base_acc": 0.7587733268737793,
-      "acc_forced_hi": 0.654533326625824,
-      "acc_forced_lo": 0.7309066653251648,
-      "delta_hi": -0.10424000024795532,
-      "delta_lo": -0.027866661548614502
+      "base_acc": 0.7612266540527344,
+      "acc_forced_hi": 0.6555466651916504,
+      "acc_forced_lo": 0.7333333492279053,
+      "delta_hi": -0.10567998886108398,
+      "delta_lo": -0.0278933048248291
     },
     "benign_low_rate": {
-      "base_acc": 0.7587733268737793,
-      "acc_forced_hi": 0.6677600145339966,
-      "acc_forced_lo": 0.5991466641426086,
-      "delta_hi": -0.09101331233978271,
-      "delta_lo": -0.15962666273117065
+      "base_acc": 0.7612266540527344,
+      "acc_forced_hi": 0.6694666743278503,
+      "acc_forced_lo": 0.6000800132751465,
+      "delta_hi": -0.09175997972488403,
+      "delta_lo": -0.1611466407775879
     },
     "large_payload_flood": {
-      "base_acc": 0.7587733268737793,
-      "acc_forced_hi": 0.5565066933631897,
-      "acc_forced_lo": 0.5557066798210144,
-      "delta_hi": -0.2022666335105896,
-      "delta_lo": -0.2030666470527649
+      "base_acc": 0.7612266540527344,
+      "acc_forced_hi": 0.5575466752052307,
+      "acc_forced_lo": 0.5575199723243713,
+      "delta_hi": -0.20367997884750366,
+      "delta_lo": -0.20370668172836304
     },
     "high_entropy_scan": {
-      "base_acc": 0.7587733268737793,
-      "acc_forced_hi": 0.5719733238220215,
-      "acc_forced_lo": 0.6574133038520813,
-      "delta_hi": -0.1868000030517578,
-      "delta_lo": -0.101360023021698
+      "base_acc": 0.7612266540527344,
+      "acc_forced_hi": 0.5735466480255127,
+      "acc_forced_lo": 0.6585333347320557,
+      "delta_hi": -0.18768000602722168,
+      "delta_lo": -0.10269331932067871
     },
     "short_connection_flood": {
-      "base_acc": 0.7587733268737793,
-      "acc_forced_hi": 0.6908000111579895,
-      "acc_forced_lo": 0.7026933431625366,
-      "delta_hi": -0.0679733157157898,
-      "delta_lo": -0.056079983711242676
+      "base_acc": 0.7612266540527344,
+      "acc_forced_hi": 0.6973333358764648,
+      "acc_forced_lo": 0.7039999961853027,
+      "delta_hi": -0.06389331817626953,
+      "delta_lo": -0.05722665786743164
     }
   }
 }
