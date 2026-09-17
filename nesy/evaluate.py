@@ -36,13 +36,14 @@ K_EVAL = 10.0   # hard k for evaluation and rule analysis
 
 # data loading
 
-def load_known_val(dataset: str, device: torch.device):
+def load_known_split(dataset: str, device: torch.device, split: str = "val"):
+    """Known-class samples from one split parquet (train / val / test_known)."""
     if dataset == "ctu":
         data_dir = PROJECT_ROOT / "data"
         vocab = json.loads((data_dir / "vocab.json").read_text())
         feature_cols = vocab["feature_cols"]
         known_ids = vocab["known_ids"]
-        df = pd.read_parquet(data_dir / "val.parquet")
+        df = pd.read_parquet(data_dir / f"{split}.parquet")
         mask = df["label_id"].isin(known_ids)
         df = df[mask].reset_index(drop=True)
         X = df[feature_cols].values.astype(np.float32)
@@ -56,7 +57,7 @@ def load_known_val(dataset: str, device: torch.device):
         l2i = vocab["label_to_id"]
         known_classes = vocab["known_classes"]
         known_ids = [l2i[c] for c in known_classes]
-        df = pd.read_parquet(data_dir / "val.parquet")
+        df = pd.read_parquet(data_dir / f"{split}.parquet")
         mask = df["label_id"].isin(known_ids)
         df = df[mask].reset_index(drop=True)
         X = df[feature_cols].values.astype(np.float32)
@@ -71,6 +72,10 @@ def load_known_val(dataset: str, device: torch.device):
     Xt = torch.tensor(X, dtype=torch.float32, device=device)
     yt = torch.tensor(y, dtype=torch.long, device=device)
     return Xt, yt, id_to_label
+
+
+def load_known_val(dataset: str, device: torch.device):
+    return load_known_split(dataset, device, "val")
 
 
 # load unknown (ood) test samples. subsample to n_sample.
@@ -217,9 +222,45 @@ def _combined_scores(mahal: np.ndarray, energy: np.ndarray,
         return 0.5 * (s + e)
 
 
-# ood auroc using mahalanobis distance on rule activation vectors.
-# rule activations form an interpretable embedding space; mahalanobis on
-# this space measures how far a sample is from the known-traffic manifold.
+# per-class Mahalanobis (Lee et al. 2018) on binary rule activations, fitted on
+# training activations and scored on known-test vs unknown-test; same protocol
+# as cbm.evaluate.ood_auroc.
+MAX_FIT, MAX_EVAL = 20000, 5000
+
+
+@torch.no_grad()
+def _perclass_scores(model, X_train, y_train, X_known, X_unknown):
+    emb_tr = model.get_embedding(X_train,   k=K_EVAL).cpu().numpy()
+    emb_kn = model.get_embedding(X_known,   k=K_EVAL).cpu().numpy()
+    emb_un = model.get_embedding(X_unknown, k=K_EVAL).cpu().numpy()
+    y_tr = y_train.cpu().numpy() if hasattr(y_train, "cpu") else np.asarray(y_train)
+    rng = np.random.RandomState(42)
+    if len(emb_tr) > MAX_FIT:
+        idx = rng.choice(len(emb_tr), MAX_FIT, replace=False)
+        emb_tr, y_tr = emb_tr[idx], y_tr[idx]
+    if len(emb_kn) > MAX_EVAL:
+        emb_kn = emb_kn[rng.choice(len(emb_kn), MAX_EVAL, replace=False)]
+    if len(emb_un) > MAX_EVAL:
+        emb_un = emb_un[rng.choice(len(emb_un), MAX_EVAL, replace=False)]
+    s_kn = _mahalanobis_scores_perclass(emb_tr, y_tr, emb_kn)
+    s_un = _mahalanobis_scores_perclass(emb_tr, y_tr, emb_un)
+    return s_kn, s_un
+
+
+def compute_ood_auroc_perclass(model, X_train, y_train, X_known, X_unknown):
+    s_kn, s_un = _perclass_scores(model, X_train, y_train, X_known, X_unknown)
+    labels = np.concatenate([np.zeros(len(s_kn)), np.ones(len(s_un))])
+    return float(roc_auc_score(labels, np.concatenate([s_kn, s_un])))
+
+
+def tpr_at_fpr_perclass(model, X_train, y_train, X_known, X_unknown, target_fpr=0.05):
+    s_kn, s_un = _perclass_scores(model, X_train, y_train, X_known, X_unknown)
+    thr = np.percentile(s_kn, (1 - target_fpr) * 100)
+    return float((s_un >= thr).mean())
+
+
+# legacy: single-centroid mahalanobis fitted in-sample on the known set.
+# kept for reference; not used by main() any more.
 @torch.no_grad()
 def compute_ood_auroc(model, X_known, X_unknown):
     emb_known  = model.get_embedding(X_known,  k=K_EVAL).cpu().numpy()
@@ -267,12 +308,15 @@ def tpr_at_fpr(model, X_known, X_unknown, target_fpr=0.05):
 @torch.no_grad()
 def compute_combined_ood(model, X_val_known, y_val_known,
                          X_known, y_known, X_unknown,
-                         target_fpr: float = 0.05, tau_percentile: float = 95.0) -> dict:
+                         target_fpr: float = 0.05, tau_percentile: float = 95.0,
+                         X_train=None, y_train=None) -> dict:
     """Compute Mahalanobis (per-class), energy, and combined OOD scores.
 
-    Per-class Mahalanobis uses class labels from val/known to fit one
-    Gaussian per class (shared pooled covariance), then scores by
-    minimum distance to any class centroid — the Lee et al. 2018 approach.
+    Per-class Mahalanobis fits one Gaussian per class (shared pooled
+    covariance) on the training activations when X_train/y_train are given
+    (else on val, legacy), then scores by minimum distance to any class
+    centroid — the Lee et al. 2018 approach. z-normalisation and tau are
+    calibrated on the val split; AUROC/TPR use X_known vs X_unknown.
 
     Three combination modes are evaluated:
       avg  : equal-weight average of z-scores (original)
@@ -310,10 +354,18 @@ def compute_combined_ood(model, X_val_known, y_val_known,
     emb_kn,  logits_kn  = _extract(X_kn_s)
     emb_un,  logits_un  = _extract(X_unknown)
 
-    # ── per-class Mahalanobis (fit on val labels) ──────────────────────────
-    s_val = _mahalanobis_scores_perclass(emb_val, y_val_s, emb_val)
-    s_kn  = _mahalanobis_scores_perclass(emb_val, y_val_s, emb_kn)
-    s_un  = _mahalanobis_scores_perclass(emb_val, y_val_s, emb_un)
+    # ── per-class Mahalanobis (fit on train labels; val if train not given) ──
+    if X_train is not None:
+        y_tr = y_train.cpu().numpy() if hasattr(y_train, "cpu") else np.asarray(y_train)
+        emb_fit = model.get_embedding(X_train, k=K_EVAL).cpu().numpy()
+        if len(emb_fit) > MAX_FIT:
+            idx = np.random.RandomState(42).choice(len(emb_fit), MAX_FIT, replace=False)
+            emb_fit, y_tr = emb_fit[idx], y_tr[idx]
+    else:
+        emb_fit, y_tr = emb_val, y_val_s
+    s_val = _mahalanobis_scores_perclass(emb_fit, y_tr, emb_val)
+    s_kn  = _mahalanobis_scores_perclass(emb_fit, y_tr, emb_kn)
+    s_un  = _mahalanobis_scores_perclass(emb_fit, y_tr, emb_un)
 
     # ── energy scores ──────────────────────────────────────────────────────
     e_val = _energy_score(logits_val)
@@ -582,28 +634,42 @@ def main():
 
     print(f"Loading checkpoint: {ckpt_path}")
     model, ckpt = load_model(ckpt_path, device)
+    np.random.seed(42)   # deterministic subsampling in the OOD scorers
 
     print("Loading data...")
+    # val: known-class F1 (model selection split), tau / z-score calibration,
+    #      rule crispness / selectivity / editing analysis
+    # train: fit per-class Mahalanobis Gaussians
+    # test_known vs test_unknown: OOD AUROC / TPR
     X_known, y_known, id_to_label = load_known_val(args.dataset, device)
+    X_train, y_train, _ = load_known_split(args.dataset, device, "train")
+    X_test_known, y_test_known, _ = load_known_split(args.dataset, device, "test_known")
     X_unknown = load_unknown_test(args.dataset, device)
-    # val split doubles as calibration set for energy/combined scoring
     X_val_known = X_known
 
-    print(f"\n  Known samples: {len(X_known)}")
+    print(f"\n  Known val samples: {len(X_known)}   train: {len(X_train)}   "
+          f"test_known: {len(X_test_known)}")
     print(f"  Unknown (OOD) samples: {len(X_unknown)}")
 
     # core metrics
     print("\nComputing metrics...")
     f1    = compute_known_f1(model, X_known, y_known)
-    auroc = compute_ood_auroc(model, X_known, X_unknown)
-    tpr5  = tpr_at_fpr(model, X_known, X_unknown)
+    auroc = compute_ood_auroc_perclass(model, X_train, y_train, X_test_known, X_unknown)
+    tpr5  = tpr_at_fpr_perclass(model, X_train, y_train, X_test_known, X_unknown)
     y_kn_np = y_known.cpu().numpy()
     comb  = compute_combined_ood(model,
                                  X_val_known, y_kn_np,
-                                 X_known, y_kn_np, X_unknown)
+                                 X_test_known, y_test_known.cpu().numpy(), X_unknown,
+                                 X_train=X_train, y_train=y_train)
 
     # rule analysis (only for models with rule_bank)
     if hasattr(model, 'rule_bank'):
+        # soft crispness: fraction of (flow, rule) soft activations at K_EVAL
+        # within 0.1 of 0 or 1 on the known val split (the binarised vector is
+        # exactly binary by construction, so its crispness is trivially 1).
+        with torch.no_grad():
+            _, soft_act = model(X_known, k=K_EVAL)
+            soft_crisp = float((torch.minimum(soft_act, 1 - soft_act) < 0.1).float().mean())
         crisp   = rule_crispness(model, X_known)
         select  = rule_class_selectivity(model, X_known, y_known, id_to_label)
         editing = rule_editing_experiment(model, X_known, y_known)
@@ -611,7 +677,7 @@ def main():
         gate_val = model.get_gate_value() if hasattr(model, 'gate') else float('nan')
     else:
         crisp = select = editing = {}
-        mean_crisp = gate_val = float('nan')
+        mean_crisp = gate_val = soft_crisp = float('nan')
 
     # results table
     print(f"\n{'='*60}")
@@ -629,7 +695,7 @@ def main():
     print(f"  Threshold tau           : {comb['tau']:.4f}")
     print(f"  Unk rejection rate      : {comb['unk_rejection_rate']*100:.1f}%")
     print(f"  Known rejection rate    : {comb['known_rejection_rate']*100:.1f}%")
-    print(f"  Mean rule crispness    : {mean_crisp:.4f}")
+    print(f"  Mean rule crispness    : {mean_crisp:.4f}  (soft, within 0.1: {soft_crisp:.4f})")
     if not np.isnan(gate_val):
         print(f"  Gate alpha (rule weight): {gate_val:.4f}")
 
@@ -653,6 +719,7 @@ def main():
         "model": args.model,
         "seed": args.seed,
         "known_f1": f1,
+        "protocol": "per-class Mahalanobis fit on train; AUROC/TPR on test_known vs unknown; F1/tau on val",
         "ood_auroc_mahal": auroc,
         "ood_auroc_energy": comb["energy_auroc"],
         "ood_auroc_comb_avg": comb["combined_avg_auroc"],
@@ -664,6 +731,7 @@ def main():
         "unk_rejection_rate": comb["unk_rejection_rate"],
         "known_rejection_rate": comb["known_rejection_rate"],
         "mean_crispness": float(mean_crisp),
+        "soft_crispness_0.1": soft_crisp,
         "gate_alpha": float(gate_val),
         "crispness_per_rule": crisp,
         "editing_results": {k: {kk: float(vv) for kk, vv in v.items()}
@@ -674,7 +742,7 @@ def main():
 
     # export selectivity matrix for figures.py heatmap
     if select:
-        sel_file = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}_selectivity.json"
+        sel_file = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}{alpha_tag}_selectivity.json"
         sel_file.write_text(_json.dumps(select, indent=2))
         print(f"  Saved: {sel_file}")
 

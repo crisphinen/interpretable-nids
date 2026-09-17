@@ -3,17 +3,19 @@
   "model": "nesy",
   "seed": 4,
   "known_f1": 0.9333190616484239,
-  "ood_auroc_mahal": 0.91588268,
-  "ood_auroc_energy": 0.55842468,
-  "ood_auroc_comb_avg": 0.73186542,
-  "ood_auroc_comb_max": 0.72828918,
-  "ood_auroc_comb_ada": 0.73186542,
-  "tpr_at_5fpr_mahal": 0.5304,
-  "tpr_at_5fpr_comb_avg": 0.6544,
-  "tau": 0.49474033904427955,
-  "unk_rejection_rate": 0.6544,
-  "known_rejection_rate": 0.0348,
+  "protocol": "per-class Mahalanobis fit on train; AUROC/TPR on test_known vs unknown; F1/tau on val",
+  "ood_auroc_mahal": 0.9154998799999999,
+  "ood_auroc_energy": 0.56955266,
+  "ood_auroc_comb_avg": 0.71071806,
+  "ood_auroc_comb_max": 0.7369165200000001,
+  "ood_auroc_comb_ada": 0.71071806,
+  "tpr_at_5fpr_mahal": 0.5284,
+  "tpr_at_5fpr_comb_avg": 0.5706,
+  "tau": 0.49482433434766293,
+  "unk_rejection_rate": 0.5706,
+  "known_rejection_rate": 0.0498,
   "mean_crispness": 1.0,
+  "soft_crispness_0.1": 0.8650814890861511,
   "gate_alpha": 0.5894436836242676,
   "crispness_per_rule": {
     "ddos_high_rate": 1.0,
@@ -50,9 +52,9 @@
     "okiru_low_rate": {
       "base_acc": 0.933768093585968,
       "acc_forced_hi": 0.933768093585968,
-      "acc_forced_lo": 0.9338405728340149,
+      "acc_forced_lo": 0.9338405132293701,
       "delta_hi": 0.0,
-      "delta_lo": 7.2479248046875e-05
+      "delta_lo": 7.241964340209961e-05
     },
     "asymmetric_flood": {
       "base_acc": 0.933768093585968,
@@ -63,17 +65,17 @@
     },
     "persistent_connection": {
       "base_acc": 0.933768093585968,
-      "acc_forced_hi": 0.9338405728340149,
+      "acc_forced_hi": 0.9338405132293701,
       "acc_forced_lo": 0.933768093585968,
-      "delta_hi": 7.2479248046875e-05,
+      "delta_hi": 7.241964340209961e-05,
       "delta_lo": 0.0
     },
     "incomplete_handshake": {
       "base_acc": 0.933768093585968,
       "acc_forced_hi": 0.933768093585968,
-      "acc_forced_lo": 0.9338405728340149,
+      "acc_forced_lo": 0.9338405132293701,
       "delta_hi": 0.0,
-      "delta_lo": 7.2479248046875e-05
+      "delta_lo": 7.241964340209961e-05
     },
     "ddos_short_burst": {
       "base_acc": 0.933768093585968,

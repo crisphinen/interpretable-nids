@@ -7,8 +7,8 @@
   },
   "cc_heartbeat_beaconing": {
     "Benign": 0.25797101855278015,
-    "C&C-HeartBeat": 0.8240579962730408,
-    "DDoS": 0.16869565844535828,
+    "C&C-HeartBeat": 0.7643478512763977,
+    "DDoS": 0.1382608711719513,
     "Okiru": 0.0
   },
   "benign_single_probe": {
@@ -20,19 +20,19 @@
   "okiru_low_rate": {
     "Benign": 0.8721739053726196,
     "C&C-HeartBeat": 0.6228985786437988,
-    "DDoS": 0.2359420359134674,
+    "DDoS": 0.23652173578739166,
     "Okiru": 0.7886956334114075
   },
   "asymmetric_flood": {
-    "Benign": 0.1281159371137619,
-    "C&C-HeartBeat": 0.5246376991271973,
+    "Benign": 0.12782607972621918,
+    "C&C-HeartBeat": 0.5101449489593506,
     "DDoS": 0.7936232089996338,
     "Okiru": 0.21507246792316437
   },
   "persistent_connection": {
     "Benign": 0.12666666507720947,
     "C&C-HeartBeat": 0.3742029070854187,
-    "DDoS": 0.07333333045244217,
+    "DDoS": 0.07420289516448975,
     "Okiru": 0.0
   },
   "incomplete_handshake": {
