@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Reconstructed scorer ablation (Table tab:scorer): OOD AUROC of five scoring
+# Scorer ablation (Table tab:scorer): OOD AUROC of five scoring
 # rules on the binary rule-activation space of the five NeSy-NIDS seeds.
 # Protocol matches nesy.evaluate: class statistics fitted on training
 # activations, AUROC on test_known vs test_unknown. mahal/energy/comb are read

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Reconstructed multi-seed CBM driver (the original was ad hoc and lost).
+# Multi-seed CBM driver.
 # Trains MLPBaseline, JointCBM (gamma in {0,0.1,0.5,1.0}), SequentialCBM and
 # HybridCBM for seeds 0..N-1 on the standard split with the current code and
 # concept labels, and records per seed: val F1 (model-selection split), test F1,

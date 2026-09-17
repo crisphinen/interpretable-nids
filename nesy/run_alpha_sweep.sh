@@ -1,5 +1,5 @@
 #!/bin/bash
-# Reconstructed alpha-sweep driver (the original was run ad-hoc and lost).
+# Alpha-sweep driver.
 # Trains + evaluates NeSy-NIDS across lambda_alpha and seeds, one dataset per GPU.
 # Covers lambda_alpha in {0,0.05,0.1,0.2,0.5,1.0} at seeds 0-4 (lambda_alpha=0 is
 # the main-table model and carries no _a suffix). Existing checkpoints are skipped,

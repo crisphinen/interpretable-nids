@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# Reconstructed temporal (session-respecting) split driver for CTU-IoT-23.
-# The original ad-hoc driver was lost; the saved parquet splits drop the capture
-# timestamp, so a temporal partition cannot be rebuilt from data/*.parquet alone.
+# Temporal (session-respecting) split driver for CTU-IoT-23.
+# The saved parquet splits drop the capture timestamp, so a temporal partition
+# cannot be rebuilt from data/*.parquet alone.
 # We therefore re-pull the known-class rows (with `ts`) from the DuckDB source
 # table `preprocessed_sorted`, encode categoricals with the SAME saved vocab as
 # the main pipeline (data/vocab.json), and order each known class by capture

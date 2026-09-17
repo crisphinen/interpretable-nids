@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Reconstructed post-hoc OOD baselines on the unconstrained MLP (Table
-# tab:ood_baselines; the original driver was ad hoc and lost). Scores:
+# Post-hoc OOD baselines on the unconstrained MLP (Table tab:ood_baselines).
+# Scores:
 #   MSP    1 - max softmax probability                      [Hendrycks & Gimpel 2017]
 #   ODIN   temperature-scaled MSP (T=1000) with input perturbation eps=0.0014
 #   Energy -T*logsumexp(logits/T), T=1                       [Liu et al. 2020]
