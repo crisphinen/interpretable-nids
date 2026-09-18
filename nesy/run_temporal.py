@@ -13,7 +13,7 @@
 # and evaluated exactly as nesy.evaluate does on the main split:
 #   - known-class weighted F1 on the temporal test (all classes),
 #   - per-class F1 + weighted F1 over the three temporally-coherent families
-#     (Benign, C&C-HeartBeat, Okiru; DDoS excluded — it is temporally bimodal,
+#     (Benign, C&C-HeartBeat, Okiru; DDoS excluded because it is temporally bimodal,
 #     a documented dataset property, see the paper),
 #   - per-class Mahalanobis OOD AUROC on the binary rule activations, fitted on
 #     the temporal-train activations, scored test_known vs test_unknown.

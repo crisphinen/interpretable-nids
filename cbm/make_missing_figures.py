@@ -70,7 +70,7 @@ def make_threshold_drift():
         model.load_state_dict(ckpt["model_state_dict"])
         model.eval()
 
-        # Build (label, drift) pairs — one bar per rule condition
+        # Build (label, drift) pairs: one bar per rule condition
         labels, drifts, colors = [], [], []
         for rule, tmpl in zip(model.rule_bank.rules, rule_templates):
             learned = rule.thresholds.detach().tolist()
@@ -100,7 +100,7 @@ def make_threshold_drift():
         ax.invert_yaxis()
         ax.set_xlabel("Learned − Initial threshold", fontsize=9)
         ax.set_title(
-            f"Threshold Drift — {ds_title}  (seed 0)\n"
+            f"Threshold Drift: {ds_title}  (seed 0)\n"
             "Red = threshold increased (tighter); Blue = decreased (relaxed)",
             fontsize=9, fontweight="bold", pad=5,
         )
@@ -157,8 +157,8 @@ def make_rule_selectivity():
         ax.set_yticks(range(len(rules)))
         ax.set_yticklabels(short_rules, fontsize=7.5)
         ax.set_title(
-            f"Rule Class Selectivity — {ds_title}  (seed 0, k=10)\n"
-            "Mean rule activation per known class after STE binarisation",
+            f"Rule Class Selectivity: {ds_title}  (seed 0, k=10)\n"
+            "Mean rule activation per known class after hard-threshold binarisation",
             fontsize=9, fontweight="bold", pad=4,
         )
 
@@ -355,7 +355,7 @@ def make_concept_space_pca():
 
     with torch.no_grad():
         X_t = torch.tensor(X, dtype=torch.float32)
-        concept_acts = model.get_embedding(X_t).numpy()  # (N, 8) — concept probabilities
+        concept_acts = model.get_embedding(X_t).numpy()  # (N, 8): concept probabilities
 
     pca = PCA(n_components=2, random_state=42)
     Z   = pca.fit_transform(concept_acts)
@@ -375,7 +375,7 @@ def make_concept_space_pca():
 
     ax.set_xlabel(f"PC 1  ({var[0]*100:.1f}% var.)", fontsize=9)
     ax.set_ylabel(f"PC 2  ({var[1]*100:.1f}% var.)", fontsize=9)
-    ax.set_title("Concept Space PCA — CIC-IoT-2023\n"
+    ax.set_title("Concept Space PCA: CIC-IoT-2023\n"
                  "JointCBM (γ=0.5), 8-dim concept activations → 2 PCs",
                  fontsize=9, fontweight="bold", pad=5)
     ax.legend(fontsize=7.5, loc="upper right", framealpha=0.85,
@@ -543,7 +543,7 @@ def make_architecture12():
     # Bottom note
     ax.text(0.50, 0.04,
             "Thresholds θ_rk learned jointly  |  "
-            "STE binarisation: 100% crisp rule activations at k=k_max",
+            "hard-threshold binarisation: 100% crisp rule activations at k=k_max",
             ha="center", va="center", fontsize=6.0, color="#444",
             style="italic",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="#f8f8f8",

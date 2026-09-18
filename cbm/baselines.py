@@ -220,7 +220,7 @@ def run_shap_mlp(X_tr, y_tr, X_te, y_te, feature_cols, concept_names, dataset):
         print(f"    {r+1:2d}. {feature_cols[fi]:<30}  {mean_abs_shap[fi]:.6f}")
 
     print(f"\n  Key limitation for paper:")
-    print(f"  SHAP gives feature attributions — not concept predictions.")
+    print(f"  SHAP gives feature attributions, not concept predictions.")
     print(f"  Cannot intervene on SHAP values; cannot compute 'concept accuracy'.")
     print(f"  JointCBM provides {len(concept_names)} named concepts with structural bottleneck (interventionable).")
 
@@ -232,7 +232,7 @@ def run_shap_mlp(X_tr, y_tr, X_te, y_te, feature_cols, concept_names, dataset):
         "n_explained": int(len(X_ex)),
         "note": (
             "SHAP provides local post-hoc feature attributions. "
-            "No concept bottleneck — intervention accuracy is undefined. "
+            "No concept bottleneck; intervention accuracy is undefined. "
             "Compare with JointCBM per-concept accuracy and intervention delta."
         ),
     }
@@ -358,7 +358,7 @@ def main():
     args = parser.parse_args()
 
     print(f"\n{'='*65}")
-    print(f"  CBM-NIDS Baselines — {args.dataset.upper()}")
+    print(f"  CBM-NIDS Baselines: {args.dataset.upper()}")
     print(f"{'='*65}")
 
     (X_tr, y_tr, C_tr,
@@ -395,7 +395,7 @@ def main():
     )
 
     print(f"\n{'='*65}")
-    print(f"  BASELINE SUMMARY — {args.dataset.upper()}")
+    print(f"  BASELINE SUMMARY: {args.dataset.upper()}")
     print(f"{'='*65}")
     print(f"  {'Model':<20}  {'Test F1':>8}  {'OOD AUROC':>10}  {'TPR@5%':>8}")
     print(f"  {'-'*55}")

@@ -43,7 +43,7 @@ C_GRAY  = "#bab0ac"
 PALE = dict(alpha=0.18)
 
 
-# FIG 1 — Architecture diagram
+# FIG 1: Architecture diagram
 
 def _box(ax, x, y, w, h, label, color, fontsize=7.5, lw=1.0, style="round,pad=0.02"):
     box = FancyBboxPatch((x - w/2, y - h/2), w, h,
@@ -82,7 +82,7 @@ def make_architecture():
     ax.text(0.03, 0.50, "x ∈ ℝ³⁷", ha="left", va="center", fontsize=6.5,
             color="#666", style="italic")
 
-    # Shared encoder block — start arrow from x=0.14 to avoid text overlap
+    # Shared encoder block: start arrow from x=0.14 to avoid text overlap
     ENC_X, ENC_Y, EW, EH = 0.24, 0.54, 0.22, 0.15
     _box(ax, ENC_X, ENC_Y, EW, EH, "MLP Encoder\n256 → 256 → 64", "#4e79a7",
          fontsize=7.5)
@@ -94,7 +94,7 @@ def make_architecture():
          fontsize=7.5)
     _arr(ax, ENC_X + EW/2, ENC_Y, CH_X - CW/2, CH_Y, lw=1.4)
 
-    # Loss label — above concept heads, no arrow needed to keep it clean
+    # Loss label: above concept heads, no arrow needed to keep it clean
     ax.text(CH_X, CH_Y + CH_H/2 + 0.04, "γ · BCE(concepts)",
             ha="center", va="bottom", fontsize=6.5, color="#d62728",
             style="italic",
@@ -120,7 +120,7 @@ def make_architecture():
     ax.text(0.54, 0.77, "skip connection  (HybridCBM)",
             fontsize=6.2, color="#76b7b2", ha="center", style="italic")
 
-    # Intervention annotation — placed below concept heads with clear spacing
+    # Intervention annotation: placed below concept heads with clear spacing
     ax.annotate("Expert\nIntervention", xy=(CH_X, CH_Y - CH_H/2),
                 xytext=(CH_X, CH_Y - CH_H/2 - 0.18),
                 fontsize=6.5, color="#9467bd", ha="center",
@@ -128,7 +128,7 @@ def make_architecture():
                 bbox=dict(boxstyle="round,pad=0.2", facecolor="#f3eeff",
                           edgecolor="#9467bd", lw=0.7))
 
-    # Legend — positioned bottom-left in a clean box
+    # Legend: positioned bottom-left in a clean box
     variants = [
         ("JointCBM (γ≥0)",  "#f28e2b", "end-to-end: class + γ·concept loss"),
         ("SequentialCBM",   "#e15759", "concept heads frozen before classifier"),
@@ -165,7 +165,7 @@ def make_architecture():
          "#59a14f", fontsize=7.5)
     _arr(ax, 0.14, 0.70, RB_X - 0.19, RB_Y, lw=1.2)
 
-    # Anneal annotation above rule box — clean, no overlap
+    # Anneal annotation above rule box: clean, no overlap
     ax.text(RB_X, RB_Y + 0.12,
             "β annealed 1→k_max  |  crispness = 1.0 at convergence",
             ha="center", va="bottom", fontsize=6.0, color="#2ca02c",
@@ -190,7 +190,7 @@ def make_architecture():
             color="#333", fontweight="bold")
     _arr(ax, GT_X + 0.10, GT_Y, 0.965, GT_Y, lw=1.0)
 
-    # α-regularisation label — top-right, away from gate box
+    # α-regularisation label: top-right, away from gate box
     ax.text(GT_X + 0.10, GT_Y + 0.22,
             "λ_α·(1-α)\nencourages rule\nreliance",
             ha="center", va="bottom", fontsize=6.0, color="#d62728",
@@ -198,7 +198,7 @@ def make_architecture():
             bbox=dict(boxstyle="round,pad=0.18", facecolor="#fff0f0",
                       edgecolor="#d62728", lw=0.6))
 
-    # OOD label — below rule box, clear of other text
+    # OOD label: below rule box, clear of other text
     ax.annotate("Mahalanobis OOD\nscored in R-dim rule space",
                 xy=(RB_X, RB_Y - 0.09), xytext=(RB_X - 0.12, 0.20),
                 fontsize=6.2, color="#9467bd", ha="center",
@@ -207,7 +207,7 @@ def make_architecture():
                 bbox=dict(boxstyle="round,pad=0.2", facecolor="#f3eeff",
                           edgecolor="#9467bd", lw=0.6))
 
-    # Threshold note — bottom strip, full width
+    # Threshold note: bottom strip, full width
     ax.text(0.50, 0.04,
             "Learned thresholds θ_rk  are analyst-editable  |  "
             "CTU threshold drift: 0.17–0.40 units from initialisation",
@@ -222,7 +222,7 @@ def make_architecture():
     print("fig1_architecture done")
 
 
-# FIG 2 — OOD AUROC comparison bar chart (CTU + CIC)
+# FIG 2: OOD AUROC comparison bar chart (CTU + CIC)
 
 def make_ood_auroc():
     # load data
@@ -305,7 +305,7 @@ def make_ood_auroc():
                 ax.errorbar(i, v, yerr=e, fmt="none", color="#333",
                             capsize=3, lw=1.2, zorder=5)
 
-        # value labels on bars — font size tuned to avoid overlap
+        # value labels on bars: font size tuned to avoid overlap
         for bar, v in zip(bars, vals):
             ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.010,
                     f"{v:.3f}", ha="center", va="bottom", fontsize=6.0,
@@ -327,7 +327,7 @@ def make_ood_auroc():
     print("fig2_ood_auroc done")
 
 
-# FIG 3 — γ-regularisation effect (AUROC variance reduction)
+# FIG 3: γ-regularisation effect (AUROC variance reduction)
 
 def make_gamma_effect():
     # 5-seed data from paper memory
@@ -453,7 +453,7 @@ def make_gamma_effect():
     print("fig3_gamma_effect done")
 
 
-# FIG 4 — Per-concept accuracy & intervention safety
+# FIG 4: Per-concept accuracy & intervention safety
 
 def make_concept_safety():
     ctu = json.loads((RES / "ctu_eval_results_g0.5.json").read_text())["JointCBM"]
@@ -477,7 +477,7 @@ def make_concept_safety():
 
     SAFE_THR = 0.99
 
-    # Short concept names — avoid splitting across two lines awkwardly
+    # Short concept names: avoid splitting across two lines awkwardly
     CTU_SHORT = {
         "is_short_connection":    "short\nconn.",
         "is_incomplete_handshake":"incom.\nhandshake",
@@ -572,7 +572,7 @@ def make_concept_safety():
     print("fig4_concept_safety done")
 
 
-# FIG 5 — NeSy rule selectivity heatmap (CTU)
+# FIG 5: NeSy rule selectivity heatmap (CTU)
 
 def make_rule_heatmap():
     sel = json.loads((NRES / "ctu_nesy_s0_selectivity.json").read_text())
@@ -596,7 +596,7 @@ def make_rule_heatmap():
     ax.set_xticklabels(classes, fontsize=8, rotation=20, ha="right")
     ax.set_yticks(range(len(rules)))
     ax.set_yticklabels(short_rules, fontsize=7.5)
-    ax.set_title("NeSy Rule Selectivity — CTU-IoT-23 (seed 0)\n"
+    ax.set_title("NeSy Rule Selectivity: CTU-IoT-23 (seed 0)\n"
                  "Mean rule activation per known class",
                  fontsize=9, fontweight="bold", pad=4)
 
@@ -614,7 +614,7 @@ def make_rule_heatmap():
     print("fig5_rule_heatmap done")
 
 
-# FIG 6 — SHAP feature importance vs CBM concept accuracy
+# FIG 6: SHAP feature importance vs CBM concept accuracy
 
 def make_shap_comparison():
     ctu_b = json.loads((RES / "ctu_cbm_baselines.json").read_text())
@@ -626,8 +626,8 @@ def make_shap_comparison():
     for ax, bdata, title in zip(
         axes,
         [ctu_b, cic_b],
-        ["(a) CTU-IoT-23 — SHAP Feature Importance (MLP)",
-         "(b) CIC-IoT-2023 — SHAP Feature Importance (MLP)"],
+        ["(a) CTU-IoT-23: SHAP Feature Importance (MLP)",
+         "(b) CIC-IoT-2023: SHAP Feature Importance (MLP)"],
     ):
         shap_data = bdata["SHAP_MLP"]
         feats  = shap_data["top10_features_by_shap"]
@@ -655,7 +655,7 @@ def make_shap_comparison():
     print("fig6_shap done")
 
 
-# FIG 7 — F1 comparison across all models (CTU + CIC)
+# FIG 7: F1 comparison across all models (CTU + CIC)
 
 def make_f1_comparison():
     ctu_ev0   = json.loads((RES / "ctu_eval_results.json").read_text())
@@ -732,7 +732,7 @@ def make_f1_comparison():
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=6.5)
     ax.set_ylabel("Weighted F1", fontsize=9)
-    ax.set_title("Known-Class F1: All Models — CTU vs CIC",
+    ax.set_title("Known-Class F1: All Models: CTU vs CIC",
                  fontsize=9, fontweight="bold", pad=4)
     ax.set_ylim(0.45, 1.04)
     ax.axhline(ctu_f1[0], color=C_MLP, lw=0.8, linestyle=":", alpha=0.6)
