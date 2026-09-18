@@ -33,7 +33,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 CBM_RES  = PROJECT_ROOT / "results" / "cbm"
 NESY_RES = PROJECT_ROOT / "results" / "nesy"
 
-# All output directories — figures go to every one
+# All output directories: figures go to every one
 OUTDIRS = [
     PROJECT_ROOT / "paper" / "figures",
     Path("/home/Ngari/Research/writing/latex/figures"),
@@ -215,7 +215,7 @@ def make_architecture():
 
     ax.text(0.50, 0.04,
             "Thresholds θ_rk learned jointly  |  "
-            "STE binarisation: 100% crisp rule activations at k=k_max",
+            "hard-threshold binarisation: 100% crisp rule activations at k=k_max",
             ha="center", va="center", fontsize=6.0, color="#444",
             style="italic",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="#f8f8f8",
@@ -344,8 +344,8 @@ def make_shap():
     for ax, ds, title in zip(
         axes,
         ["ctu", "cic"],
-        ["(a) CTU-IoT-23 — SHAP Feature Importance (MLP)",
-         "(b) CIC-IoT-2023 — SHAP Feature Importance (MLP)"],
+        ["(a) CTU-IoT-23: SHAP Feature Importance (MLP)",
+         "(b) CIC-IoT-2023: SHAP Feature Importance (MLP)"],
     ):
         bdata = json.loads((CBM_RES / f"{ds}_cbm_baselines.json").read_text())
         shap  = bdata["SHAP_MLP"]
@@ -434,7 +434,7 @@ def make_f1_comparison():
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=6.5)
     ax.set_ylabel("Weighted F1", fontsize=9)
-    ax.set_title("Known-Class F1: All Models — CTU vs CIC",
+    ax.set_title("Known-Class F1: All Models: CTU vs CIC",
                  fontsize=9, fontweight="bold", pad=4)
     ax.set_ylim(0.45, 1.04)
     ref = ctu_f1[0]
@@ -495,7 +495,7 @@ def make_rule_selectivity():
         ax.set_yticks(range(len(rules)))
         ax.set_yticklabels(short_rules, fontsize=7.5)
         ax.set_title(
-            f"Rule Class Selectivity — {title}  (seed 0, k=10)",
+            f"Rule Class Selectivity: {title}  (seed 0, k=10)",
             fontsize=9, fontweight="bold", pad=4)
 
         for i in range(len(rules)):
@@ -555,7 +555,7 @@ def make_threshold_drift():
                            rotation=45, ha="right")
         ax.set_ylabel("Learned − Initial threshold", fontsize=8.5)
         ax.set_title(
-            f"Threshold Drift — {title}  (seed 0)",
+            f"Threshold Drift: {title}  (seed 0)",
             fontsize=8.5, fontweight="bold", pad=4)
 
         ax.legend(handles=[
@@ -718,13 +718,13 @@ def make_concept_space_pca():
 
     ax.set_xlabel(f"PC 1  ({var[0]*100:.1f}% var.)", fontsize=9)
     ax.set_ylabel(f"PC 2  ({var[1]*100:.1f}% var.)", fontsize=9)
-    ax.set_title("Concept Space PCA — CIC-IoT-2023\n"
+    ax.set_title("Concept Space PCA: CIC-IoT-2023\n"
                  "JointCBM (γ=0.5), 8-dim concept activations → 2 PCs",
                  fontsize=9, fontweight="bold", pad=5)
     ax.legend(fontsize=7.5, loc="upper right",
               framealpha=0.85, markerscale=2.0)
 
-    # PNG only — PCA scatter does not need vector PDF
+    # PNG only: PCA scatter does not need vector PDF
     for d in OUTDIRS:
         fig.savefig(d / "cic_concept_space_pca.png",
                     dpi=200, bbox_inches="tight")

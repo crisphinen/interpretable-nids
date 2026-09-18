@@ -315,7 +315,7 @@ def compute_combined_ood(model, X_val_known, y_val_known,
     Per-class Mahalanobis fits one Gaussian per class (shared pooled
     covariance) on the training activations when X_train/y_train are given
     (else on val, legacy), then scores by minimum distance to any class
-    centroid — the Lee et al. 2018 approach. z-normalisation and tau are
+    centroid, the Lee et al. 2018 approach. z-normalisation and tau are
     calibrated on the val split; AUROC/TPR use X_known vs X_unknown.
 
     Three combination modes are evaluated:
@@ -393,7 +393,7 @@ def compute_combined_ood(model, X_val_known, y_val_known,
     c_ad_kn  = w_s * s_z_kn  + w_e * e_z_kn
     c_ad_un  = w_s * s_z_un  + w_e * e_z_un
 
-    # tau on best combined (avg) — calibrated on val
+    # tau on best combined (avg), calibrated on val
     tau = float(np.percentile(c_avg_val, tau_percentile))
 
     def _auroc(s_in, s_out):
