@@ -1,0 +1,645 @@
+\documentclass[journal]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{caption}
+\usepackage{microtype}
+\emergencystretch=1em
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{transparent}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=black,
+}
+
+\title{Towards Trustworthy IoT Network Security: Concept Bottlenecks
+  and Differentiable Rules for Interpretable Open-Set Intrusion Detection}
+
+\author{Ngari~Crisphine~Macharia and~Ning~Weng%
+  \thanks{N.~C.~Macharia and N.~Weng are with the School of Electrical,
+    Computer and Biomedical Engineering, Southern Illinois University
+    Carbondale, IL~62901~USA
+    (e-mail: c.ngari@siu.edu, nweng@siu.edu).
+    Corresponding author: N.~C.~Macharia.}%
+  \thanks{Code and pre-trained models will be made publicly available
+    upon acceptance of this paper.}%
+}
+
+\begin{document}
+
+\markboth{IEEE Internet of Things Journal}%
+{Ngari \MakeLowercase{\textit{et al.}}: Interpretable Open-Set IoT Intrusion Detection via CBMs and Differentiable Rules}
+
+\maketitle
+
+\begin{abstract}
+Machine learning (ML)-based network intrusion detection systems (NIDS) mostly face two implementation barriers which are lack of interpretability, and poor handling of novel attack families unseen during training (the open-set problem). We present a joint evaluation of two complementary interpretable architecture that is applied to IoT traffic classification and
+open-set detection. First, Concept Bottleneck Models (CBMs) filter predictions through a layer of human-defined traffic concepts and support test-time intervention. Second, Neuro-Symbolic NIDS (NeSy-NIDS) maps domain-expert attack signatures as differentiable threshold rules with learnable parameters, producing an exactly binary rule-activation space leveraging $k$-annealing and the Straight-Through Estimator. NeSy-NIDS additionally incorporates a neural fallback gated by a learnable mixing coefficient $\alpha$. Both architectures independently use per-class Mahalanobis distance~\cite{lee2018simple} in their respective representation spaces for open-set scoring. On CTU-IoT-23 and CIC-IoT-2023, JointCBM and NeSy-NIDS incur no classification accuracy cost. On CTU-IoT-23, NeSy-NIDS achieves OOD AUROC of 0.906 and JointCBM with moderate concept regularisation achieves 0.895 with both matching or exceeding the unconstrained MLP baseline. On CIC-IoT-2023, OOD detectability is strictly dictated by the degree of task coupling during bottleneck training. JointCBM with $\gamma~of~0.5$ achieves the best interpretable-model AUROC outperforming both fully decoupled training and unconstrained joint training, while NeSy-NIDS suffers significantly. We term
+this the \emph{task-coupling OOD penalty}. NeSy-NIDS also ensures threshold adjustments remain logically sound and a controllable interpretability-vs-OOD trade-off by use of
+$\alpha$-regularisation, at zero F1 cost.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Internet of Things, network intrusion detection, concept bottleneck, open-set detection, out-of-distribution.
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Internet of Things (IoT) devices now predominantly occupy the network endpoints. They present a highly appealing attack surface due to irregular update cadences and diverse underlying firmware for botnet recruitment, distributed denial-of-service (DDoS) amplification, and command-and-control (C\&C) infrastructure. Network level intrusion detection systems (NIDS) provide a robust optimal baseline defense that is passive on traffic flows while remaining entirely transparent to end-devices.
+
+IoT deployments impose distinct constraints for traffic-based security monitoring. Unlike enterprise hosts, IoT devices cannot run endpoint security agents and detection is constrained passively on flows captured at a gateway or router tap~\cite{mirsky2018kitsune}. The attack vector matrix is uniquely structured. Mirai-family botnets generate high-rate UDP and TCP floods from compromised devices~\cite{meidan2018nbaiot}, C\&C heartbeats demonstrate deterministic beaconing inter-arrival patterns, and reconnaissance scans produce asymmetric packet distributions. These distinct operational signatures make IoT traffic conducive to rule and concept-based representations. At the same time, the proliferation of Mirai sub-families and DDoS variants means that a model trained on a handful of known attack families will routinely encounter structurally
+similar but previously unseen variants during implementation, which is the open-set challenge this paper analyzes.
+
+Deep learning (DL) based NIDS attains a strong classification accuracy for known attacks, however, imposes two significant barriers during implementation.First, the \emph{interpretability limitation}: DL models fail to provide explainable justifications for flagged anomalies.  Without knowing \emph{which} traffic features triggered a decision, operators cannot validate alerts, adjust policies, or satisfy regulatory requirements~\cite{rudin2019stop,arp2022dos}. Post-hoc explainers address this limitation but operate outside the model, even the most capable post-hoc NIDS explainer (xNIDS~\cite{wei2023xnids}) yields fidelity improvements solely when bench-marked against LIME and SHAP, while remaining external to the model's decision process.
+
+Second, the \emph{open-set problem}: NIDS trained on a closed set of known attacks will inevitably encounter new variants families during deployment~\cite{arp2022dos}. A model that confidently assigns novel traffic to a known class provides false assurance. Existing approaches either retrain periodically or deploy a secondary anomaly detector, neither of which uses the model's own representations for principled open-set scoring~\cite{han2023owad}.
+
+In this paper, we tackle both problems by independently embedding interpretability \emph{into} each model's architecture and evaluating its effect on open-set detection. Two complementary architectures are
+studied as shown in Fig.~\ref{fig:arch}. (i)~\textbf{CBMs}~\cite{koh2020concept}, predictions are forced through an intermediate layer of human-defined concepts  making each intermediate decision directly auditable and facilitating test-time
+interventions. (ii)~\textbf{NeSy-NIDS}, domain-expert attack signatures are translated into a layer of parameterized thresholds rules whose thresholds are jointly learned using $k$-annealing and the Straight-Through Estimator (STE)~\cite{bengio2013ste,liu2023reinmax}, producing an exactly binary rule-activation vector at inference.
+
+Unlike xNIDS~\cite{wei2023xnids}, which generates post-hoc explanations from a black-box model, both architectures are inherently interpretable and intermediate representations consist of human-defined
+concepts (CBM) or exact binary rules (NeSy-NIDS). Unlike OWAD~\cite{han2023owad}, which detects normality shift in deployed detectors over time, we address unknown-class detection at single-inference level in models whose representation spaces are human-interpretable.
+
+\smallskip
+\noindent\textbf{Contributions:}
+\begin{enumerate}
+  \item \textbf{Task-coupling OOD penalty}: we identify and explain a failure mode specific to jointly trained bottleneck architectures on CIC-IoT-2023. OOD AUROC degrades monotonically as task-coupling strength increases, demonstrating that joint optimization for classification does not inherently yield compression and instead collapses the distributional spread required for Mahalanobis OOD separation.
+  \item \textbf{Zero accuracy cost}: Evaluated CBMs and differentiable rule learning for IoT NIDS under open-set evaluation conditions, validating that neither architecture sacrifices classification accuracy relative to an unconstrained MLP.
+  \item \textbf{100\% rule crispness}: NeSy-NIDS with $k$-annealing and STE produces strictly binary rule activations at inference without a post-quantisation step, yielding syntactically verifiable if-then rules for deployment audit.
+  \item \textbf{Deployable interpretability trade-off}: a controllable $\alpha$-gate provides a Pareto front between rule reliance and OOD detectability, selectable via brief fine-tuning without retraining from scratch.
+  \item \textbf{Concept leakage quantification}: a $\gamma$-fidelity regulariser eliminates concept leakage in CBMs, simultaneously improving OOD AUROC on CTU-IoT-23 at constant classification F1.
+\end{enumerate}
+
+\section{Related Work}
+
+Deploying deep learning-based NIDS requires operators to understand \emph{why} a model flagged a flow before they can act on an alert~\cite{rudin2019stop,arp2022dos}. Post-hoc explainability has emerged as the primary paradigm for addressing with xNIDS~\cite{wei2023xnids} applying sparse group lasso to produce human-readable firewall rules, while GEAD~\cite{han2024gead} extracts global decision-tree rules from a trained deep model.These methods are practically useful but fundamentally limited where an explanation can be post-hoc unfaithful the moment the model changes. We instead embed interpretability directly into the architecture.
+
+CBMs~\cite{koh2020concept} force predictions through a layer of human-specified concepts, making each intermediate step auditable. Zarlenga et al.~\cite{zarlenga2022concept} extend concepts to higher-dimensional embeddings (CEMs), and Yuksekgonul et al.~\cite{yuksekgonul2023posthoc} show that post-hoc concept alignment can reconfigure a trained network into a CBM. To our knowledge, no prior work evaluates CBMs for NIDS, nor measures concept leakage quantitatively in network traffic.
+
+Petersen et al.~\cite{petersen2022logic} showed that binary logic gate networks can be trained end-to-end via smooth relaxations. The Straight-Through Estimator~\cite{yang2022ste} propagates discrete gradients through thresholded activations, thereby facilitating Boolean constraint learning while preserving backpropagation capabilities. DeepProbLog~\cite{manhaeve2021deepproblog} integrates neural predicates into probabilistic logic programs, and Logic Tensor Networks~\cite{badreddine2022ltn} ground first-order formulae in differentiable tensor semantics. NeSy-NIDS applies this body of work to IoT network flows, where rules must be expressed as threshold feature conjunctions that a security analyst can read and override.
+
+The Mahalanobis detector~\cite{lee2018simple} fits class-conditional Gaussians over final hidden-layer features. Fort et al.~\cite{fort2021exploring} showed that feature quality that is not the scoring method drives OOD performance. Softmax-based alternatives include MaxSoftmax~\cite{hendrycks2017baseline} and the energy score~\cite{liu2020energy}, whose log-sum-exp formulation has stronger theoretical grounding. Vaze et al.~\cite{vaze2022openset} show that a well tuned closed-set classifier already yields strong open-set recognition. In security, OWAD~\cite{han2023owad} detects normality shift in deployed models, and CADE~\cite{yang2021cade} pinpoints concept-drift samples with both at the system level rather than the per-sample inference level that we address.
+
+N-BaIoT~\cite{meidan2018nbaiot} and Kitsune~\cite{mirsky2018kitsune} establish per-device anomaly detection as the dominant IoT paradigm but provide no attack classification or analyst-facing explanation. Arp et al.~\cite{arp2022dos} documented key ML security pitfalls with notably closed-world evaluation and absent human-auditable decisions. Apruzzese et al.~\cite{apruzzese2022ml} argue that operator opacity is the primary deployment barrier. De Keersmaeker et al.~\cite{dekeersmaeker2023survey} rated CTU-IoT-23 and CIC-IoT-2023 among the most comprehensive IoT datasets. Feature engineering in this work follows the reproducible flow-statistic approach of TON\_IoT~\cite{alsaedi2020toniot}.
+
+
+\section{Methodology}
+
+Fig.~\ref{fig:arch} illustrates the two architectures evaluated in this
+work.\textbf{(A) Concept Bottleneck Model (CBM)} has a 2-layer MLP concept encoder that transforms raw features into $K$ interpretable concept scores. A linear classifier maps concept scores to class logits.  Predictions are fully auditable at the concept layer, and expert intervention can override individual concept values at test time. \textbf{(B) NeSy-NIDS:} Expert-defined threshold rules are  differentiably parameterised. $k$-annealing and the STE produce strictly binary rule activations at inference. A learnable $\alpha$-gate blends the rule head with a parallel neural fallback.
+
+\begin{figure*}[t]
+    \centering
+    \vspace{-1mm}
+    \def\svgwidth{.85\textwidth}
+    \fontsize{5}{5}\selectfont
+    \input{nesy_nids_cbm_architecture (1).pdf_tex}
+    \vspace{-1mm}
+    \caption{Overview of the proposed framework}
+    \label{fig:arch}
+    \vspace{-2mm}
+\end{figure*}
+
+\subsection{Datasets}
+
+\textbf{CTU-IoT-23}~\cite{parmisano2020ctu} provides labelled network flows from IoT devices captured under controlled laboratory conditions. We use a 37-feature version pre-processed from Zeek logs (packet/byte counts, inter-arrival times, flag counts). Four classes are treated as \emph{known} (Benign, C\&C-HeartBeat, DDoS, Okiru) with nine attack families are held out as \emph{unknown} for OOD evaluation.
+
+\textbf{CIC-IoT-2023}~\cite{neto2023ciciot} covers 33 attack scenarios across 105 IoT devices. After stratified subsampling of the $\approx$40M-row dataset, the feature set comprises 39 z-score normalised columns. Five classes are known and 29 form the unknown set. Data splits follow a 70/15/15 stratified partition for both datasets.
+Both are among the most widely used public IoT security benchmarks~\cite{dekeersmaeker2023survey};
+TON\_IoT~\cite{alsaedi2020toniot} was considered but excluded to maintain a tractable known/unknown class balance.
+
+
+\subsection{Concept Bottleneck Models}
+\label{sec:cbm}
+
+A CBM~\cite{koh2020concept} factors the classifier
+$f(\mathbf{x})=y$ into two stages:
+\begin{equation}
+  \hat{\mathbf{c}} = g(\mathbf{x}),
+  \quad\hat{y} = h(\hat{\mathbf{c}}) = f(\mathbf{x}),
+\end{equation}
+\begin{sloppypar}\hbadness=10000
+where $g=\mathbb{R}^d=[0,1]^K$ is the concept encoder ($d$ is the number of raw input features: 37 for CTU-IoT-23, 39 for CIC-IoT-2023), $h=[0,1]^K=\mathbb{R}^C$ is the classifier ($C$ is the number of known classes: 4 for CTU-IoT-23, 5 for
+CIC-IoT-2023), and the equality $h(\hat{\mathbf{c}})=f(\mathbf{x})$ makes the factorisation $f=h\circ g$ explicit.
+We define $K{=}8$ domain-derived flow concepts per dataset(e.g.,\ \textit{is\_high\_rate}, \textit{is\_beaconing}, \textit{is\_incomplete\_handshake}), approximated as soft binary targets from threshold rules on raw features. These labels are deterministic functions of the input features. Concept accuracy (Section~\ref{sec:leakage}) measures agreement with practical thresholds rather than ground-truth semantic correctness, a limitation we acknowledge. The choice $K{=}8$ balances vocabulary richness with the Mahalanobis covariance requirement which holds for our dataset sizes but would be violated by much larger vocabularies. NeSy-NIDS uses the same number of rule templates ($R{=}8$, Section~\ref{sec:nesy}), a coincidence of design rather than a shared constraint.
+\end{sloppypar}
+
+\textbf{Training variants.}
+For \emph{JointCBM}  at $\gamma{=}0$ , standard joint training minimizes cross entropy and binary concept losses simultaneously. When $\gamma{>}0$, joint training augmented with a concept-fidelity penalty which is evaluated at $\gamma\in\{0.1,0.5,1.0\}$
+\begin{equation}
+  \mathcal{L} = \mathcal{L}_{\mathrm{CE}} + \lambda\,\mathcal{L}_{\mathrm{BCE}}
+    + \gamma\,\|\hat{\mathbf{c}} - \mathbf{c}_{\text{gt}}\|^2,
+\end{equation}
+where $\mathbf{c}_{\text{gt}}\in\{0,1\}^K$ are ground-truth binary concept labels, $\lambda{\geq}0$  is weights concept supervision, and $\gamma{\geq}0$
+is a fidelity penalty that mitigates \emph{concept leakage} by encoding of task-discriminative information beyond the declared concept layer. For \emph{SequentialCBM}, $g$ is trained and frozen first, then  $h$ is trained on $\hat{\mathbf{c}}$, decoupling concept learning from classification.
+\emph{HybridCBM}  is an extension of JointCBM with a skip connection where 64-dimensional encoder embedding is integrated with the $K$ concept predictions to form a $[K{+}64]$ dimensional input to the classifier allowing the model to exploit structure beyond the declared concept vocabulary while retaining an interpretable interface at the concept layer.
+
+\textbf{OOD scoring.}
+We apply the per-class Mahalanobis detector of Lee et al.~\cite{lee2018simple} in the concept space. Per-class Gaussians $\mathcal{N}(\boldsymbol{\mu}_c,\boldsymbol{\Sigma})$ are fitted on training concept vectors (shared covariance, $\varepsilon{=}10^{-4}$ regularisation,
+pseudoinverse for collinear dimensions). The anomaly score where high
+values indicate OOD samples is
+\begin{equation}
+  s(\mathbf{x}) = \min_c\,(\hat{\mathbf{c}}-\boldsymbol{\mu}_c)^\top
+  \boldsymbol{\Sigma}^{-1}(\hat{\mathbf{c}}-\boldsymbol{\mu}_c),
+  \label{eq:mahal}
+\end{equation}
+the minimum squared Mahalanobis distance over known classes~\cite{fort2021exploring}.
+
+Algorithm~\ref{alg:cbm} summarises the full training and scoring procedure.
+
+\begin{algorithm}[!ht]
+\caption{CBM Training and OOD Scoring}
+\label{alg:cbm}
+\begin{algorithmic}[1]
+\footnotesize
+\Require Training set $\{(\mathbf{x}_i, \mathbf{c}_i, y_i)\}$,
+         hyperparameters $\lambda$, $\gamma$
+\Ensure  Encoder $g$, classifier $h$,
+         per-class Gaussians $\{\boldsymbol{\mu}_c, \boldsymbol{\Sigma}\}$
+\State Initialise concept encoder $g$ (MLP: $d{\to}256{\to}256{\to}64{\to}K$, LayerNorm+ReLU), linear classifier $h$
+\For{each epoch}
+  \For{each mini-batch $(\mathbf{X}, \mathbf{C}, \mathbf{Y})$}
+    \State $\hat{\mathbf{C}} = g(\mathbf{X})$
+      \Comment{concept scores $\in [0,1]^K$}
+    \State $\hat{\mathbf{Y}} = h(\hat{\mathbf{C}})$
+      \Comment{class logits}
+    \State $\mathcal{L} = \mathcal{L}_{\mathrm{CE}}(\hat{\mathbf{Y}},\mathbf{Y})
+             + \lambda\,\mathcal{L}_{\mathrm{BCE}}(\hat{\mathbf{C}},\mathbf{C})
+             + \gamma\,\|\hat{\mathbf{C}}-\mathbf{C}\|^2$
+    \State Update $g$, $h$ via $\nabla\mathcal{L}$
+  \EndFor
+\EndFor
+\For{each class $c$} \Comment{fit OOD detector on training concepts}
+  \State $\boldsymbol{\mu}_c = \mathrm{mean}\{g(\mathbf{x}_i)~and ~y_i = c\}$
+\EndFor
+\State $\boldsymbol{\Sigma} =$ regularised shared covariance
+\Statex
+\Statex \textbf{Inference}($\mathbf{x}$):
+\State $\hat{\mathbf{c}} = g(\mathbf{x})$;\quad
+       $\hat{y} = \arg\max\, h(\hat{\mathbf{c}})$
+\State $s(\mathbf{x}) = \min_c\,
+       (\hat{\mathbf{c}}-\boldsymbol{\mu}_c)^\top
+       \boldsymbol{\Sigma}^{-1}
+       (\hat{\mathbf{c}}-\boldsymbol{\mu}_c)$
+       \Comment{OOD score}
+\State \Return $\hat{y},\; s(\mathbf{x})$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Neuro-Symbolic NIDS: Differentiable Rule Learning}
+\label{sec:nesy}
+
+\subsubsection{Rule Templates}
+$R{=}8$ rule templates per dataset are predefined from domain knowledge rather than generated by the model. Each template is an  integral of threshold conditions on selected flow features. Representative CTU-IoT-23
+rules includes \texttt{ddos\_high\_rate} (Rate$>$1000\,pps, DDoS), \texttt{cc\_heartbeat\_beaconing} ($1.5{<}$IAT$<5$\,s, C\&C-HB), \texttt{incomplete\_handshake} (syn$>$2$\wedge$ack$<$1, C\&C-HB), and \texttt{asymmetric\_flood} (src$<$1$\wedge$dst$>$1, DDoS). CIC-IoT-2023 uses eight similar z-scored rules targeting DDoS-SYN, Mirai flooding, port scanning, and benign traffic.
+
+Given input $\mathbf{x}$, each rule $r$ is an integral of threshold conditions, where $\mathcal{I}_r^{>}$ ($\mathcal{I}_r^{<}$) indexes features with greater-than (less-than) conditions
+\[
+  a_r^{\mathrm{hard}}(\mathbf{x}) =
+    \prod_{i\in\mathcal{I}_r^{>}}\!\mathbf{1}[x_i{>}\theta_i]\cdot
+    \prod_{j\in\mathcal{I}_r^{<}}\!\mathbf{1}[x_j{<}\theta_j].
+\]
+This formulation is non-differentiable, preventing gradient-based refinement of $\theta_i$. Following Petersen et al.~\cite{petersen2022logic}, We approximate logical AND by multiplying soft binary values, converting each condition to a sigmoid gate, $\mathbf{1}[x_i{>}\theta_i] = sigma\!\bigl(k(x_i{-}\theta_i)\bigr)\in[0,1]$, with sign flipped for less-than conditions. This gives
+\begin{equation}
+  a_r(\mathbf{x};k) =
+    \prod_{i\in\mathcal{I}_r^{>}}\!\sigma\!\bigl(k(x_i{-}\theta_i)\bigr)\cdot
+    \prod_{j\in\mathcal{I}_r^{<}}\!\sigma\!\bigl(k(\theta_j{-}x_j)\bigr),
+  \label{eq:rule_score}
+\end{equation}
+which recovers $a_r^{\mathrm{hard}}$ in the limit $k = infty$~\cite{yang2022ste}. Because $\theta_i$ are trained jointly, the model fits expert-defined boundaries to the observed data.
+
+\subsubsection{\texorpdfstring{$k$}{k}-Annealing and Straight-Through Estimator}
+
+Sigmoid steepness $k$ linearly starts from $k_0{=}1$ (smooth gradients, threshold learning) to $k_T{=}10$ (near-step-function, binary activations) over $T_{\mathrm{warm}}{=}30$ epochs:
+\begin{equation}
+  k(t) = k_0 + \min\!\bigl(\tfrac{t}{T_{\mathrm{warm}}},1\bigr)(k_T{-}k_0).
+\end{equation}
+To enforce \emph{exact} binary activations at inference while preserving differentiable threshold learning, we apply the Straight-Through Estimator (STE)~\cite{bengio2013ste,liu2023reinmax}. The hard binarization
+\begin{equation}
+  a_r^{\mathrm{hard}} = \mathbf{1}[a_r(\mathbf{x};\,k(t)) > 0.5]
+\end{equation} is used in the forward pass, and gradients backpropagates through the smooth surrogate $a_r$ (Eq.~\ref{eq:rule_score}). The resulting gradient in relation to threshold $\theta_i$ for a greater-than condition is
+\begin{equation}
+  \frac{\partial \mathcal{L}}{\partial \theta_i} \approx
+    \frac{\partial \mathcal{L}}{\partial a_r} \cdot
+    \Bigl(-k(t)\,g_i^{>}(1{-}g_i^{>})\prod_{j \neq i} g_j\Bigr),
+    \quad i\in\mathcal{I}_r^{>},
+\end{equation}
+where $g_i^{>}{=}\sigma(k(t)(x_i{-}\theta_i))$, sign flips to $+k(t)$ for less-than conditions. As $k(t)$ grows, $g_i^{>}(1{-}g_i^{>})$ becomes $0$ for committed gates, reducing spurious threshold drift. This achieves 100\% \emph{rule crispness} where all activations collapse to exactly $\{0,1\}$ at inference while preserving differentiable training.
+
+\subsubsection{Architecture and \texorpdfstring{$\alpha$}{alpha}-Gate}
+
+A Rule Bank layer stacks all $R$ rule activations into a hard binary vector $\mathbf{a}(\mathbf{x})\in\{0,1\}^R$ at inference (or soft $[0,1]^R$ during training). A linear head maps activations to rule logits $\mathbf{l}_{\mathrm{rule}}{=}\mathbf{W}\mathbf{a}{+}\mathbf{b}$. A parallel two-hidden-layer MLP on raw features produces neural logits $\mathbf{l}_{\mathrm{neural}}$. A scalar mixing gate blends the two:
+\begin{equation}
+  \mathbf{l} = \alpha\,\mathbf{l}_{\mathrm{rule}} +
+               (1{-}\alpha)\,\mathbf{l}_{\mathrm{neural}},
+  \label{eq:alpha_gate}
+\end{equation}
+where $\alpha{=}\sigma(w_\alpha)\in(0,1)$ is learned jointly with the network. To push $\alpha$ to $1$ (more rule-reliant), an optional squared penalty on the neural contribution is added
+\begin{equation}
+  \mathcal{L}_\alpha = \mathcal{L}_{\mathrm{CE}}(\mathbf{l}) +
+                       \lambda_\alpha(1{-}\alpha)^2,\quad \lambda_\alpha{\geq}0.
+\end{equation}
+
+\subsubsection{OOD Scoring in Rule-Activation Space}
+At inference, binary rule activations $\mathbf{a}^{\mathrm{hard}}(\mathbf{x})$ form an $R$-dimensional embedding. We fit the Mahalanobis detector (Eq.~\ref{eq:mahal}) in this space using known-class training activations. Novel attacks are expected to activate different rule subsets from known classes, producing anomalous patterns detectable by distance. Binary vectors do not follow a multivariate Gaussian. Mahalanobis is therefore an approximation here.
+
+Algorithm~\ref{alg:nesy} summarizes the full NeSy-NIDS training and scoring procedure, where $\mathrm{sg}(\cdot)$ denotes the stop-gradient operator used in the STE step.
+
+\begin{algorithm}[!ht]
+\caption{NeSy-NIDS Training and OOD Scoring}
+\label{alg:nesy}
+\begin{algorithmic}[1]
+\footnotesize
+\Require Training set $\{(\mathbf{x}_i, y_i)\}$, rule templates with
+         initial thresholds $\boldsymbol{\theta}^{(0)}$,
+         hyperparameters $\lambda_\alpha$,
+         $k_0{=}1$, $k_T{=}10$, $T_{\mathrm{warm}}$
+\Ensure  Thresholds $\boldsymbol{\theta}$, MLP $\phi$, gate $w_\alpha$,
+         per-class Gaussians $\{\boldsymbol{\mu}_c, \boldsymbol{\Sigma}\}$
+\State Initialise $\boldsymbol{\theta} = \boldsymbol{\theta}^{(0)}$,
+       MLP parameters $\phi$, gate $w_\alpha$
+\For{epoch $t = 1, \ldots, T$}
+  \State $k = k_0 + \min\!\bigl(t/T_{\mathrm{warm}},1\bigr)(k_T - k_0)$
+    \Comment{anneal steepness}
+  \For{each mini-batch $(\mathbf{X}, \mathbf{Y})$}
+    \For{each rule $r$}
+      \State $a_r^{>} = \prod_{i\in\mathcal{I}_r^{>}}\!\sigma(k(x_i{-}\theta_i))$
+      \State $a_r = a_r^{>} \cdot \prod_{j\in\mathcal{I}_r^{<}}\!\sigma(k(\theta_j{-}x_j))$
+    \EndFor
+    \State $\mathbf{a}^{\!\mathrm{hard}} = \mathbf{a}
+           + \mathrm{sg}\!\bigl(\mathbf{1}[\mathbf{a}{>}0.5]-\mathbf{a}\bigr)$
+           \Comment{STE binarise}
+    \State $\mathbf{l}_{\mathrm{rule}} = \mathbf{W}\mathbf{a}^{\mathrm{hard}}\!+\!\mathbf{b}$
+    \State $\mathbf{l}_{\mathrm{neural}} = \mathrm{MLP}_\phi(\mathbf{x})$
+    \State $\alpha = \sigma(w_\alpha)$
+    \State $\mathbf{l} = \alpha\,\mathbf{l}_{\mathrm{rule}} + (1{-}\alpha)\,\mathbf{l}_{\mathrm{neural}}$
+    \State $\mathcal{L} = \mathcal{L}_{\mathrm{CE}}(\mathbf{l},\mathbf{Y}) + \lambda_\alpha(1{-}\alpha)^2$
+    \State Update $\boldsymbol{\theta}$, $\phi$, $w_\alpha$ via $\nabla\mathcal{L}$
+  \EndFor
+\EndFor
+\For{each class $c$} \Comment{fit OOD detector on binary rule activations}
+  \State $\boldsymbol{\mu}_c = \mathrm{mean}\{\mathbf{a}^{\mathrm{hard}}(\mathbf{x}_i) : y_i = c\}$
+\EndFor
+\State $\boldsymbol{\Sigma} = $ regularised shared covariance
+\Statex
+\Statex \textbf{Inference}($\mathbf{x}$):
+\State $\mathbf{a}^{\mathrm{hard}} = $ binarise rule activations at $k{=}k_T$
+\State $\alpha = \sigma(w_\alpha)$;\quad
+       $\hat{y} = \arg\max\,(\alpha\,\mathbf{l}_{\mathrm{rule}} + (1{-}\alpha)\,\mathbf{l}_{\mathrm{neural}})$
+\State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{%
+  $s(\mathbf{x}) = \min_c\,(\mathbf{a}^{\mathrm{hard}}-\boldsymbol{\mu}_c)^\top
+  \boldsymbol{\Sigma}^{-1}(\mathbf{a}^{\mathrm{hard}}-\boldsymbol{\mu}_c)$
+  \hfill\Comment{OOD score}}
+\State \Return $\hat{y},\; s(\mathbf{x})$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Open-Set Decision Rule}
+\label{sec:openset}
+
+The classifiers of Sections~\ref{sec:cbm} and~\ref{sec:nesy} are closed-set with  over the class logits always returning one of the $C$ known classes, even for flows drawn from unseen attack families. The anomaly score $s(\mathbf{x})$ from Eq.~\ref{eq:mahal} is therefore coupled to the classifier using an explicit rejection threshold $\tau$, producing  a $(C{+}1)$-class open-set decision.
+\begin{equation}
+  \hat{y}_{\mathrm{open}}(\mathbf{x}) =
+  \begin{cases}
+    \textit{unknown}, & s(\mathbf{x}) > \tau,\\[2pt]
+    \arg\max_c\, l_c(\mathbf{x}), & \text{otherwise},
+  \end{cases}
+\end{equation}
+where $l_c$ denotes the $c$-th class logit ($h(\hat{\mathbf{c}})$) for CBM, and the blended logits of Eq.~\ref{eq:alpha_gate} for NeSy-NIDS. The threshold is calibrated on the known-class validation split
+\begin{equation}
+  \tau = Q_{0.95}\bigl\{s(\mathbf{x}_i) :
+        \mathbf{x}_i \in \mathcal{D}_{\mathrm{val}}^{\mathrm{known}}\bigr\},
+\end{equation}
+i.e.\ the 95th percentile of in-distribution scores, so at most 5\% of known traffic is rejected. Samples of a known class  are not used to select $\tau$, ensuring that threshold calibration is unsupervised with respect to unknown classes. Note that $\tau$ is calibrated in known-class traffic and is distinct from the TPR@5\%FPR metric, which sweeps the anomaly score independently of $\tau$.
+
+\subsection{Baselines and Evaluation}
+
+An unconstrained MLP with two hidden layers of 256 units each (LayerNorm, ReLU) and a 64-dimensional embedding layer, followed by a linear classifier, serves as the accuracy ceiling. A Decision Tree (DT; depth search over $\{5,10,15,\infty\}$, selected by validation F1) and a Random Forest (RF~\cite{breiman2001random}; 100 trees, depth 10) represent classical baselines. DT OOD scoring uses the Mahalanobis distance in the raw feature space, RF OOD scoring uses $1{-}\max(\hat{p})$ (ensemble confidence). The MLP's OOD score uses Mahalanobis in its 64-dim last encoder layer, applying the same scoring method as CBM and NeSy-NIDS, though in a higher-dimensional space (64-dim versus 8-dim).
+
+\textbf{Metrics:} weighted F1 in the known-class validation split (used for early stopping and model selection), AUROC and TPR@5\%FPR for OOD detection, evaluated on held-out unknown-class test samples. For
+NeSy-NIDS is crispness of the rule and the gate value $\alpha$.
+
+\textbf{Training:} Adam ($\mathrm{lr}{=}10^{-3}$, batch 512, $\varepsilon{=}10^{-4}$ covariance regulariser). CBM uses up to 50 epochs, patience 10, single seed, $\gamma\in\{0,0.1,0.5,1.0\}$, $\lambda{=}0.5$ (selected by coarse grid search over $\{0.1,0.5,1.0\}$ on the CTU-IoT-23 validation split, classification F1 was stable across all values). NeSy-NIDS uses up to 60 epochs, patience 12, five seeds (0 to 4) and  $\lambda_\alpha\in\{0,0.1\}$.
+
+\section{Results and Discussion}
+
+\subsection{Classification Accuracy}
+
+\begin{sloppypar}\hbadness=10000
+Table~\ref{tab:main} summarises  both NeSy-NIDS and all JointCBM  where variants match the unconstrained MLP on both datasets. The F1 gap between NeSy-NIDS and MLP is $+0.0007$ on CTU-IoT-23 and $-0.0018$ on CIC-IoT-2023 a  difference below 0.002 in both cases and consistent with the seed-to-seed variation observed across NeSy-NIDS runs. This validates the zero accuracy cost finding of~\cite{koh2020concept} in the IoT NIDS domain under open-set evaluation conditions, and demonstrates that interpretable constraints carry no performance penalty.
+\end{sloppypar}
+
+Rule-only ablation degrades significantly in CTU-IoT-23, confirming that the neural fallback handles traffic patterns outside the eight rule templates and that the $\alpha$-gate correctly delegates these cases. The fallback is less critical on CIC-IoT-2023 where the tighter CIC rules cover more of the class structure.
+
+Decision Tree (DT) and Random Forest (RF) achieve a comparable F1 but at a severe cost to OOD detection, as detailed in Section~\ref{sec:ood}. SequentialCBM and Post-hoc CBM collapse in CTU (F1: 0.5725/0.5783) but recover in CIC (0.7200/0.7257). In CTU, stage-1 concept training optimizes the 8-dimensional space against binary threshold labels rather than the class boundary, and once the concept head is frozen, the linear classifier cannot recover the lost discriminative subspace. In CIC, class boundaries align more closely with the declared concept vocabulary, so the frozen concept representation retains enough discriminative structure for the classifier.
+
+All four $\gamma$ variants produce virtually identical classification F1 (Table~\ref{tab:main}), confirming that $\gamma$-regularization carries no accuracy cost and its effect is exclusively on OOD detection, analyzed in Section~\ref{sec:leakage}.
+
+
+\begin{table*}[!t]
+\renewcommand{\arraystretch}{1.15}
+\caption{Classification F1 evaluated on the known-class validation split, AUROC and TPR@5\%FPR evaluated on
+  held-out unknown-class test samples.
+  \textbf{Bold} shows the best among interpretable models.}
+\label{tab:main}
+\centering
+\small
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{3}{c}{\textbf{CTU-IoT-23}} &
+  \multicolumn{3}{c}{\textbf{CIC-IoT-2023}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+\textbf{Model} & \textbf{F1} & \textbf{AUROC} & \textbf{TPR@5\%} &
+                 \textbf{F1} & \textbf{AUROC} & \textbf{TPR@5\%} \\
+\midrule
+MLP Baseline
+  & 0.9327 & 0.890 & 0.528
+  & 0.8210 & 0.806 & 0.552 \\
+\midrule
+JointCBM ($\gamma{=}0$)
+  & 0.9328 & 0.838 & 0.438
+  & 0.8197 & 0.668 & 0.259 \\
+JointCBM ($\gamma{=}0.1$)
+  & 0.9326 & 0.895 & 0.660
+  & 0.8186 & 0.654 & 0.230 \\
+JointCBM ($\gamma{=}0.5$)
+  & 0.9327 & 0.883 & 0.613
+  & 0.8187 & \textbf{0.728} & \textbf{0.470} \\
+JointCBM ($\gamma{=}1.0$)
+  & 0.9328 & 0.887 & \textbf{0.674}
+  & 0.8190 & 0.707 & 0.395 \\
+SequentialCBM
+  & 0.5725 & 0.707 & 0.359
+  & 0.7200 & 0.675 & 0.178 \\
+HybridCBM
+  & 0.9326 & 0.825 & 0.346
+  & \textbf{0.8207} & 0.665 & 0.202 \\
+Post-hoc CBM$^\star$
+  & 0.5783 & 0.864 & 0.490
+  & 0.7257 & 0.623 & 0.076 \\
+\midrule
+\textbf{NeSy-NIDS}
+  & \textbf{0.9334} & $\mathbf{0.906\pm0.016}$ & $0.549\pm0.079$
+  & $0.8192$ & $0.605\pm0.006$ & $0.221\pm0.053$ \\
+NeSy + $\alpha$-reg
+  & 0.9335 & $0.892\pm0.028$ & $0.498\pm0.033$
+  & 0.8192 & $0.623\pm0.020$ & $0.237\pm0.076$ \\
+Rule-only
+  & 0.5612 & 0.863 & 0.459
+  & 0.7561 & 0.693 & 0.270 \\
+\midrule
+DT
+  & 0.9350 & 0.335 & 0.037
+  & 0.8116 & 0.809 & 0.560 \\
+RF
+  & 0.9351 & 0.627 & 0.411
+  & 0.8045 & 0.694 & 0.140 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Open-Set Detection}
+\label{sec:ood}
+
+Fig.~\ref{fig:auroc_vs_f1}  plots the OOD AUROC against F1, revealing a clear separation between model families that depends on the structure of the dataset.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/auroc_vs_f1.pdf}
+  \caption{OOD AUROC vs.\ known-class weighted F1 for all models on
+  CTU-IoT-23 (left) and CIC-IoT-2023 (right). Error bars indicate
+  $\pm$1 std over 5 seeds where available.}
+  \label{fig:auroc_vs_f1}
+\end{figure*}
+
+\textbf{CTU-IoT-23.}
+The rule-space and concept-space Mahalanobis scores are highly effective. NeSy-NIDS achieves AUROC  of 0.906 and JointCBM ($\gamma{=}0.1$) achieves 0.895 both above the MLP at 0.890. The gap of 0.011 falls within the NeSy-NIDS's seed-to-seed variation. Both substantially outperform the DT with an AUROC of 0.335 and the RF at 0.627. The sub-random DT AUROC reflects score-polarity inversion. Mahalanobis in the raw 37-dimensional feature space assigns \emph{higher} distances to known class samples than to unknowns because the four known classes occupy wider, more diffuse regions of the raw feature space than the novel unknowns, which cluster near the known class centroids along superficially similar flow statistics. At 5\% FPR, JointCBM with $\gamma$ at $0.1$ achieves 0.660, $\gamma$ at $1.0$ achieves 0.674, and NeSy-NIDS achieves 0.549 both exceeding the MLP at 0.528. Interpretable models detect more novel attacks at the same false-alarm budget while remaining fully auditable.
+
+\textbf{CIC-IoT-2023.}
+The CIC results reveal that the detectability of the OOD depends not only on the task but also on the \emph{degree} of coupling. JointCBM with moderate concept regularization when $\gamma{=}0.5$ achieves AUROC of 0.728, which is the best among all interpretable models while both fully decoupled training and unconstrained joint training ($\gamma{=}0$ at 0.668) perform worse.  HybridCBM's lower AUROC  reflects its skip connection, where the classifier bypasses the concept bottleneck via the 64-dim encoder embedding, reducing concept-space OOD separability. The Rule-only ablation achieves AUROC is 0.693, exceeding the full NeSy-NIDS at 0.605. Without a neural fallback, the rule bank is forced to find more discriminative threshold boundaries, which preserves within-class variance in the activation space. The remaining gap between the best interpretable model and the MLP (0.728 vs.\ 0.806) reflects the 39 to 8 bottleneck compression tax. On CIC-IoT-2023, DT marginally exceeds the MLP, because raw-feature Mahalanobis in CIC's z-scored 39-dimensional space happens to separate the held-out unknowns well, a property that bottleneck compression (8-dim) partially sacrifices. This non-monotone pattern identifies an optimal coupling strength without any concept grounding ($\gamma{=}0$), the bottleneck collapses to a task-optimized representation that lacks distributional spread with full decoupling (SequentialCBM), the concept space is semantically faithful but task-irrelevant structure dominates. Moderate
+regularization ($\gamma{=}0.5$) achieves the best balance. We term the degradation at both extremes the \emph{task-coupling OOD penalty}.
+
+Post-hoc CBM achieves AUROC 0f 0.864 in CTU-IoT-23 and 0.623 in CIC-IoT-2023, but with a severe penalty in F1 (0.5783/0.7257). The high AUROC in CTU despite low F1 is explained by the concept probes inheriting the MLP's OOD-separable structure from its frozen embeddings, while the linear probe cannot recover the class-discriminative boundary. This confirms that the performance of OOD in concept space is derived in part from the underlying representation of MLP, not solely from the bottleneck.
+
+As demonstrated by Fort et al.~\cite{fort2021exploring}, representation quality governs Mahalanobis OOD performance, our $\gamma$ ablation confirms that a concept bottleneck improves OOD detection when concept regularization is calibrated to balance semantic grounding with task-relevant structure.
+
+\textbf{Rule crispness and selectivity.}
+After $k$-annealing to $k{=}10$, all rule activations fall strictly into $\{0,1\}$ (100\% rule crispness), confirming exact Boolean behaviour at inference. Fig.~\ref{fig:selectivity} shows mean activation rates per known class for both datasets.
+\begin{sloppypar}\hbadness=10000
+On CTU-IoT-23, rules fire selectively but not deterministically
+(\texttt{cc\_heartbeat\_beaconing} at 0.76 on C\&C-HeartBeat,
+\texttt{incomplete\_handshake} at 0.86, \texttt{asymmetric\_flood} at 0.79 on DDoS), preserving within-class variance and giving Mahalanobis the spread needed to separate known from unknown distributions. On CIC-IoT-2023, selectivity is
+near-deterministic (\texttt{syn\_flood\_ddos} at 1 on DDoS-SYN,
+\texttt{benign\_low\_rate} at 0.94 on Benign), collapsing within-class
+variance to near-zero and stripping Mahalanobis of discriminative
+signal (CIC AUROC at 0.605). High OOD detection therefore requires
+\emph{selective but not certain} rule firing.
+\end{sloppypar}
+\begin{sloppypar}\hbadness=10000
+Learned thresholds shift in domain-consistent directions across both
+datasets (Fig.~\ref{fig:threshold_drift}). On CTU-IoT-23,
+\texttt{cc\_heartbeat\_beaconing} IAT bounds relax by up to $-0.46$
+while \texttt{incomplete\_handshake} SYN conditions tighten by $+0.19$.
+CIC-IoT-2023 exhibits larger drifts (up to $-1.15$ on
+\texttt{syn\_flood\_ddos}), consistent with its more heterogeneous
+z-scored traffic. All drifts are semantically consistent, confirming
+principled refinement rather than arbitrary deviation.
+\end{sloppypar}
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.47\textwidth,height=5.5cm,keepaspectratio]{figures/rule_selectivity1_ctu.pdf}\hfill
+  \includegraphics[width=0.47\textwidth,height=5.5cm,keepaspectratio]{figures/rule_selectivity1_cic.pdf}
+  \caption{Mean rule activation rate per known class after STE
+    binarisation.}
+  \label{fig:selectivity}
+\end{figure*}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.47\textwidth]{figures/threshold_drift_ctu.pdf}\hfill
+  \includegraphics[width=0.47\textwidth]{figures/threshold_drift_cic.pdf}
+  \caption{Per-condition threshold drift (learned $-$ initial), seed~0.
+    Red: tightened ($>0$); blue: relaxed ($<0$).}
+  \label{fig:threshold_drift}
+\end{figure*}
+
+\subsection{The \texorpdfstring{$\alpha$}{alpha}-Gate and Interpretability Trade-Off}
+
+Without regularisation, NeSy-NIDS converges to $\alpha{=}0.37$ on
+CTU-IoT-23 and $\alpha{=}0.30$ on CIC-IoT-2023, indicating that the
+neural fallback carries substantial weight. With $\lambda_\alpha{=}0.1$,
+the gate rises to $\alpha{=}0.68$ and $0.85$ respectively
+(mean over 5 seeds), at zero F1 cost. On CTU-IoT-23, higher $\alpha$ incurs a minor OOD cost consistent with the rule head displacing a
+neural head whose embedding was more OOD-compact. On CIC-IoT-2023, OOD
+AUROC marginally improves under $\alpha$-regularisation since the rule-dominant embedding is more tightly
+structured.
+
+The $\alpha$-gate provides a \emph{controllable interpretability-OOD trade-off}. An operator can shift the balance by adjusting $\lambda_\alpha$ during brief fine-tuning, without full retraining.A full sweep over $\lambda_\alpha$ values to characterise the complete trade-off curve is left as future work. This addresses the operator-control requirement identified by Arp et al.~\cite{arp2022dos}.
+
+\subsection{Concept Leakage and the \texorpdfstring{$\gamma$}{gamma} Ablation}
+\label{sec:leakage}
+
+Table~\ref{tab:cbm_concepts} reports per-concept prediction accuracy
+for each CBM variant. JointCBM without concept regularisation ($\gamma{=}0$)
+achieves mean concept accuracy of 84.9\% (CTU) and 92.5\% (CIC). On
+CTU, accuracy rises monotonically to 92.7\% at $\gamma{=}1.0$. On CIC,
+accuracy is stable at 90--92\% across all $\gamma$: the
+\texttt{is\_short\_connection} concept achieves only approximately 50\%
+across all variants, reflecting a threshold mismatch with the z-scored
+CIC distribution rather than a regularisation failure. SequentialCBM reaches near-perfect concept accuracy (99.9\% on CTU  and 93.1\% on CIC) by learning concepts before task training. HybridCBM also achieves
+high accuracy (99.6\%/92.9\%). Its skip connection lets the classifier
+bypass the concept bottleneck, so the concept head faces no classification
+pressure and can freely minimise the BCE loss. This grounding does not,
+however, guarantee the best OOD detection. Higher accuracy indicates more semantically faithful concept bottleneck. SequentialCBM accuracy reflects stage-1 training only and the concept head is frozen before stage-2 classifier training.
+
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.1}
+\caption{Mean concept prediction accuracy (\%) per CBM variant.}
+\label{tab:cbm_concepts}
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{CTU-IoT-23} & \textbf{CIC-IoT-2023} \\
+\midrule
+JointCBM ($\gamma{=}0$)   & 84.9 & 92.5 \\
+JointCBM ($\gamma{=}0.1$) & 86.9 & 91.3 \\
+JointCBM ($\gamma{=}0.5$) & 91.8 & 90.2 \\
+JointCBM ($\gamma{=}1.0$) & 92.7 & 91.8 \\
+SequentialCBM             & 99.9 & 93.1 \\
+HybridCBM                 & 99.6 & 92.9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+OOD AUROC rises with concept regularisation on CTU-IoT-23
+from 0.838 ($\gamma{=}0$) to 0.895 ($\gamma{=}0.1$), then remains
+above 0.883 for higher $\gamma$ (0.883 at $\gamma{=}0.5$ and 0.887 at
+$\gamma{=}1.0$) even modest grounding suffices to separate
+per-class clusters beyond the MLP (0.890). On CIC-IoT-2023 the pattern
+peaks at $\gamma{=}0.5$ (0.728), with both under-grounding ($\gamma{=}0$:
+0.668) and over-constraint ($\gamma{=}1.0$ at 0.707 and SequentialCBM at 0.675)
+performing worse, as shown in Fig.~\ref{fig:gamma_auroc}. Concept fidelity
+(Table~\ref{tab:cbm_concepts}) explains this, at $\gamma{=}0.5$, concepts
+are semantically grounded (91.8\%/90.2\%) while retaining the soft
+distributional structure Mahalanobis scoring exploits.
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig_auroc_vs_gamma1.pdf}
+  \caption{OOD AUROC vs.\ $\gamma$ (concept-fidelity regularisation
+    strength)}
+  \label{fig:gamma_auroc}
+\end{figure}
+
+\subsection{Computational Overhead}
+\label{sec:compute}
+
+JointCBM adds only 296 parameters ($+0.3\%$, total 93{,}548) over the MLP baseline
+(93{,}252) with no measurable latency overhead (0.42\,$\mu$s/sample on both),
+making concept-level interpretability computationally free.
+NeSy-NIDS uses 13{,}825 parameters for the CTU-IoT-23 configuration
+($d{=}37$; $7{\times}$ fewer than the MLP; 13{,}764 in the neural
+fallback, 60 in the rule bank, plus one scalar gate) but incurs a
+$2.4{\times}$ latency cost (1.03\,$\mu$s/sample) from product-of-sigmoids
+rule evaluation. Latency was measured on a single CPU core (Intel Core i9-9820X
+at 3.30\,GHz, batch size 512), both models remain well within the throughput budget
+of gateway hardware.
+
+
+\subsection{Discussion}
+
+\textbf{Dataset structure governs OOD detectability.}
+CTU-IoT-23 has four well-separated known classes whose traffic profiles
+map cleanly within eight expert rules. CIC-IoT-2023's 29 unknown attack
+families largely share high-level characteristics (high packet rate,
+short connections) with known attacks, causing overlap in jointly
+trained rule and concept spaces. This aligns with Fort
+et al.~\cite{fort2021exploring} that representation quality governs
+Mahalanobis OOD performance. Our results refine this finding with the
+task-coupling OOD penalty showing that the quality bottleneck is introduced
+by the \emph{degree} of joint task optimisation, not by vocabulary size
+or compression ratio alone.
+
+\textbf{Inherent vs.\ post-hoc interpretability.}
+Post-hoc explainers such as xNIDS~\cite{wei2023xnids} generate high-fidelity
+explanations from a black-box model, but these explanations are external
+and can become inconsistent when the underlying model is retrained. Our
+architectures embed interpretability in the model itself, at no accuracy cost,
+and use the same interpretable representation for OOD detection.
+The two designs serve different operational needs. CBM supports test-time
+concept intervention by a domain analyst, whereas NeSy-NIDS allows direct
+inspection of learned threshold values and their drift from the initial
+expert specification. Only inherent interpretability enables both test-time
+expert intervention and alignment with regulatory
+requirements~\cite{arp2022dos,rudin2019stop}.
+
+\textbf{Deployment implications.}
+The $\gamma$ and $\lambda_\alpha$ hyperparameters provide complementary
+control over interpretability. $\gamma$ controls concept fidelity and OOD
+separation but must be fixed before training, as it shapes the gradient
+signal during encoder optimisation and cannot be adjusted without
+retraining the concept encoder. $\lambda_\alpha$, by contrast, penalises
+only the scalar gate $w_\alpha$ and can be tuned via brief fine-tuning
+after the main training run, without retraining the rule bank or neural
+fallback. Softmax-based OOD detectors such as
+MaxSoftmax~\cite{hendrycks2017baseline} and energy
+scoring~\cite{liu2020energy} operate on output probabilities and can be
+applied post-hoc to any classifier, but score OOD samples in an opaque
+output space. Our architectures score in the interpretable bottleneck
+space, so a flagged sample can be simultaneously \emph{detected} and
+\emph{diagnosed} via its concept or rule activations a property
+unavailable to post-hoc scoring methods. Both architectures fit within the computational budget of gateway-class
+hardware (Section~\ref{sec:compute}) and are therefore deployable on
+resource-constrained IoT devices.
+
+\textbf{Limitations.} CBM variants use a single random seed; $\gamma$
+ablation results are indicative trends rather than statistically confirmed
+differences. Multi-seed CBM evaluation and a full $\lambda_\alpha$ sweep are
+left for future work. Additionally, concept labels are empirical threshold
+functions, and Mahalanobis distance is an
+approximation in the binary rule-activation space.
+
+\section{Conclusion}
+
+We evaluated CBMs and NeSy-NIDS as interpretable open-set NIDS on two IoT
+datasets, finding that JointCBM and NeSy-NIDS sacrifice no classification F1
+vs.\ an unconstrained MLP ($\pm0.002$) while delivering human-auditable representations.
+On CTU-IoT-23, both exceed the MLP at 5\% FPR while on CIC-IoT-2023,
+JointCBM with $\gamma$ at $0.5$ achieves the best AUROC of 0.728 outperforming
+both SequentialCBM and no grounding hence establishing the \emph{task-coupling OOD penalty}. Moderate concept
+regularisation maximises distributional spread for Mahalanobis separation.
+Future work should explore data-driven rule/concept discovery, hierarchical
+architectures combining both bottleneck types, experimental validation of test-time concept intervention in CBM, and evaluation on
+enterprise-scale traffic with a less favourable known-to-unknown class ratio.
+
+\section*{Acknowledgment}
+The authors declare that no specific funding was received for this research.
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\begin{IEEEbiographynophoto}{Crisphine Macharia Ngari}
+(Student Member, IEEE) received the B.Sc. degree in Electrical and Computer
+Engineering from Gandhi Institute of Technology and Management, India, in 2024. He is currently pursuing the M.Sc degree in Electrical and Computer Engineering with the School of Electrical, Computer and Biomedical Engineering, Southern Illinois University Carbondale. His research interests include machine learning for network security, network intrusion detection systems, interpretable artificial intelligence, open-set recognition for
+IoT traffic analysis, and hardware security.
+\end{IEEEbiographynophoto}
+
+\begin{IEEEbiographynophoto}{Ning Weng}
+(Senior Member, IEEE) received His Ph.D. degree in Electrical and Computer Engineering from
+the University of Massachusetts Amherst, Amherst, MA, USA, in 2005.
+He is currently a Professor with the School of Electrical, Computer
+and Biomedical Engineering, Southern Illinois University-Carbondale, IL, USA.
+His research interests include scalable system design for deep packet
+inspection, machine learning, network systems, and security.
+\end{IEEEbiographynophoto}
+
+\end{document}

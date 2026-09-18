@@ -1,0 +1,549 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\usepackage{times}
+\setlist[itemize]{leftmargin=1.6em,topsep=2pt,itemsep=1pt}
+
+\newcommand{\reviewer}[1]{\bigskip\noindent{\Large\textbf{Reviewer~#1}}\par\medskip}
+\newcommand{\cmt}[2]{\medskip\noindent\textbf{Comment #1.} \textit{#2}\par}
+\newcommand{\resp}{\smallskip\par\noindent\textbf{Response:} }
+\newcommand{\revs}{\smallskip\par\noindent\underline{\textbf{The specific revisions/updates in the manuscript are detailed below:}}\par}
+
+\begin{document}
+
+\begin{center}
+{\Large\textbf{Response to Reviewers}}\\[4pt]
+\textbf{Manuscript:} Interpretable Open-Set Intrusion Detection for IoT: What
+Governs Out-of-Distribution Detection in Concept-Bottleneck and Neuro-Symbolic
+Models\\[2pt]
+\textbf{Manuscript ID:} IoT-69735-2026 \quad\textbullet\quad \textbf{Journal:} IEEE Internet of Things Journal
+\end{center}
+
+\noindent\textbf{Dear Editor-in-Chief,}
+
+\smallskip
+We thank you and the two reviewers for the careful and detailed reading of our
+manuscript. The comments were precise and constructive, and working through them
+has improved the rigour and clarity of the paper. Below we respond to every
+comment in turn. For each one we restate the concern, describe the change we
+made and why it addresses the concern, and give the location of the change in the
+manuscript. All added or modified text appears in blue in the accompanying
+tracked-changes version, so each revision can be checked directly.
+
+One outcome of this revision is significant enough that we want to state it up
+front. Both reviewers asked us to replace our single-seed Concept-Bottleneck
+results with a five-seed evaluation (Comments R1.4 and R2.2). When we did, the
+``task-coupling OOD penalty'' that had been a headline claim of the original
+submission did not reproduce: it rested on one favourable seed. We have removed
+the claim rather than defend a result we can no longer support, retitled the
+paper, and rebuilt it around the conclusion the five-seed evidence does support,
+that representation geometry and scorer choice, not the strength of concept
+regularisation, govern open-set detectability. The non-replication is now
+reported as a result in its own right. The paper is more honest for the change,
+and we thank the reviewers for prompting it.
+
+\smallskip
+\noindent\textbf{The principal revisions and updates are summarized as follows:}
+\begin{itemize}
+  \item Re-evaluated every learned model (MLP, JointCBM $\times4\,\gamma$,
+  SequentialCBM, HybridCBM, NeSy-NIDS) over \textbf{five seeds} with mean$\pm$std
+  (Table~IV), and replicated the CIC $\gamma$ ablation on a second independent
+  five-seed set.
+  \item Withdrew the single-seed ``task-coupling'' claim and its figure; retitled
+  and re-abstracted the paper around the scorer--representation finding.
+  \item Added a \textbf{scorer ablation} (Table~V) comparing per-class
+  Mahalanobis with Hamming, Jaccard, energy, and a combined score.
+  \item Added \textbf{post-hoc OOD baselines} (MSP, ODIN, energy, deep $k$NN,
+  Mahalanobis) on the unconstrained MLP (Table~VI).
+  \item Added an \textbf{alternative known/unknown split} on both datasets and a
+  \textbf{temporal, session-respecting split} (Table~I).
+  \item Replaced the concept-accuracy proxy with a \textbf{direct concept-leakage
+  probe} and decoupled concept accuracy from OOD detection (Section~IV-D).
+  \item Added a full \textbf{$\lambda_\alpha$ sweep} over six values $\times$ five
+  seeds (Table~VII and figure).
+  \item Added the \textbf{exact concept and rule definitions with thresholds}
+  (Table~II).
+  \item \textbf{Quantified} the previously qualitative Fig.~3 and Fig.~4 claims
+  (variance--AUROC correlation; threshold-drift reproducibility).
+  \item Corrected the computational analysis to \textbf{single-thread, batch-1
+  latency} and removed the unsupported on-device claims (Section~IV-E).
+  \item Added a research-gap discussion and a ``Scope of the contribution''
+  paragraph stating what is and is not novel; redrafted the Abstract,
+  Introduction, and Conclusion.
+\end{itemize}
+
+\smallskip
+We resubmit the revised manuscript for your consideration and hope the reviewers
+find their concerns fully addressed.
+
+\smallskip
+\noindent Sincerely,\\
+\noindent The Authors
+
+% =====================================================================
+\reviewer{1}
+\noindent\textbf{Comments to the Author.} \textit{This paper presents a timely
+and well-executed study on interpretable open-set intrusion detection for IoT
+networks, evaluating two complementary architectures (Concept Bottleneck Models
+and Neuro-Symbolic NIDS) with rigorous empirical validation. The work addresses
+two critical deployment barriers---lack of interpretability and poor handling of
+novel attack families. Recommendation: major revision, particularly regarding
+experimental rigor, presentation clarity, and the depth of theoretical
+grounding.}
+
+\smallskip
+We thank the reviewer for the positive assessment and for comments that sharpened
+the paper's rigour and clarity. We address each point below.
+
+\cmt{R1.1}{The paper treats 4 classes as known and 9 as unknown on CTU-IoT-23,
+and 5 known/29 unknown on CIC-IoT-2023. The selection criteria for which classes
+are known vs.\ unknown is not justified. This choice significantly impacts OOD
+difficulty and should be motivated by plausible deployment scenarios.}
+\resp The reviewer is right that the partition shapes OOD difficulty and should be
+motivated rather than assumed. We have added a ``Known/unknown selection''
+paragraph (Section~III-A) that sets out the reasoning. The known set consists of
+the coarse traffic archetypes an operator can plausibly label early in a
+deployment: a benign baseline together with one representative family from each
+dominant malicious category (volumetric DDoS, botnet C\&C/Mirai flooding, and
+reconnaissance/scanning). The held-out unknowns are mostly sub-families and
+protocol variants of those same categories, which matches the operational
+open-set case in which a detector trained on a few labelled exemplars must flag
+novel variants of known threat types. We also do not rest on this argument alone:
+as explained under Comment~R1.8, the central findings hold under an alternative
+known/unknown partition and under a temporal split, so they are not an artefact of
+this particular choice.
+\revs
+\begin{itemize}
+  \item Added the ``Known/unknown selection'' paragraph motivating the partition
+  by a deployment scenario (Section~III-A).
+  \item Cross-referenced the alternative-split and temporal-split checks that
+  support the choice empirically (Comment~R1.8; Section~III-A).
+\end{itemize}
+
+\cmt{R1.2}{The paper states $\lambda$ was selected by ``coarse grid search over
+$\{0.1,0.5,1.0\}$'' (Section III-E). This is insufficient detail---what
+validation metric was optimized? How was the grid chosen? The single
+$\lambda=0.5$ value used throughout suggests limited hyperparameter exploration.}
+\resp The original description was too brief to reproduce, and we have expanded it
+in Section~III-E. The weight $\lambda$ scales the concept-supervision term of the
+loss; the grid $\{0.1,0.5,1.0\}$ spans an order of magnitude around the operative
+regime, and the selection criterion was the known-class validation weighted F1,
+the same quantity used for early stopping. Known-class F1 turns out to be almost
+invariant to $\lambda$ (within $\pm0.002$ on both datasets), which is why we fixed
+$\lambda$ at the middle value and varied $\gamma$ instead. To show this rather
+than assert it, we added a $\lambda$-sensitivity table (Table~III, five seeds) for
+F1, concept accuracy, and OOD AUROC. F1 stays flat while $\lambda$ trades concept
+accuracy against OOD detectability in opposite directions on the two datasets (CTU
+AUROC $0.790{\to}0.884$; CIC $0.752{\to}0.724$ as $\lambda$ goes from $0.1$ to
+$1.0$). The single value is therefore a considered choice supported by evidence,
+not a sign of limited search.
+\revs
+\begin{itemize}
+  \item Clarified the role of $\lambda$, the optimisation metric, and the grid
+  rationale (Section~III-E).
+  \item Added Table~III reporting F1, concept accuracy, and OOD AUROC across
+  $\lambda$ over five seeds.
+\end{itemize}
+
+\cmt{R1.3}{The use of Mahalanobis distance on binary rule activations
+(Section III-C.4) is theoretically questionable, as the authors note. This
+approximation is acknowledged but not justified or evaluated against alternatives
+(e.g., Hamming distance, Jaccard similarity).}
+\resp Acknowledging the approximation without testing it was a real gap. We now
+evaluate it directly with a scorer ablation (Table~V, five seeds) that sets
+per-class Mahalanobis against two distances native to the binary simplex (Hamming
+and Jaccard to the nearest known-class majority-vote centroid), a logit-space
+energy score, and a Mahalanobis+energy combination, all under one protocol. The
+outcome is informative. On the well-separated CTU activations every
+activation-space scorer performs about the same (Mahalanobis $0.899$, Jaccard
+$0.891$, Hamming $0.863$), so the Gaussian assumption is not what limits
+performance there. On the near-deterministic CIC activations no activation-space
+scorer exceeds $0.64$ and only the logit-space energy score recovers detection
+($0.749$). What decides the outcome is the geometry of the representation, not the
+metric applied to it. We keep the caveat that Mahalanobis is an approximation on
+binary vectors, but the choice is now supported empirically, and we state in the
+text that the scorer has to be matched to the representation.
+\revs
+\begin{itemize}
+  \item Added Table~V (scorer ablation: Mahalanobis, Hamming, Jaccard, energy, and
+  combined) with discussion (Section~IV-B).
+  \item Added an explicit, ablation-backed statement that Mahalanobis is an
+  approximation on binary activations (Section~III-C).
+\end{itemize}
+
+\cmt{R1.4}{CBMs use ``single seed'' (Section III-E), while NeSy-NIDS uses 5 seeds.
+This inconsistency undermines the statistical validity of the CBM results,
+particularly for the $\gamma$ ablation study where differences are modest (0.838
+to 0.895 AUROC). The authors should have performed multi-seed runs.}
+\resp This was the most consequential weakness in the original submission, and we
+have corrected it. Every learned model, the MLP, all four JointCBM $\gamma$
+variants, SequentialCBM, HybridCBM, and NeSy-NIDS, now reports five-seed
+mean$\pm$std (Table~IV). The analysis did more than add error bars. The modest CTU
+$\gamma$ differences the reviewer points to ($0.838/0.895/0.883/0.887$) do not
+reproduce: over five seeds they become $0.800/0.828/0.835/0.840$ with standard
+deviations of $0.023$--$0.044$, and SequentialCBM's earlier CTU value of $0.707$
+was an unlucky draw (five-seed mean $0.885$). The CIC ``task-coupling'' effect
+that carried part of the original narrative also failed to reproduce; we have
+withdrawn it and reframed the paper, as described in the Central Revision below.
+\revs
+\begin{itemize}
+  \item Re-ran every learned model over five seeds; Table~IV reports mean$\pm$std.
+  \item Replicated the CIC $\gamma$ ablation on a second independent five-seed set
+  and withdrew the task-coupling claim (Central Revision).
+\end{itemize}
+
+\cmt{R1.5}{The paper claims ``joint evaluation'' but largely treats the two
+architectures independently. The authors should strengthen the novelty narrative
+by more explicitly positioning how their integrated evaluation framework provides
+unique insights beyond prior work.}
+\resp The original framing did not make the value of the joint treatment clear, and
+we have reworked it around a unified open-set evaluation framework. Two
+structurally different interpretable models, a concept bottleneck and a
+neuro-symbolic rule bank, are held to one identical protocol: the same data
+splits, OOD scorer, thresholding, and seeds. The point of the design is not to
+merge the two architectures but to make their behaviour directly comparable, and
+that comparability is what produces the two findings that survive replication.
+The dependence of scorer effectiveness on representation geometry is visible only
+because the two representations differ under an otherwise identical pipeline, and
+the absence of a consistent concept-regularisation effect is visible only because
+the effect is tracked across both architectures, both datasets, and multiple
+splits. We make this reasoning explicit in the Abstract, the revised contribution
+list, and a new ``Scope of the contribution'' paragraph (Section~I), and reinforce
+it in the Discussion.
+\revs
+\begin{itemize}
+  \item Added the ``Scope of the contribution'' paragraph and revised the
+  contribution list to foreground the unified-protocol insight (Section~I).
+  \item Revised the Abstract and Discussion to state what the joint evaluation
+  uniquely reveals.
+\end{itemize}
+
+\cmt{R1.6}{Can you provide the exact 8 concept definitions for each dataset,
+including the threshold values used to generate ground-truth concept labels?}
+\resp Yes. Table~II now lists all eight concepts for each dataset together with
+the exact threshold expression used to produce every ground-truth label, for
+example \texttt{is\_high\_rate} ($\mathrm{Rate}>1000$\,pps) and
+\texttt{is\_incomplete\_handshake} ($\mathrm{syn\_count}>2 \wedge
+\mathrm{fin\_count}=0$) on CTU-IoT-23. CTU thresholds are given in raw physical
+units and CIC thresholds in standardised (z-scored) units, matching the two
+preprocessing pipelines, so the concept labels can be regenerated exactly from the
+raw features. We also note in the text that, because the labels are deterministic
+threshold functions, our reported concept accuracy measures agreement with these
+declared thresholds rather than with external semantic ground truth.
+\revs
+\begin{itemize}
+  \item Added Table~II with all eight concept definitions and exact thresholds for
+  both datasets, units specified.
+  \item Clarified that concept accuracy measures agreement with the declared
+  threshold labels (Section~III-B).
+\end{itemize}
+
+\cmt{R1.7}{Why was TON\_IoT excluded despite being a widely-used IoT security
+benchmark? Would the task-coupling OOD penalty generalize to this dataset?}
+\resp The exclusion is a deliberate scoping decision that we should have justified.
+Our concept and rule vocabularies are defined over Zeek-style bidirectional flow
+statistics (packet and byte counts, inter-arrival times, connection state, and
+flag counts), which CTU-IoT-23 and CIC-IoT-2023 share and which allow a controlled
+comparison over the same feature interface. TON\_IoT's network features are not
+expressed over this interface, so using it would mean re-deriving the entire
+concept and rule vocabulary and would confound the same-interface comparison the
+study depends on; we have added this reasoning to Section~III-A. On whether the
+task-coupling penalty would carry over to TON\_IoT: that claim did not survive
+multi-seed replication and has been withdrawn (see the Central Revision), so the
+question no longer arises. The mechanisms that do survive, the dependence of OOD
+detectability on representation geometry and scorer choice, are properties of the
+training objective and representation rather than of any one dataset, and testing
+them on further benchmarks is a natural next step.
+\revs
+\begin{itemize}
+  \item Added the TON\_IoT exclusion rationale based on feature-interface
+  compatibility (Section~III-A).
+  \item Noted that the withdrawn task-coupling claim makes the generalisation
+  sub-question moot, and flagged broader-benchmark evaluation as future work.
+\end{itemize}
+
+\cmt{R1.8}{How sensitive are the results to the known/unknown class split? Have
+you tested alternative splits?}
+\resp We tested this two ways. First, we built an alternative CTU known set
+(\{Benign, DDoS, Okiru, C\&C\}, promoting C\&C from the unknown pool and demoting
+C\&C-HeartBeat) and a matching alternative CIC known set, and re-ran the full CBM
+evaluation over five seeds on each. The conclusions hold: every JointCBM variant
+stays within $0.005$ of the MLP on known-class F1 ($0.994$ on CTU), and $\gamma$
+again fails to buy OOD detection (MLP $0.841$; JointCBM $\gamma{=}0$: $0.721$ down
+to $\gamma{=}1.0$: $0.667$), this time in the opposite direction to the main split,
+which is itself a sign that the $\gamma$ effect is not consistent. The CIC
+alternative split behaves the same way (F1 within $0.002$ of the MLP's $0.819$;
+JointCBM AUROC $0.752{\to}0.727$ with $\gamma$). Second, we added a temporal,
+session-respecting split (Table~I; see also Comment~R2.3). The qualitative
+findings hold across all four dataset/split combinations, which is strong evidence
+that they do not depend on the original partition.
+\revs
+\begin{itemize}
+  \item Added alternative CTU and CIC known/unknown splits, each over five seeds
+  (Section~III-A).
+  \item Added the temporal, session-respecting split (Table~I) as a further check.
+\end{itemize}
+
+% =====================================================================
+\reviewer{2}
+\noindent\textbf{Comments to the Author.} \textit{The manuscript investigates
+interpretable open-set IoT intrusion detection using CBMs and a neuro-symbolic
+NeSy-NIDS architecture. The topic fits IoT-J well, but the work currently appears
+closer to an empirical integration/evaluation of established techniques.}
+
+\smallskip
+The reviewer's characterisation is accurate, and it led us to state the nature of
+the contribution far more precisely. We address the ten points below.
+
+\cmt{R2.1}{CBM, STE-based differentiable logic, Mahalanobis OOD scoring, and
+neural/rule hybridization are all established techniques, while NeSy-NIDS mainly
+appears to assemble these components. The authors should explicitly identify
+which mathematical or algorithmic mechanism is fundamentally new rather than
+application-specific integration.}
+\resp We now state the claim of novelty explicitly and keep it modest, in a new
+``Scope of the contribution'' paragraph (Section~I). We do not claim that concept
+bottlenecks, sigmoid-relaxed threshold rules, Mahalanobis scoring, or neural/rule
+hybridisation are individually new, and we say so plainly. The contribution is
+empirical and methodological, not a new learning algorithm: a controlled,
+multi-seed open-set study that identifies what actually governs
+out-of-distribution detection in these models, the coupling between the scoring
+rule and the geometry of the representation, and that overturns a plausible but
+seed-fragile ``task-coupling'' effect we had ourselves reported. In a literature
+where single-seed claims are common, establishing which mechanisms genuinely
+transfer to open-set NIDS, under replication and against stronger baselines, is a
+useful result, and we have framed the paper around it.
+\revs
+\begin{itemize}
+  \item Added the ``Scope of the contribution'' paragraph delimiting what is and
+  is not novel (Section~I).
+  \item Revised the Related Work positioning to state that the components are
+  established and to place the contribution at the level of the empirical study.
+\end{itemize}
+
+\cmt{R2.2}{The CBM experiments use only a single random seed, which seriously
+weakens the central conclusions. Differences such as AUROC 0.890 vs 0.895 or
+0.883 are too small to interpret without variance estimates, particularly when
+NeSy-NIDS itself exhibits $\pm0.016$--$0.028$ AUROC variation.}
+\resp This point, shared with Reviewer~1 (Comment~R1.4), drove the central revision
+of the paper. All learned models now report five-seed mean$\pm$std (Table~IV), and
+the reviewer's specific worry is borne out. With variance estimated, the small CTU
+$\gamma$ differences fall well within one standard deviation of each other
+(five-seed AUROC $0.800/0.828/0.835/0.840$, std $0.023$--$0.044$), so they cannot
+be read as a real ordering, and the CIC ``task-coupling'' peak disappears. We have
+withdrawn the affected claims and now report only what is stable across seeds.
+\revs
+\begin{itemize}
+  \item Table~IV now reports five-seed mean$\pm$std for all learned models, and
+  claims that do not survive this variance are withdrawn (Central Revision).
+\end{itemize}
+
+\cmt{R2.3}{The open-set evaluation protocol may substantially overestimate real
+deployment generalization. The manuscript randomly partitions flows before
+withholding attack families, but it does not demonstrate separation by device or
+capture session.}
+\resp Random partitioning can indeed leak session identity between train and test,
+and we have added a temporal, session-respecting split to test for it (Table~I). A
+strictly device-disjoint attack split is not feasible on CTU-IoT-23, because the
+malicious families come from very few source hosts (Okiru, DDoS, and
+C\&C-HeartBeat originate from only 4, 7, and 5 source IPs). We instead order each
+known class by capture timestamp and train on the earliest 70\% while testing on
+the latest 15\%, so test traffic strictly follows training traffic in time. The
+analysis also exposed a property of the dataset that we report openly: the CTU
+\emph{DDoS} family is temporally bimodal, a high-rate flood capture followed by a
+near-zero-rate one, so a timestamp split turns DDoS into a cross-capture task on
+which every model, the unconstrained MLP included, scores F1 $0.00$. We therefore
+report the three temporally-coherent families, whose weighted F1 drops from
+${\approx}0.99$ under a random split to $0.862$ under the temporal one, which
+confirms the reviewer's point that random partitioning is optimistic. The central
+conclusions still hold: OOD AUROC rises only weakly with $\gamma$
+($0.765/0.798/0.831/0.833$ versus MLP $0.795$), the reverse of the alternative-split
+ordering, and NeSy-NIDS remains the strongest OOD detector ($0.898$).
+\revs
+\begin{itemize}
+  \item Added the temporal, session-respecting split with per-class F1,
+  coherent-family F1, and OOD AUROC (Table~I, Section~III-A), including the DDoS
+  bimodality finding.
+\end{itemize}
+
+\cmt{R2.4}{The OOD baseline comparison is too limited for the paper's main
+open-set claim. Comparing mainly against Mahalanobis-MLP, DT, and RF is
+insufficient to demonstrate state-of-the-art open-set capability.}
+\resp We have broadened the comparison and corrected the framing of the claim. Five
+established post-hoc detectors now run on the unconstrained MLP (Table~VI): maximum
+softmax probability, ODIN, energy, deep $k$-nearest-neighbours, and per-class
+Mahalanobis. The comparison is telling. Confidence-based scores fail on this task
+(inverted on CTU, $0.18$--$0.23$; only modest on CIC, $0.64$--$0.75$), while
+feature-space detectors are strong and set the effective ceiling ($k$NN $0.908$ on
+CTU / $0.846$ on CIC; Mahalanobis $0.890$ / $0.821$). We do not claim to beat these
+black-box detectors, and we now say explicitly that we make no state-of-the-art
+open-set claim. What we do show is that interpretable rule and concept spaces keep
+competitive OOD separability while remaining auditable, alongside the finding that
+the effective scorer is set by the representation.
+\revs
+\begin{itemize}
+  \item Added Table~VI with MSP, ODIN, energy, deep $k$NN, and Mahalanobis on the
+  MLP.
+  \item Added an explicit statement that no state-of-the-art claim is made, and
+  reframed the contribution as competitive-with-auditability (Section~IV-B).
+\end{itemize}
+
+\cmt{R2.5}{Mahalanobis modeling over exactly binary NeSy rule vectors is
+theoretically questionable and experimentally under-validated. The
+eight-dimensional binary activation vectors violate the multivariate Gaussian
+assumption, yet the entire NeSy OOD mechanism depends on this approximation.}
+\resp A mechanism this central needed explicit validation, which the scorer
+ablation from Comment~R1.3 now provides (Table~V). Under one protocol we compare
+per-class Mahalanobis against two scorers that make no Gaussian assumption and
+work natively on binary vectors (Hamming and Jaccard distance to the nearest class
+centroid), a logit-space energy score, and a combination. On the well-separated
+CTU activations all activation-space scorers perform about equally, so the Gaussian
+assumption is not the limiting factor there; on the near-deterministic CIC
+activations none succeeds, whatever assumption it makes. The adequacy of
+Mahalanobis is therefore an empirical finding that depends on the representation,
+not an unexamined assumption, and the text now presents it that way.
+\revs
+\begin{itemize}
+  \item Table~V validates Mahalanobis against binary-native (Hamming, Jaccard) and
+  logit-space scorers; Sections~III-C and IV-B revised accordingly.
+\end{itemize}
+
+\cmt{R2.6}{The claim that $\gamma$ regularization eliminates concept leakage is
+not demonstrated or unclear how to verify. Table II only reports agreement
+between predicted concepts and threshold-generated concept labels.}
+\resp Both observations are correct: concept accuracy is only agreement with the
+threshold labels and does not measure leakage, and the original claim was not
+demonstrated. We replaced the proxy with a direct probe. A linear classifier is
+trained to predict the class from (i) the soft concept scores and (ii) their
+binarised values, and leakage is the test-accuracy gap, the extra task information
+carried by the soft deviations beyond the declared concept values (five seeds).
+Measured this way, leakage is negligible on CTU-IoT-23 ($\le0.008$ for every
+$\gamma$) and sits at $0.05$--$0.07$ on CIC-IoT-2023 with no reduction as $\gamma$
+grows ($\gamma{=}0$: $0.051$; $\gamma{=}1.0$: $0.068$). Since the evidence does not
+support the original claim, we have retracted the statement that $\gamma$
+eliminates leakage and now present concept accuracy as the property $\gamma$
+controls, kept separate from OOD detection.
+\revs
+\begin{itemize}
+  \item Added the soft-versus-binarised linear-probe leakage measurement
+  (Section~IV-D).
+  \item Retracted the ``$\gamma$ eliminates leakage'' claim and decoupled concept
+  accuracy from OOD detectability.
+\end{itemize}
+
+\cmt{R2.7}{The claimed $\alpha$-controlled interpretability--OOD Pareto front is
+unsupported. Only $\lambda_\alpha=0$ and $0.1$ are evaluated, producing
+essentially two operating points, while the manuscript itself admits a complete
+sweep is future work.}
+\resp Two operating points cannot support a Pareto-front claim, and we have run the
+full sweep, $\lambda_\alpha \in \{0,0.05,0.1,0.2,0.5,1.0\}$ over five seeds each
+(Table~VII and figure). The results call for a more careful statement. The
+regulariser raises the learned gate $\alpha$ (rule reliance) monotonically from
+${\sim}0.30$--$0.38$ to ${\sim}0.86$--$0.95$ at no cost in known-class F1, while
+OOD AUROC stays flat on CTU (within $0.015$ across the whole sweep) and rises by
+about $0.05$ on CIC. We now describe $\lambda_\alpha$ as a control that lets an
+operator dial up rule reliance at no accuracy or detection cost, rather than as a
+Pareto front, and we removed the earlier suggestion that it could be adjusted
+without retraining (each sweep point was trained from scratch), which we mark as
+untested.
+\revs
+\begin{itemize}
+  \item Added Table~VII and the $\alpha$-gate sweep figure over six values $\times$
+  five seeds (Section~IV-C).
+  \item Reworded the claim from a ``Pareto front'' to a ``control knob'' and
+  flagged the fine-tuning conjecture as untested.
+\end{itemize}
+
+\cmt{R2.8}{100\% rule crispness is not a particularly convincing contribution
+because it follows directly from the hard thresholding operation in Eq.~(6).}
+\resp Exact binarity follows from the hard threshold and is not, in itself, a
+result; we no longer present it as one. Working through this comment also led us to
+correct a genuine imprecision in the method description, which we report for
+accuracy: the hard $0.5$ threshold is applied only at inference (for the audited
+rule vector and OOD scoring), while training uses the annealed sigmoid gates
+throughout, and the straight-through gradient is not part of the training path. We
+corrected Section~III-C and Algorithm~2 to say this and no longer describe
+binarity as a contribution. In its place we report a measure that does carry
+information: the fraction of soft activations at $k{=}10$ lying within $0.1$ of
+binary before the cut ($0.86$ on CTU, $0.78$ on CIC), which quantifies how close
+the audited rule vector is to the evidence the classifier used, and we check that
+the thresholding is benign for predictions (the predicted class changes on $0.0\%$
+of CTU and $1.2\%$ of CIC validation flows). All previously reported numbers were
+produced by this implementation, so none of them change.
+\revs
+\begin{itemize}
+  \item Corrected the method description and Algorithm~2 to state that hard
+  thresholding is applied only at inference (Section~III-C).
+  \item Replaced the trivial crispness statement with the soft-activation measure
+  and a thresholding-benignity check.
+\end{itemize}
+
+\cmt{R2.9}{The computational/deployment analysis is too optimistic. The reported
+$0.42$--$1.03$\,$\mu$s/sample measurements use an Intel Core i9-9820X desktop-class
+CPU with batch size 512, which does not substantiate the statement that the
+models fit gateway-class or resource-constrained IoT hardware.}
+\resp A batch-512 throughput figure on a desktop CPU says nothing about
+gateway-class hardware, and we have removed that claim (Section~IV-E). We now
+report two quantities that are both meaningful and honestly scoped: the memory
+footprint ($<0.4$\,MB; NeSy-NIDS has $13{,}825$ parameters) and the per-flow,
+single-thread, batch-1 latency, which is the conservative regime for a gateway
+scoring each flow as it completes (MLP $96$\,$\mu$s, JointCBM $109$\,$\mu$s,
+NeSy-NIDS ${\sim}590$\,$\mu$s on the desktop CPU). We state that these are
+desktop-class measurements, make no claim about on-device performance, and note
+that validation on ARM gateway processors is future work.
+\revs
+\begin{itemize}
+  \item Rewrote Section~IV-E around batch-1 single-thread latency and memory
+  footprint.
+  \item Removed the gateway-hardware claim and identified on-device ARM
+  measurement as future work.
+\end{itemize}
+
+\cmt{R2.10}{Fig.~3 attributes CIC's poor NeSy OOD performance to near-deterministic
+rule activations and reduced within-class variance, while Fig.~4 claims threshold
+movements are semantically consistent; neither claim is supported through
+controlled ablations or quantitative correlation analysis.}
+\resp Both claims were qualitative, and we have replaced them with quantitative
+evidence. For Fig.~3, we measured, across all ten NeSy-NIDS models (five seeds on
+each of the two datasets), the relationship between mean within-class
+rule-activation variance and OOD AUROC; the two are strongly correlated (Pearson
+$r{=}0.976$, $p<10^{-5}$). We note in the text that the two datasets form two
+clusters, so the result confirms the between-dataset pattern rather than a
+fine-grained law, and we say so explicitly. For Fig.~4, we quantified how
+reproducible the learned threshold drifts are across seeds: they are strongly
+correlated on CIC (mean pairwise $r{=}0.71$) but seed-dependent on CTU (mean
+pairwise $r{=}0.04$). We have tempered the claim accordingly, reading the CIC drift
+as systematic and the CTU pattern as indicative only, and no longer assert uniform
+semantic consistency.
+\revs
+\begin{itemize}
+  \item Added the within-class-variance versus OOD-AUROC correlation for Fig.~3,
+  with an explicit note on the two-cluster caveat (Section~IV-B).
+  \item Added the threshold-drift reproducibility correlations and tempered the
+  Fig.~4 claim.
+\end{itemize}
+
+% =====================================================================
+\bigskip
+\noindent{\large\textbf{Central Revision (shared across both reviewers)}}\par
+\smallskip
+\noindent This is the largest change in the revision, and we describe it plainly.
+The five-seed evaluation both reviewers asked for (Comments~R1.4 and R2.2) showed
+that the ``task-coupling OOD penalty'' reported in the original submission was an
+artifact of a single favourable seed. The CIC $\gamma{=}0.5$ peak ($0.727$) rested
+on one seed whose $\gamma{=}0$ draw was unusually low ($0.668$; five-seed mean
+$0.746$); over five seeds AUROC in fact decreases monotonically with $\gamma$
+($0.746/0.739/0.727/0.720$), and an independent second five-seed set reproduces
+this with a shallower slope. On CTU the ordering is the reverse, and on the
+alternative and temporal CTU splits it reverses again: across four dataset/split
+combinations the sign of the $\gamma$ effect flips twice and its magnitude never
+exceeds $0.04$. We have removed the task-coupling claim and its figure, retitled
+and re-abstracted the paper, and now report the non-replication itself as a
+methodological result, that single-seed ablations can manufacture spurious
+open-set effects and that open-set claims about interpretable NIDS need multi-seed
+replication. The analysis cost us a headline result, but the paper is more honest
+and more broadly useful for it, and we thank both reviewers for prompting it.
+
+\end{document}
