@@ -1023,6 +1023,29 @@ per dataset and one temporal split (Section~\ref{sec:datasets}); broader
 dataset and split coverage, and the test-time intervention that CBMs make
 possible, remain future work.
 
+\textbf{Scope of the negative result.} Because the caution rests on two datasets we
+state its reach precisely. What we expect to \emph{transfer} is the structural claim
+and the evaluation lesson: since OOD detectability is set by where unknown families
+land relative to the known-class model---a quantity orthogonal to known-class
+properties---interpretable NIDS scored by per-class Mahalanobis or related
+activation-space detectors, under family-holdout open-set evaluation, should show the
+same decoupling of closed-set quality from open-set detection and the same seed-,
+architecture- and split-sensitivity. What we \emph{do not} claim to generalise is any
+particular direction: that CTU-like corpora favour activation-space scorers and
+CIC-like corpora favour a logit-space energy score, that a given metric's sign is
+fixed, or that \emph{no} known-class predictor exists---two datasets show that the
+natural candidates fail here, not that none can succeed anywhere. The finding also
+need not hold for packet- or graph-level representations, learned rather than
+hand-authored concept vocabularies, or OOD scorers beyond the ones we test.
+Expanding the claim to ``no known-class predictor governs open-set detectability in
+IoT NIDS'' has a concrete minimum: replicate the geometry$\times$architecture
+factorial on at least two further IoT corpora with distinct feature
+schemas---one Zeek-style, so the CTU vocabulary transfers unchanged, and one
+packet-level, requiring a fresh vocabulary---each with its own family-holdout splits,
+and test whether the sign reversals persist. A metric that predicts detectability
+consistently across four or more datasets would weaken the negative; persistent
+reversals would graduate the caution from an existence proof to a general standard.
+
 \section{Conclusion}
 
 We evaluated CBMs and NeSy-NIDS as interpretable open-set NIDS on two IoT
