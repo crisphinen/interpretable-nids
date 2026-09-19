@@ -65,21 +65,23 @@ Unlike xNIDS~\cite{wei2023xnids}, which explains a black-box model after the fac
 \smallskip
 \noindent\textbf{Contributions:}
 \begin{enumerate}
-  \item \textbf{Zero accuracy cost}: jointly trained CBMs and differentiable rule learning for IoT NIDS incur no known-class F1 penalty relative to an unconstrained MLP under open-set evaluation, over five seeds on both datasets.
-  \item \textbf{Scorer--representation matching}: OOD detectability depends more on the geometry of the representation than on the scoring rule applied to it. Activation-space scorers all work on the well-separated CTU rule space but fail on the near-deterministic CIC space, where only a logit-space energy score restores detection (Table~\ref{tab:scorer}).
-  \item \textbf{Regularisation strength is not the lever}: concept-fidelity ($\gamma$) regularisation has no consistent effect on OOD AUROC. Its influence is small ($\le0.04$) and changes sign between datasets and between splits of the same dataset, and a $0.06$-AUROC ``task-coupling'' effect visible at a single seed does not survive replication. We report this as evidence that open-set claims on interpretable NIDS need multi-seed evaluation.
-  \item \textbf{Binary rules and a controllable gate}: NeSy-NIDS learns rule thresholds through $k$-annealed sigmoid gates and binarises the activations at inference, giving exactly binary, syntactically checkable if-then rules at no accuracy cost; a penalty on the gate $\alpha$ raises rule reliance across most of its range at no cost in F1 or OOD AUROC.
+  \item \textbf{Main finding---open-set detectability is not reliably governed by any tunable or measurable factor.} Across two IoT benchmarks, six architectures and five seeds, OOD detectability is not controlled by concept-fidelity regularisation ($\gamma$; effect $\le0.07$, sign flipping across five dataset/split combinations, Table~\ref{tab:gamma_splits}) and is not predicted by any known-class geometry statistic: within-class variance, class separability, and even closed-set accuracy all \emph{reverse} across architectures (a Simpson's paradox, Section~\ref{sec:ksweep}). Single-seed effects, such as a $0.06$-AUROC ``task-coupling'', do not replicate. We offer this as a practical evaluation standard---open-set claims on interpretable NIDS need multi-seed, multi-architecture, multi-split validation, not one favourable configuration.
+  \item \textbf{Scorer choice is dataset-contingent and consequential.} The best OOD scorer flips between datasets across all six architectures---per-class Mahalanobis on CTU-IoT-23, where a logit-space energy score is below chance, versus energy on CIC-IoT-2023---so the detector must be matched to the deployment, not chosen a priori (Tables~\ref{tab:scorer},~\ref{tab:scorer_arch}).
+  \item \textbf{Interpretability at zero accuracy cost.} Jointly trained CBMs and NeSy-NIDS match an unconstrained MLP on known-class F1 (within $0.002$ over five seeds on both datasets) under open-set evaluation.
+  \item \textbf{Binary, auditable rules.} NeSy-NIDS learns rule thresholds through $k$-annealed sigmoid gates and binarises the activations at inference, giving exactly binary, syntactically checkable if-then rules at no accuracy cost; a penalty on the gate $\alpha$ raises rule reliance across most of its range at no cost in F1 or OOD AUROC.
 \end{enumerate}
 
 \noindent\textbf{Scope of the contribution.} The components we combine are
 established: concept bottlenecks~\cite{koh2020concept}, sigmoid-relaxed
 threshold rules~\cite{petersen2022logic,yang2022ste}, per-class Mahalanobis
-scoring~\cite{lee2018simple}, and neural/rule hybridisation. The contribution
-is empirical rather than a new learning algorithm: a controlled, multi-seed
-open-set study that identifies what governs OOD detection in these models, the
-coupling between scoring rule and representation, and shows that a plausible
-single-seed ``task-coupling'' effect does not replicate, in line with calls for
-more careful security-ML evaluation~\cite{arp2022dos}.
+scoring~\cite{lee2018simple}, and neural/rule hybridisation. The contribution is
+therefore not a new detector or a state-of-the-art result; it is a controlled,
+multi-seed, multi-architecture open-set study whose \emph{primary result is
+negative}---open-set detectability in these models is not reliably governed by
+regularisation strength or by any known-class geometry statistic, and a plausible
+single-seed effect does not replicate. We intend this as methodological guidance for
+building and evaluating interpretable IoT NIDS, in line with calls for more careful
+security-ML evaluation~\cite{arp2022dos}.
 
 \section{Related Work}
 
@@ -172,8 +174,8 @@ classification (coherent-family F1 $0.862$, DDoS $0.00$) but gives the
 \emph{strongest} temporal-split OOD AUROC of any model here
 ($0.898{\pm}0.048$, and $0.923{\pm}0.006$ with the $\alpha$-gate penalty of
 Section~\ref{sec:alpha}); its well-separated binary rule activations remain the
-best OOD representation on CTU-IoT-23 even under the harder split, reinforcing
-that the representation, not the regularisation strength, governs detectability.
+best OOD representation on CTU-IoT-23 even under the harder split, with
+concept-fidelity $\gamma$ again showing no consistent bearing on detectability.
 
 \begin{table}[t]
 \centering\small
@@ -1024,16 +1026,20 @@ possible, remain future work.
 \section{Conclusion}
 
 We evaluated CBMs and NeSy-NIDS as interpretable open-set NIDS on two IoT
-datasets under one multi-seed protocol. Both match an unconstrained MLP on
-known-class F1 ($\pm0.002$) while exposing a representation an analyst can
-read. Open-set detectability is governed by representation geometry and
-scorer choice: on the well-separated CTU rule space every activation-space
-scorer works, whereas on the near-deterministic CIC space activation-space
-scorers fail and a logit-space energy score restores detection.
-Concept-fidelity regularisation strength, in contrast, has no consistent effect
-on OOD AUROC: its small influence changes sign across datasets and splits, and a
-single-seed ``task-coupling'' effect does not survive replication. Open-set
-claims about interpretable NIDS therefore need multi-seed replication. Future
+datasets under one multi-seed, multi-architecture protocol. Both match an
+unconstrained MLP on known-class F1 ($\pm0.002$) while exposing a representation
+an analyst can read---interpretability at no accuracy cost. Our central result,
+however, is a caution: open-set detectability in these models is \emph{not}
+reliably governed by any factor one would tune or measure. Concept-fidelity
+regularisation has no consistent effect (its small influence changes sign across
+five dataset/split combinations); no known-class geometry statistic predicts it
+(within-class variance, separability and closed-set accuracy all reverse across
+architectures); and single-seed effects such as a ``task-coupling'' penalty do not
+replicate. Which scorer works is itself dataset-contingent---activation-space on
+CTU-IoT-23, logit-space energy on CIC-IoT-2023---and cannot be chosen a priori.
+Open-set claims about interpretable NIDS therefore need multi-seed,
+multi-architecture, multi-split validation rather than one favourable
+configuration. Future
 work includes data-driven rule and concept discovery, architectures that
 combine both bottleneck types, a study of test-time concept intervention, and
 evaluation on enterprise-scale traffic with a less favourable
