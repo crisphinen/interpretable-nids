@@ -20,8 +20,8 @@
   urlcolor=black,
 }
 
-\title{Towards Trustworthy IoT Intrusion Detection: What Governs
-  Open-Set Recognition in Interpretable Models}
+\title{Interpretable Intrusion Detection for IoT: Free Interpretability,
+  Fragile Open-Set Detection}
 
 \author{Ngari~Crisphine~Macharia and~Ning~Weng%
   \thanks{N.~C.~Macharia and N.~Weng are with the School of Electrical,
@@ -41,7 +41,7 @@
 \maketitle
 
 \begin{abstract}
-Machine-learning intrusion detection systems (NIDS) for IoT networks face two obstacles to deployment: operators cannot see why a flow was flagged, and models trained on a closed set of attack families misclassify novel ones (the open-set problem). We study two interpretable architectures under one open-set protocol. Concept Bottleneck Models (CBMs) route predictions through a layer of human-defined traffic concepts and allow test-time intervention. Neuro-Symbolic NIDS (NeSy-NIDS) turns expert attack signatures into threshold rules with learnable thresholds, trained with annealed sigmoid gates and binarised at inference, alongside a neural fallback blended through a learnable gate. On CTU-IoT-23 and CIC-IoT-2023, jointly trained CBMs and NeSy-NIDS match an unconstrained MLP on known-class F1 (within 0.002 over five seeds), so interpretability costs no accuracy. We then ask what governs out-of-distribution (OOD) detection. The representation, not the scoring rule, is decisive: on the well-separated activations of CTU-IoT-23, per-class Mahalanobis and simple centroid distances all reach 0.86--0.90 AUROC, whereas on the near-deterministic activations of CIC-IoT-2023 no activation-space scorer exceeds 0.64 and only a logit-space energy score restores detection. Concept-fidelity regularisation strength, by contrast, has no consistent effect: its small influence on OOD AUROC changes sign between datasets and between splits of one dataset, and a 0.06-AUROC ``task-coupling'' effect seen at a single seed does not survive replication. Representation geometry and scorer choice, not regularisation strength, decide open-set detectability, and single-seed open-set results on interpretable NIDS need replication before they are reported. NeSy-NIDS additionally emits exactly binary, auditable rule activations at no accuracy cost.
+Machine-learning intrusion detection systems (NIDS) for IoT networks face two obstacles to deployment: operators cannot see why a flow was flagged, and models trained on a closed set of attack families misclassify novel ones (the open-set problem). We study two interpretable architectures under one open-set protocol. Concept Bottleneck Models (CBMs) route predictions through a layer of human-defined traffic concepts and allow test-time intervention. Neuro-Symbolic NIDS (NeSy-NIDS) turns expert attack signatures into threshold rules with learnable thresholds, trained with annealed sigmoid gates and binarised at inference, alongside a neural fallback blended through a learnable gate. On CTU-IoT-23 and CIC-IoT-2023, jointly trained CBMs and NeSy-NIDS match an unconstrained MLP on known-class F1 (within 0.002 over five seeds), so interpretability costs no accuracy. We then ask what governs out-of-distribution (OOD) detection, and the main finding is cautionary. Which scorer works is dataset-specific---on CTU-IoT-23 per-class Mahalanobis and simple centroid distances all reach 0.86--0.90 AUROC, whereas on CIC-IoT-2023 no activation-space scorer exceeds 0.64 and only a logit-space energy score restores detection---but no scorer-independent property of the representation predicts this consistently. Concept-fidelity regularisation strength has no consistent effect either: its influence on OOD AUROC is small and changes sign between datasets and splits, and a 0.06-AUROC ``task-coupling'' effect seen at a single seed does not survive replication. A between-dataset correlation suggesting that representation geometry ``governs'' detectability (within-class activation variance tracking AUROC at $r{=}0.98$) reverses within a dataset once architecture is varied ($r{=}-0.84$), marking it a confound rather than a mechanism. No property of the known-class representation---variance, class separability, or even closed-set accuracy---predicts detectability consistently: on CTU-IoT-23 the \emph{worst} closed-set classifier is the \emph{best} unknown-attack detector, contrary to the usual closed-set-implies-open-set heuristic. The lesson is methodological: open-set results on interpretable NIDS that rest on one dataset, seed, or architecture can invert when the others are varied, and need multi-factor replication before they are reported. NeSy-NIDS additionally emits exactly binary, auditable rule activations at no accuracy cost.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -659,7 +659,9 @@ certain}. This is not anecdotal: across the ten NeSy-NIDS models (five seeds
 $\times$ two datasets), mean within-class rule-activation variance correlates
 with OOD AUROC at Pearson $r{=}0.976$ ($p{<}10^{-5}$). We note that the two
 datasets contribute two well-separated clusters to this correlation, so it
-confirms the between-dataset pattern rather than a fine-grained law.
+confirms the between-dataset pattern rather than a fine-grained law---and, as
+Section~\ref{sec:ksweep} shows, it reverses within a dataset once architecture is
+varied, so it does not identify a governing quantity.
 \end{sloppypar}
 \begin{sloppypar}\hbadness=10000
 The learned thresholds move away from their expert initial values
@@ -691,57 +693,109 @@ read the CIC drift as systematic and the CTU pattern as indicative only.
   \label{fig:threshold_drift}
 \end{figure*}
 
-\subsection{Is the Geometry Effect Causal? A Within-Dataset Test}
+\subsection{A Geometry Statistic Does Not Govern Detectability}
 \label{sec:ksweep}
 
-The contrast in Section~\ref{sec:ood} is between two datasets, which leaves open
-whether within-class activation variance \emph{governs} activation-space
-detectability or only correlates with it across two corpora. We test this with a
-controlled manipulation inside each dataset. The annealing steepness $k_T$
-(Section~\ref{sec:nesy}) sets how crisply the rules fire, and a higher $k_T$ drives
-the learned thresholds toward configurations whose binarised activations differ
-more from flow to flow within a class. We retrain NeSy-NIDS at
-$k_T\in\{2,5,10,20\}$ (five seeds each) and score OOD with the same per-class
-Mahalanobis detector, holding everything else fixed. Known-class F1 is flat across
-$k_T$ (CTU-IoT-23 $0.934$, CIC-IoT-2023 $0.819$), so this isolates the OOD
-mechanism at no accuracy cost.
+The between-dataset contrast of Section~\ref{sec:crisp} invites a mechanistic
+reading: that a scorer-independent property of the representation---within-class
+activation variance---\emph{governs} activation-space detectability. We define that
+property as the mean within-class variance of the scoring-space activations,
+computed without reference to any detector, and ask whether it predicts OOD AUROC
+across the full design (architecture $\times$ concept-fidelity $\gamma$ $\times$
+seed), not only across the two datasets. It does not.
 
-The manipulation moves detectability only where it moves the representation's
-within-class variance. On CTU-IoT-23, raising $k_T$ from $2$ to $20$ takes
-crispness from $0.61$ to $0.95$ but leaves the within-class rule-activation
-variance essentially unchanged ($\approx0.13$), and the AUROC is flat within seed
-noise ($0.914\to0.897$; $r{=}0.00$ across the twenty CTU runs). On CIC-IoT-2023 the
-within-class variance rises with $k_T$ ($0.024\to0.040$) and the AUROC rises with
-it at the endpoints ($0.618{\pm}.008$ at $k_T{=}2$ to $0.648{\pm}.018$ at
-$k_T{=}20$), though the intermediate points are noisier ($0.609$, $0.616$) and the
-overall association is moderate ($r{=}0.53$ across the twenty CIC runs).
-Fig.~\ref{fig:ksweep} shows both. The between-dataset pattern of
-Section~\ref{sec:crisp} is thus reproduced, weakly but in the predicted direction,
-\emph{within} a dataset by a single knob: where the manipulation moves within-class
-variance (CIC), detectability follows; where it does not (CTU), it is unmoved.
+Across the thirty CBM concept-space models per dataset (six architecture/$\gamma$
+settings $\times$ five seeds), the sign of the variance--AUROC relationship depends
+on how the design is sliced (Fig.~\ref{fig:confounding}). Between the two datasets
+the one with more within-class variance also has the higher AUROC (CTU
+$0.075$/$0.833$ vs CIC $0.049$/$0.714$), the positive association of
+Section~\ref{sec:crisp}. But \emph{within} CIC-IoT-2023, across architectures, it
+reverses sharply---more within-class variance goes with \emph{worse} detection
+($r{=}-0.84$), SequentialCBM carrying the highest variance and the lowest
+AUROC---while within CTU-IoT-23 it is weak ($r{=}+0.28$) and pooled over both
+datasets only $r{=}+0.48$. The degeneracy of the within-class covariance behaves the
+same way: CIC's activation clusters have \emph{higher} effective rank than CTU's
+($4.9$ vs $3.1$) yet lower AUROC. This is a confound, not a mechanism: raw
+within-class variance conflates useful class-conditional spread with the noise of a
+poorly fitted concept space, so the between-dataset correlation does not survive as
+a within-condition predictor.
 
-\begin{figure*}[!t]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=0.92\textwidth]{figures/ksweep.pdf}
-  \caption{Training-time annealing sweep ($k_T\in\{2,5,10,20\}$, five seeds each).
-    (a)~OOD AUROC (per-class Mahalanobis) versus the final gate steepness $k_T$;
-    known-class F1 is constant throughout ($\approx0.93$ on CTU-IoT-23,
-    $\approx0.82$ on CIC-IoT-2023). (b)~The same runs against within-class
-    rule-activation variance. CTU sits in a high-variance, high-AUROC regime that
-    $k_T$ does not leave; on CIC, $k_T$ moves the variance and detectability follows
-    in the predicted direction, though the gap to CTU is not closed.}
-  \label{fig:ksweep}
-\end{figure*}
+  \includegraphics[width=\columnwidth]{figures/confounding.pdf}
+  \caption{Within-class variance does not govern OOD detectability. One point per
+    CBM concept-space model (six architecture/$\gamma$ settings $\times$ five
+    seeds $\times$ two datasets); dashed lines are per-dataset fits, the grey line
+    joins the dataset means. The between-dataset association is positive (grey), but
+    within CIC-IoT-2023 it reverses ($r{=}-0.84$): a Simpson's paradox that marks
+    the geometry statistic as a confound rather than a mechanism.}
+  \label{fig:confounding}
+\end{figure}
 
-The same experiment marks the limit of the claim. Even at $k_T{=}20$, CIC's
-within-class variance ($0.040$) stays far below CTU's at any $k_T$ ($\approx0.13$),
-and its AUROC never approaches CTU's. Annealing moves detectability \emph{within} a
-dataset's regime but cannot lift CIC into CTU's; the gap between the two is set by
-how class-homogeneously the expert rules fire on each corpus---a property of the
-rule vocabulary and the data, not of the training schedule. We therefore read
-within-class activation variance as governing activation-space OOD detectability,
-with the crispness that makes the rules auditable trading off against it, and we do
-not claim that annealing alone can move a dataset to arbitrary detectability.
+It is not only within-class variance. Known-class \emph{separability} fails the
+same way: the Fisher trace ratio $\mathrm{tr}(S_B)/\mathrm{tr}(S_W)$, a
+ridge-regularised LDA separability $\mathrm{tr}((S_W{+}\varepsilon I)^{-1}S_B)$, and
+even closed-set F1 all correlate with OOD AUROC with \emph{opposite} sign on the two
+datasets (Table~\ref{tab:signflip}). The decisive case is SequentialCBM: on
+CTU-IoT-23 it is the \emph{worst} classifier (F1 $0.573$, Table~\ref{tab:main}) yet
+the \emph{best} interpretable OOD detector (AUROC $0.885$)---a direct counterexample
+to the closed-set-implies-open-set heuristic of Vaze et al.~\cite{vaze2022openset}.
+The only quantity that tracks AUROC consistently is the ratio of unknown to known
+Mahalanobis distance, which is a proxy of AUROC itself and needs the unknowns to
+compute.
+
+\begin{table}[t]
+\centering\small
+\caption{No property of the \emph{known}-class representation predicts OOD AUROC
+consistently: the sign of its correlation with AUROC (thirty CBM concept-space
+models per dataset) flips between CTU-IoT-23 and CIC-IoT-2023. Only the
+unknown-based ratio---a proxy of AUROC that needs the unknowns---is stable.}
+\label{tab:signflip}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{lcc}
+\toprule
+Metric (known-class only) & within CTU & within CIC \\
+\midrule
+Within-class variance & $+0.28$ & $-0.84$ \\
+Fisher ratio $\mathrm{tr}(S_B)/\mathrm{tr}(S_W)$ & $-0.31$ & $+0.81$ \\
+Ridge-LDA separability & $-0.13$ & $+0.70$ \\
+Closed-set F1 & $-0.50$ & $+0.51$ \\
+\midrule
+Unknown/known distance ratio$^\dagger$ & $+0.61$ & $+0.66$ \\
+\bottomrule
+\end{tabular}\\[2pt]
+{\footnotesize $^\dagger$Uses the unknown flows, so it is a proxy of AUROC rather
+than an independent predictor.}
+\end{table}
+
+This locates the confound. OOD detectability is set by \emph{where the unknown
+families fall} relative to the known class-conditional model, and that placement is
+orthogonal to any known-class property. Architecture changes the
+representation---SequentialCBM's frozen concept encoder, fit to the concept
+thresholds rather than the class boundary, spreads the known classes so that
+unknowns land far out on CTU but among the knowns on CIC---so the same change moves
+unknown placement in dataset-specific directions, and every known-class metric's
+correlation with AUROC reverses with it.
+
+A direct manipulation confirms the instability. Retraining NeSy-NIDS at annealing
+steepness $k_T\in\{2,5,10,20\}$ (five seeds) moves the within-class variance at
+constant known-class F1, but AUROC follows only weakly and only on one dataset: on
+CIC it rises with $k_T$ at the endpoints ($0.618\to0.648$) with a moderate
+association ($r{=}0.53$) and a non-monotone middle, while on CTU the variance does
+not move with $k_T$ and AUROC is flat ($r{=}0.00$). No manipulation we tried makes
+within-class variance a consistent lever.
+
+We therefore withdraw the reading that representation geometry \emph{governs}
+open-set detectability. No property of the known-class representation we
+examined---within-class variance, Fisher or LDA separability, or closed-set
+accuracy---predicts it consistently, because detectability is governed by the
+placement of unknown families relative to the known-class model, which is not a
+function of known-class geometry and cannot be anticipated at training time. An
+apparent geometry--detectability law read off a two-dataset correlation reverses
+under a multi-factor analysis. This is the same lesson as the $\gamma$ ablation
+(Section~\ref{sec:ood}): open-set claims on interpretable NIDS that rest on one axis
+of variation---one dataset, one seed, or one architecture---can invert when the
+others are varied.
 
 \subsection{The \texorpdfstring{$\alpha$}{alpha}-Gate and Interpretability Trade-Off}
 \label{sec:alpha}
@@ -844,9 +898,9 @@ CIC-IoT-2023, sits at $0.05$--$0.07$ and, if anything, grows with $\gamma$
 ($\gamma{=}0$: $0.051{\pm}.006$; $\gamma{=}1.0$: $0.068{\pm}.008$). So $\gamma$
 raises concept accuracy but does not remove leakage and, as
 Section~\ref{sec:ood} showed, does not improve open-set detection. Regularisation strength governs concept
-accuracy; representation geometry and scorer choice govern OOD detectability
-(Table~\ref{tab:scorer}). We accordingly withdraw the earlier claim that
-$\gamma$ eliminates concept leakage.
+accuracy but not open-set detectability, which no scorer-independent geometry
+statistic we tested predicts consistently (Section~\ref{sec:ksweep}). We
+accordingly withdraw the earlier claim that $\gamma$ eliminates concept leakage.
 
 \subsection{Computational Overhead}
 \label{sec:compute}
@@ -866,18 +920,22 @@ on-device performance.
 
 \subsection{Discussion}
 
-\textbf{Representation geometry and scorer choice govern OOD detectability.}
+\textbf{Which scorer works depends on the representation, but no simple geometry
+statistic governs it.}
 CTU-IoT-23 has four well-separated known classes whose traffic profiles map
-cleanly onto the eight expert rules, giving activation clusters with the
-covariance structure per-class Mahalanobis exploits. On CIC-IoT-2023 the
-rules fire near-deterministically, within-class variance collapses, and
+cleanly onto the eight expert rules, and per-class Mahalanobis and centroid
+distances all work; on CIC-IoT-2023 the rules fire near-deterministically and
 every activation-space scorer fails where a logit-space energy score works
-(Table~\ref{tab:scorer}). This adds a qualification to Fort et
-al.~\cite{fort2021exploring}: the representation sets the ceiling, and the
-scoring rule has to be chosen for the geometry of that representation; which
-activation-space metric is used matters little. The strength of concept
-regularisation, by contrast, has no consistent effect on OOD AUROC across
-datasets and splits (Section~\ref{sec:ood}).
+(Table~\ref{tab:scorer}). So the scorer has to be chosen for the representation at
+hand, echoing Fort et al.~\cite{fort2021exploring}. It is tempting to explain the
+difference by a scorer-independent property of the representation---within-class
+activation variance---but that explanation does not hold up: the variance--AUROC
+association is positive between datasets yet reverses within a dataset across
+architectures (Section~\ref{sec:ksweep}, Fig.~\ref{fig:confounding}), so it is a
+confound. The strength of concept regularisation likewise has no consistent effect
+on OOD AUROC across datasets and splits (Section~\ref{sec:ood}). The robust
+statement is negative: neither regularisation strength nor any single geometry
+statistic we examined governs open-set detectability.
 
 \textbf{Inherent vs.\ post-hoc interpretability.}
 Post-hoc explainers such as xNIDS~\cite{wei2023xnids} produce faithful
