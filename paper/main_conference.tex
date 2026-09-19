@@ -719,17 +719,12 @@ Section~\ref{sec:ksweep} shows, it reverses within a dataset once architecture i
 varied, so it does not identify a governing quantity.
 \end{sloppypar}
 \begin{sloppypar}\hbadness=10000
-The learned thresholds move away from their expert initial values
-(Fig.~\ref{fig:threshold_drift}, seed 0). On CTU-IoT-23 the
-\texttt{cc\_heartbeat\_beaconing} bounds relax by up to $-0.46$ while the
-\texttt{incomplete\_handshake} SYN condition tightens by $+0.19$. CIC-IoT-2023
-shows larger drifts (up to $-1.15$ on \texttt{syn\_flood\_ddos}), in keeping
-with its more heterogeneous z-scored traffic. To test whether the shifts are
-systematic, we measure their reproducibility across the five seeds. On
-CIC-IoT-2023 the per-condition drifts are strongly correlated across seeds
-(mean pairwise $r{=}0.71$), so the refinement direction is reproducible; on
-CTU-IoT-23 they are seed-dependent (mean pairwise $r{=}0.04$). We therefore
-read the CIC drift as systematic and the CTU pattern as indicative only.
+The learned thresholds move away from their expert initial values (seed~0): on
+CTU-IoT-23 the \texttt{cc\_heartbeat\_beaconing} bounds relax by up to $-0.46$, and
+CIC-IoT-2023 shows larger drifts (up to $-1.15$ on \texttt{syn\_flood\_ddos}). These
+drifts are reproducible across seeds on CIC-IoT-2023 (mean pairwise $r{=}0.71$) but
+seed-dependent on CTU-IoT-23 ($r{=}0.04$), so we read the CIC refinement as
+systematic and the CTU pattern as indicative only.
 \end{sloppypar}
 \begin{figure*}[!t]
   \centering
@@ -737,15 +732,6 @@ read the CIC drift as systematic and the CTU pattern as indicative only.
   \includegraphics[width=0.47\textwidth,height=5.5cm,keepaspectratio]{figures/rule_selectivity1_cic.pdf}
   \caption{Mean binarised rule activation per known class (seed 0).}
   \label{fig:selectivity}
-\end{figure*}
-
-\begin{figure*}[!t]
-  \centering
-  \includegraphics[width=0.47\textwidth]{figures/threshold_drift_ctu.pdf}\hfill
-  \includegraphics[width=0.47\textwidth]{figures/threshold_drift_cic.pdf}
-  \caption{Per-condition threshold drift (learned $-$ initial), seed~0.
-    Red: tightened ($>0$); blue: relaxed ($<0$).}
-  \label{fig:threshold_drift}
 \end{figure*}
 
 \subsection{A Geometry Statistic Does Not Govern Detectability}
