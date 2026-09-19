@@ -16,8 +16,8 @@
 
 \begin{center}
 {\Large\textbf{Response to Reviewers}}\\[4pt]
-\textbf{Manuscript:} Towards Trustworthy IoT Intrusion Detection: What Governs
-Open-Set Recognition in Interpretable Models\\[2pt]
+\textbf{Manuscript:} Interpretable Intrusion Detection for IoT: Free
+Interpretability, Fragile Open-Set Detection\\[2pt]
 \textbf{Manuscript ID:} IoT-69735-2026 \quad\textbullet\quad \textbf{Journal:} IEEE Internet of Things Journal
 \end{center}
 
@@ -72,14 +72,19 @@ and we thank the reviewers for prompting it.
   \item Added a research-gap discussion and a ``Scope of the contribution''
   paragraph stating what is and is not novel; redrafted the Abstract,
   Introduction, and Conclusion.
-  \item Added a \textbf{controlled within-dataset test} of the representation-geometry
-  claim (Section~IV-C, Fig.~5): a training-time annealing sweep ($k_T\in\{2,5,10,20\}$,
-  five seeds) that moves the interpretable representation's within-class variance at
-  constant known-class F1. On CIC-IoT-2023 detectability follows the induced variance
-  in the predicted direction; on CTU-IoT-23, where the variance does not move, it is
-  unchanged---turning the previously between-dataset association into a within-dataset
-  manipulation, while making explicit that annealing moves detectability only within a
-  dataset's regime.
+  \item \textbf{Withdrew the ``representation geometry governs detectability''
+  reading} after a multi-factor test (new Section~IV-C, Fig.~5). A geometry
+  $\times$ architecture $\times$ $\gamma$ factorial (six CBM settings $\times$ five
+  seeds $\times$ two datasets) shows that within-class activation variance predicts
+  OOD AUROC with \emph{opposite} sign between datasets (positive) and within a
+  dataset across architectures ($r{=}-0.84$ on CIC-IoT-2023)---a Simpson's
+  paradox---so the earlier two-dataset correlation was a confound. A direct
+  annealing manipulation ($k_T$ sweep) moves the variance but AUROC follows only
+  weakly and inconsistently. The revised central claim is the negative,
+  methodological one: neither concept-fidelity regularisation nor any single
+  scorer-independent geometry statistic we examined consistently governs open-set
+  detectability, so open-set claims resting on one dataset, seed, or architecture
+  can invert when the others are varied.
 \end{itemize}
 
 \smallskip
