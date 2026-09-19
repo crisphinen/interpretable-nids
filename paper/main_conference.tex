@@ -41,7 +41,7 @@
 \maketitle
 
 \begin{abstract}
-Machine-learning intrusion detection systems (NIDS) for IoT networks face two obstacles to deployment: operators cannot see why a flow was flagged, and models trained on a closed set of attack families misclassify novel ones (the open-set problem). We study two interpretable architectures under one open-set protocol. Concept Bottleneck Models (CBMs) route predictions through a layer of human-defined traffic concepts and allow test-time intervention. Neuro-Symbolic NIDS (NeSy-NIDS) turns expert attack signatures into threshold rules with learnable thresholds, trained with annealed sigmoid gates and binarised at inference, alongside a neural fallback blended through a learnable gate. On CTU-IoT-23 and CIC-IoT-2023, jointly trained CBMs and NeSy-NIDS match an unconstrained MLP on known-class F1 (within 0.002 over five seeds), so interpretability costs no accuracy. We then ask what governs out-of-distribution (OOD) detection, and the main finding is cautionary. Which scorer works is dataset-specific---on CTU-IoT-23 per-class Mahalanobis and simple centroid distances all reach 0.86--0.90 AUROC, whereas on CIC-IoT-2023 no activation-space scorer exceeds 0.64 and only a logit-space energy score restores detection---but no scorer-independent property of the representation predicts this consistently. Concept-fidelity regularisation strength has no consistent effect either: its influence on OOD AUROC is small and changes sign between datasets and splits, and a 0.06-AUROC ``task-coupling'' effect seen at a single seed does not survive replication. A between-dataset correlation suggesting that representation geometry ``governs'' detectability (within-class activation variance tracking AUROC at $r{=}0.98$) reverses within a dataset once architecture is varied ($r{=}-0.84$), marking it a confound rather than a mechanism. No property of the known-class representation---variance, class separability, or even closed-set accuracy---predicts detectability consistently: on CTU-IoT-23 the \emph{worst} closed-set classifier is the \emph{best} unknown-attack detector, contrary to the usual closed-set-implies-open-set heuristic. The lesson is methodological: open-set results on interpretable NIDS that rest on one dataset, seed, or architecture can invert when the others are varied, and need multi-factor replication before they are reported. NeSy-NIDS additionally emits exactly binary, auditable rule activations at no accuracy cost.
+Machine-learning intrusion detection systems (NIDS) for IoT networks face two obstacles to deployment: operators cannot see why a flow was flagged, and models trained on a closed set of attack families misclassify novel ones (the open-set problem). We study two interpretable architectures under one open-set protocol. Concept Bottleneck Models (CBMs) route predictions through a layer of human-defined traffic concepts and allow test-time intervention. Neuro-Symbolic NIDS (NeSy-NIDS) turns expert attack signatures into threshold rules with learnable thresholds, trained with annealed sigmoid gates and binarised at inference, alongside a neural fallback blended through a learnable gate. On CTU-IoT-23 and CIC-IoT-2023, jointly trained CBMs and NeSy-NIDS match an unconstrained MLP on known-class F1 (within 0.002 over five seeds), so interpretability costs no accuracy. We then ask what governs out-of-distribution (OOD) detection, and the main finding is cautionary. Which scorer works is dataset-specific---on CTU-IoT-23 per-class Mahalanobis and simple centroid distances all reach 0.86--0.90 AUROC, whereas on CIC-IoT-2023 no activation-space scorer exceeds 0.64 and only a logit-space energy score restores detection---but no representational property we tested reliably predicts which scorer will work. Concept-fidelity regularisation strength has no consistent effect either: its influence on OOD AUROC is small and changes sign between datasets and splits, and a 0.06-AUROC ``task-coupling'' effect seen at a single seed does not survive replication. A between-dataset correlation suggesting that representation geometry ``governs'' detectability (within-class activation variance tracking AUROC at $r{=}0.98$) reverses within a dataset once architecture is varied ($r{=}-0.84$), marking it a confound rather than a mechanism. No property of the known-class representation---variance, class separability, or even closed-set accuracy---reliably predicts detectability across our six architectures and four dataset/split combinations: on CTU-IoT-23 the \emph{worst} closed-set classifier is the \emph{best} unknown-attack detector, contrary to the usual closed-set-implies-open-set heuristic. The lesson is methodological: open-set results on interpretable NIDS that rest on one dataset, seed, or architecture can invert when the others are varied, and need multi-factor replication before they are reported. NeSy-NIDS additionally emits exactly binary, auditable rule activations at no accuracy cost.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -578,10 +578,65 @@ Mahalanobis scoring works in both the rule and the concept space. NeSy-NIDS ($0.
 Here the unconstrained MLP is the strongest detector ($0.806{\pm}.002$). Among the interpretable models, the four JointCBM $\gamma$ variants sit at $0.720$--$0.746$, decreasing with $\gamma$ (seed-std $0.01$--$0.02$), the reverse of the CTU ordering; SequentialCBM and HybridCBM are lower ($0.678$, $0.674$), and NeSy-NIDS with Mahalanobis scoring reaches only $0.615$. The gap to the MLP is the price of compressing 39 features into 8 concepts. The DT slightly exceeds the MLP because raw-feature Mahalanobis in CIC's z-scored 39-dimensional space happens to separate the held-out unknowns well, a property the 8-dimensional bottleneck partly gives up.
 
 \textbf{Regularisation strength is not the lever.}
-A single-seed run had suggested a ``task-coupling'' effect on CIC, with JointCBM OOD AUROC rising from $0.668$ at $\gamma{=}0$ to a peak of $0.727$ at $\gamma{=}0.5$. Over five seeds there is no peak: AUROC falls monotonically from $0.746$ at $\gamma{=}0$ to $0.720$ at $\gamma{=}1.0$, with $\gamma{=}0.5$ ($0.727$) below $\gamma{=}0$. An independent five-seed replication (seeds~5--9) gives the same picture, with a shallower slope ($\gamma{=}0$: $0.749$; $\gamma{=}0.5$: $0.743$; $\gamma{=}1.0$: $0.741$); pooled over ten seeds, $\gamma{=}0$ scores $0.747{\pm}.014$ and $\gamma{=}0.5$ $0.735{\pm}.013$. On CTU the ordering is the opposite ($0.800{\to}0.840$), and on the alternative CTU split of Section~\ref{sec:datasets} it reverses again. Across four dataset/split combinations the sign of the $\gamma$ effect flips twice and its size never exceeds $0.04$; concept-fidelity regularisation strength therefore does not reliably govern OOD detectability. A single-seed ablation can manufacture an effect larger than any of these, so open-set claims on interpretable NIDS need multi-seed replication.
+A single-seed run had suggested a ``task-coupling'' effect on CIC, with JointCBM OOD AUROC rising from $0.668$ at $\gamma{=}0$ to a peak of $0.727$ at $\gamma{=}0.5$. Over five seeds there is no peak: AUROC falls monotonically from $0.746$ at $\gamma{=}0$ to $0.720$ at $\gamma{=}1.0$, with $\gamma{=}0.5$ ($0.727$) below $\gamma{=}0$. An independent five-seed replication (seeds~5--9) gives the same picture, with a shallower slope ($\gamma{=}0$: $0.749$; $\gamma{=}0.5$: $0.743$; $\gamma{=}1.0$: $0.741$); pooled over ten seeds, $\gamma{=}0$ scores $0.747{\pm}.014$ and $\gamma{=}0.5$ $0.735{\pm}.013$. On CTU the ordering is the opposite ($0.800{\to}0.840$), and on the alternative CTU split of Section~\ref{sec:datasets} it reverses again. Across five dataset/split combinations (Table~\ref{tab:gamma_splits}) the sign of the $\gamma$ effect is inconsistent---positive on the standard and temporal CTU splits, negative on the alternative CTU split and on both CIC splits---and its magnitude never exceeds $0.07$; concept-fidelity regularisation strength therefore does not reliably govern OOD detectability. A single-seed ablation can manufacture an effect larger than any of these, so open-set claims on interpretable NIDS need multi-seed replication.
+
+\begin{table}[t]
+\centering\small
+\caption{Concept-fidelity $\gamma$ does not reliably govern OOD detectability:
+JointCBM OOD AUROC vs.\ $\gamma$ (five seeds) for every split. The sign of the
+$\gamma$ effect ($\Delta{=}\gamma_{1.0}{-}\gamma_0$) is positive on two splits and
+negative on three, and its magnitude stays below $0.07$.}
+\label{tab:gamma_splits}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llccccc}
+\toprule
+Split & Data & $\gamma{=}0$ & $\gamma{=}0.1$ & $\gamma{=}0.5$ & $\gamma{=}1.0$ & $\Delta$ \\
+\midrule
+Standard    & CTU & $0.800$ & $0.828$ & $0.835$ & $0.840$ & $+0.040$ \\
+Alternative & CTU & $0.721$ & $0.713$ & $0.679$ & $0.667$ & $-0.054$ \\
+Temporal    & CTU & $0.765$ & $0.798$ & $0.831$ & $0.833$ & $+0.068$ \\
+Standard    & CIC & $0.746$ & $0.739$ & $0.727$ & $0.720$ & $-0.026$ \\
+Alternative & CIC & $0.752$ & $0.740$ & $0.740$ & $0.727$ & $-0.025$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \textbf{Scorer choice must match the representation.}
 Whether a scorer works depends on the geometry of the representation, not on regularisation (Table~\ref{tab:scorer}). We compare per-class Mahalanobis with two distances native to the binary simplex, each measured to the nearest known-class majority-vote centroid (Hamming and Jaccard distance), with a logit-space energy score $-\log\sum_c e^{l_c}$~\cite{liu2020energy}, and with a $z$-normalised average of Mahalanobis and energy. On CTU the rule-activation clusters of the known classes are well separated, and every activation-space scorer works: Mahalanobis $0.899$, Jaccard $0.891$, Hamming $0.863$, the first two within one std of each other. The logit-space energy score is below chance ($0.474$), and averaging it with Mahalanobis only drags the score down ($0.659$). On CIC the picture inverts. Near-deterministic rule firing (see \emph{Rule crispness and selectivity} below) leaves little within-class variance, and no activation-space scorer exceeds $0.64$ (Mahalanobis $0.615$, Hamming $0.632$, Jaccard $0.629$). The energy score bypasses the activation geometry and restores detection ($0.749{\pm}.014$); combining it with Mahalanobis adds little ($0.756{\pm}.011$). The choice among activation-space metrics matters little on either dataset; what matters is whether the activation space separates known from unknown at all, and that is decided by the representation. This matches the picture of Fort et al.~\cite{fort2021exploring}: the representation sets the ceiling, and the scoring rule has to be chosen to fit it.
+
+This dataset dependence is not specific to NeSy-NIDS. Running the same scorers on all
+six CBM/MLP architectures (Table~\ref{tab:scorer_arch}, five seeds) gives the same
+split: per-class Mahalanobis is the best scorer for \emph{every} architecture on
+CTU-IoT-23 ($0.81$--$0.89$, with the logit-space energy score below chance), and on
+CIC-IoT-2023 the ordering inverts---energy, or its combination with Mahalanobis, is
+best for every architecture while Mahalanobis drops to $0.68$--$0.75$. No single
+scorer is best on both datasets, and the right choice cannot be made without
+observing the unknown regime.
+
+\begin{table}[t]
+\centering\small
+\caption{Scorer choice is dataset-contingent across all architectures: OOD AUROC
+under per-class Mahalanobis vs.\ the logit-space energy score (mean over five
+seeds). Mahalanobis wins on CTU-IoT-23 (where energy is below chance); the ordering
+inverts on CIC-IoT-2023. Hamming and Jaccard (concept space only) never win.}
+\label{tab:scorer_arch}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{CTU-IoT-23} & \multicolumn{2}{c}{CIC-IoT-2023} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Architecture & Mahal. & Energy & Mahal. & Energy \\
+\midrule
+MLP                    & $0.891$ & $0.307$ & $0.812$ & $0.606$ \\
+JointCBM ($\gamma{=}0$)   & $0.807$ & $0.457$ & $0.746$ & $0.771$ \\
+JointCBM ($\gamma{=}0.1$) & $0.837$ & $0.538$ & $0.738$ & $0.775$ \\
+JointCBM ($\gamma{=}0.5$) & $0.843$ & $0.513$ & $0.724$ & $0.792$ \\
+JointCBM ($\gamma{=}1.0$) & $0.847$ & $0.563$ & $0.721$ & $0.790$ \\
+SequentialCBM          & $0.890$ & $0.694$ & $0.682$ & $0.699$ \\
+HybridCBM              & $0.817$ & $0.418$ & $0.675$ & $0.608$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[t]
 \centering\small
@@ -786,9 +841,10 @@ not move with $k_T$ and AUROC is flat ($r{=}0.00$). No manipulation we tried mak
 within-class variance a consistent lever.
 
 We therefore withdraw the reading that representation geometry \emph{governs}
-open-set detectability. No property of the known-class representation we
-examined---within-class variance, Fisher or LDA separability, or closed-set
-accuracy---predicts it consistently, because detectability is governed by the
+open-set detectability. Across six architectures, four dataset/split combinations
+and five seeds, no known-class property we examined predicts it---within-class
+variance, Fisher or LDA separability, and closed-set accuracy all reverse---because
+detectability is governed by the
 placement of unknown families relative to the known-class model, which is not a
 function of known-class geometry and cannot be anticipated at training time. An
 apparent geometry--detectability law read off a two-dataset correlation reverses
