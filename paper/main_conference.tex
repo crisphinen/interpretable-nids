@@ -691,6 +691,58 @@ read the CIC drift as systematic and the CTU pattern as indicative only.
   \label{fig:threshold_drift}
 \end{figure*}
 
+\subsection{Is the Geometry Effect Causal? A Within-Dataset Test}
+\label{sec:ksweep}
+
+The contrast in Section~\ref{sec:ood} is between two datasets, which leaves open
+whether within-class activation variance \emph{governs} activation-space
+detectability or only correlates with it across two corpora. We test this with a
+controlled manipulation inside each dataset. The annealing steepness $k_T$
+(Section~\ref{sec:nesy}) sets how crisply the rules fire, and a higher $k_T$ drives
+the learned thresholds toward configurations whose binarised activations differ
+more from flow to flow within a class. We retrain NeSy-NIDS at
+$k_T\in\{2,5,10,20\}$ (five seeds each) and score OOD with the same per-class
+Mahalanobis detector, holding everything else fixed. Known-class F1 is flat across
+$k_T$ (CTU-IoT-23 $0.934$, CIC-IoT-2023 $0.819$), so this isolates the OOD
+mechanism at no accuracy cost.
+
+The manipulation moves detectability only where it moves the representation's
+within-class variance. On CTU-IoT-23, raising $k_T$ from $2$ to $20$ takes
+crispness from $0.61$ to $0.95$ but leaves the within-class rule-activation
+variance essentially unchanged ($\approx0.13$), and the AUROC is flat within seed
+noise ($0.914\to0.897$; $r{=}0.00$ across the twenty CTU runs). On CIC-IoT-2023 the
+within-class variance rises with $k_T$ ($0.024\to0.040$) and the AUROC rises with
+it at the endpoints ($0.618{\pm}.008$ at $k_T{=}2$ to $0.648{\pm}.018$ at
+$k_T{=}20$), though the intermediate points are noisier ($0.609$, $0.616$) and the
+overall association is moderate ($r{=}0.53$ across the twenty CIC runs).
+Fig.~\ref{fig:ksweep} shows both. The between-dataset pattern of
+Section~\ref{sec:crisp} is thus reproduced, weakly but in the predicted direction,
+\emph{within} a dataset by a single knob: where the manipulation moves within-class
+variance (CIC), detectability follows; where it does not (CTU), it is unmoved.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/ksweep.pdf}
+  \caption{Training-time annealing sweep ($k_T\in\{2,5,10,20\}$, five seeds each).
+    (a)~OOD AUROC (per-class Mahalanobis) versus the final gate steepness $k_T$;
+    known-class F1 is constant throughout ($\approx0.93$ on CTU-IoT-23,
+    $\approx0.82$ on CIC-IoT-2023). (b)~The same runs against within-class
+    rule-activation variance. CTU sits in a high-variance, high-AUROC regime that
+    $k_T$ does not leave; on CIC, $k_T$ moves the variance and detectability follows
+    in the predicted direction, though the gap to CTU is not closed.}
+  \label{fig:ksweep}
+\end{figure*}
+
+The same experiment marks the limit of the claim. Even at $k_T{=}20$, CIC's
+within-class variance ($0.040$) stays far below CTU's at any $k_T$ ($\approx0.13$),
+and its AUROC never approaches CTU's. Annealing moves detectability \emph{within} a
+dataset's regime but cannot lift CIC into CTU's; the gap between the two is set by
+how class-homogeneously the expert rules fire on each corpus---a property of the
+rule vocabulary and the data, not of the training schedule. We therefore read
+within-class activation variance as governing activation-space OOD detectability,
+with the crispness that makes the rules auditable trading off against it, and we do
+not claim that annealing alone can move a dataset to arbitrary detectability.
+
 \subsection{The \texorpdfstring{$\alpha$}{alpha}-Gate and Interpretability Trade-Off}
 \label{sec:alpha}
 

@@ -72,6 +72,14 @@ and we thank the reviewers for prompting it.
   \item Added a research-gap discussion and a ``Scope of the contribution''
   paragraph stating what is and is not novel; redrafted the Abstract,
   Introduction, and Conclusion.
+  \item Added a \textbf{controlled within-dataset test} of the representation-geometry
+  claim (Section~IV-C, Fig.~5): a training-time annealing sweep ($k_T\in\{2,5,10,20\}$,
+  five seeds) that moves the interpretable representation's within-class variance at
+  constant known-class F1. On CIC-IoT-2023 detectability follows the induced variance
+  in the predicted direction; on CTU-IoT-23, where the variance does not move, it is
+  unchanged---turning the previously between-dataset association into a within-dataset
+  manipulation, while making explicit that annealing moves detectability only within a
+  dataset's regime.
 \end{itemize}
 
 \smallskip
