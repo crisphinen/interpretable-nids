@@ -1,4 +1,4 @@
-%% Creator: Inkscape 1.4.4 (dcaf3e7, 2026-05-05), www.inkscape.org
+%% Creator: Inkscape 1.4.2 (ebf0e94, 2025-05-08), www.inkscape.org
 %% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
 %% Accompanies image file 'nesy_cbm_architecture.pdf' (pdf, eps, ps)
 %%
@@ -38,7 +38,7 @@
   \newcommand*\fsize{\dimexpr\f@size pt\relax}%
   \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
   \ifx\svgwidth\undefined%
-    \setlength{\unitlength}{866.8661499bp}%
+    \setlength{\unitlength}{865.98257446bp}%
     \ifx\svgscale\undefined%
       \relax%
     \else%
@@ -50,78 +50,78 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.55992186)%
+  \begin{picture}(1,0.57372723)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{nesy_cbm_architecture.pdf}}%
-    \put(0.36813024,0.06061873){\color[rgb]{0,0,0.0745098}\transparent{0.87444901}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{$\mathbf{1}-\mathbf{\alpha}$}\end{tabular}}}}%
+    \put(0.0625773,0.36849972){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Input:}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=2]{nesy_cbm_architecture.pdf}}%
-    \put(0.06436678,0.3560843){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Input:}\end{tabular}}}}%
+    \put(0.0625773,0.34078554){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Network\end{tabular}}}}%
+    \put(0.0625773,0.31393742){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Flow\end{tabular}}}}%
+    \put(0.0625773,0.28622324){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Features\end{tabular}}}}%
+    \put(0.1936973,0.54729501){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{(A) Concept Bottleneck Model (CBM)}\end{tabular}}}}%
+    \put(0.16651,0.26699559){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{(B) NeSy-NIDS}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=3]{nesy_cbm_architecture.pdf}}%
-    \put(0.06436678,0.32839836){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Network\end{tabular}}}}%
-    \put(0.06436678,0.30157761){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Flow\end{tabular}}}}%
-    \put(0.06436678,0.27389168){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Features\end{tabular}}}}%
-    \put(0.19535314,0.53469735){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{(A) Concept Bottleneck Model (CBM)}\end{tabular}}}}%
-    \put(0.16819355,0.25468363){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{(B) NeSy-NIDS}\end{tabular}}}}%
+    \put(0.63713348,0.47330377){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Linear}\\\textbf{Classifier}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=4]{nesy_cbm_architecture.pdf}}%
-    \put(0.63833734,0.46078152){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Linear}\\\textbf{Classifier}\end{tabular}}}}%
+    \put(0.21976895,0.46291079){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Concept}\\\textbf{Encoder}\end{tabular}}}}%
+    \put(0.22503227,0.43130287){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}(2-layer MLP)\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=5]{nesy_cbm_architecture.pdf}}%
-    \put(0.22139822,0.45039914){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Concept}\\\textbf{Encoder}\end{tabular}}}}%
-    \put(0.22665617,0.41882344){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}(2-layer MLP)\end{tabular}}}}%
+    \put(0.31389883,0.23321403){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Rule Bank \& Evaluation}\end{tabular}}}}%
+    \put(0.31318543,0.22037715){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{differentiable threshold scoring}\end{tabular}}}}%
+    \put(0.24058836,0.18399933){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Learnable}\\\textit{thresholds}\end{tabular}}}}%
+    \put(0.29801756,0.16856276){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$\theta_1$}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=6]{nesy_cbm_architecture.pdf}}%
-    \put(0.31543215,0.2209365){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Rule Bank \& Evaluation}\end{tabular}}}}%
-    \put(0.31471947,0.2081127){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{differentiable threshold scoring}\end{tabular}}}}%
-    \put(0.2421964,0.17177196){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Learnable}\\\textit{thresholds}\end{tabular}}}}%
-    \put(0.29956707,0.15635113){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$\theta_1$}\end{tabular}}}}%
+    \put(0.20344723,0.11445845){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\theta_1$\end{tabular}}}}%
+    \put(0.25389427,0.11534427){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\theta_2$\end{tabular}}}}%
+    \put(0.37997987,0.18399933){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Differentiable}\\\textit{scoring}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=7]{nesy_cbm_architecture.pdf}}%
-    \put(0.20509313,0.10230197){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\theta_1$\end{tabular}}}}%
-    \put(0.25548876,0.10318689){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\theta_2$\end{tabular}}}}%
-    \put(0.38144583,0.17177196){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Differentiable}\\\textit{scoring}\end{tabular}}}}%
+    \put(0.37391591,0.12352869){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$k$-annealed gates;}\\\textit{binarised at inference}\end{tabular}}}}%
+    \put(0.19872678,0.14255066){\color[rgb]{0.06666667,0.06666667,0.06666667}\rotatebox{90}{\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$\theta_i$\end{tabular}}}}}%
+    \put(0.19891789,0.20370569){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$R{=}8$\end{tabular}}}}%
+    \put(0.25027087,0.20227887){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l} expert defined rules\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=8]{nesy_cbm_architecture.pdf}}%
-    \put(0.37538806,0.11136296){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$k$-annealed gates;}\\\textit{binarised at inference}\end{tabular}}}}%
-    \put(0.20037749,0.13036555){\color[rgb]{0.06666667,0.06666667,0.06666667}\rotatebox{90}{\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$\theta_i$\end{tabular}}}}}%
-    \put(0.18275263,0.1949302){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$R{=}8$\end{tabular}}}}%
-    \put(0.25186904,0.19003288){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l} expert defined rules\end{tabular}}}}%
+    \put(0.33329366,0.46199085){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$K {=}8$}\end{tabular}}}}%
+    \put(0.44012942,0.46238799){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Human-defined Traffic concepts}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=9]{nesy_cbm_architecture.pdf}}%
-    \put(0.33198744,0.44848657){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$K {=}8$}\end{tabular}}}}%
-    \put(0.44153408,0.44987687){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Human-defined Traffic concepts}\end{tabular}}}}%
+    \put(0.42423053,0.42996909){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}concept scores $\hat{c}$\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=10]{nesy_cbm_architecture.pdf}}%
-    \put(0.4256514,0.41749102){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}concept scores $\hat{c}$\end{tabular}}}}%
+    \put(0.36852548,0.36876392){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$\gamma$-fidelity reg.}\end{tabular}}}}%
+    \put(0.33265507,0.38286686){\color[rgb]{0.06666667,0.06666667,0.06666667}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{traffic}\end{tabular}}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=11]{nesy_cbm_architecture.pdf}}%
-    \put(0.37000312,0.35634823){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$\gamma$-fidelity reg.}\end{tabular}}}}%
-    \put(0.33416927,0.3704368){\color[rgb]{0.06666667,0.06666667,0.06666667}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{traffic}\end{tabular}}}}}%
+    \put(0.48209619,0.36371938){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Mahalanobis OOD}\end{tabular}}}}%
+    \put(0.44687307,0.37530004){\color[rgb]{0.06666667,0.06666667,0.06666667}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{traffic}\end{tabular}}}}}%
+    \put(0.35535435,0.47657969){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{CONCEPT LAYER}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=12]{nesy_cbm_architecture.pdf}}%
-    \put(0.48345807,0.35130883){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Mahalanobis OOD}\end{tabular}}}}%
-    \put(0.44827085,0.36287769){\color[rgb]{0.06666667,0.06666667,0.06666667}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{traffic}\end{tabular}}}}}%
-    \put(0.35684541,0.4640541){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{CONCEPT LAYER}\end{tabular}}}}%
+    \put(0.79305387,0.3425452){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Mahalanobis}\\\textbf{OODDetector}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=13]{nesy_cbm_architecture.pdf}}%
-    \put(0.79409879,0.33015624){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Mahalanobis}\\\textbf{OODDetector}\end{tabular}}}}%
+    \put(0.51313362,0.22922393){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Binary Rule }\\\textbf{ Activation}\end{tabular}}}}%
+    \put(0.51073809,0.20526978){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$a\in\{0,1\}^{R}$\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=14]{nesy_cbm_architecture.pdf}}%
-    \put(0.51446387,0.21695047){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Binary Rule }\\\textbf{ Activation}\end{tabular}}}}%
-    \put(0.51532842,0.18423015){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\mbox{}\end{tabular}}}}%
+    \put(0.50262044,0.13701019){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Linear rule Head}\end{tabular}}}}%
+    \put(0.49557909,0.12645249){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{l}_{\mathrm{rule}}$ = \\$\mathbf{W}\mathbf{a}^{\mathrm{hard}}$\\+ $\mathbf{b}$\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=15]{nesy_cbm_architecture.pdf}}%
-    \put(0.45740773,0.10257099){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{l}_{\mathrm{rule}} =  \mathbf{W}\mathbf{a}^{\mathrm{hard}}\! +\!\mathbf{b}$\end{tabular}}}}%
-    \put(0.5039614,0.12483072){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Linear rule Head}\end{tabular}}}}%
+    \put(0.6563715,0.13227599){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{$\alpha$-Gate}\end{tabular}}}}%
+    \put(0.66285332,0.11508868){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}(interpretability dial)\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=16]{nesy_cbm_architecture.pdf}}%
-    \put(0.65755574,0.12010134){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{$\alpha$-Gate}\end{tabular}}}}%
-    \put(0.66403096,0.10293155){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}(interpretability dial)\end{tabular}}}}%
+    \put(0.23708514,0.08580464){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Neural Head}\\\textbf{(Fallback)}\end{tabular}}}}%
+    \put(0.22848837,0.05829578){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l} $\mathbf{l}_{\mathrm{neural}} $\\= $\mathrm{MLP}_\phi(\mathbf{x})$\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=17]{nesy_cbm_architecture.pdf}}%
-    \put(0.23869676,0.07367736){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Neural Head}\\\textbf{(Fallback)}\end{tabular}}}}%
+    \put(0.19067225,0.37564552){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{\textit{Expert intervention}}\end{tabular}}}}%
+    \put(0.17802196,0.3645296){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{$\text{override$\mathbf{c_x}$ at test-time}$}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=18]{nesy_cbm_architecture.pdf}}%
-    \put(0.19233117,0.36322282){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{\textit{Expert intervention}}\end{tabular}}}}%
-    \put(0.18532506,0.35293248){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{\text{override$\mathbf{c_x}$ at test-time}}\end{tabular}}}}%
+    \put(0.5992924,0.39590455){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Class Logits}\end{tabular}}}}%
+    \put(0.60855929,0.37822237){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{y(C=4/5)}$\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=19]{nesy_cbm_architecture.pdf}}%
-    \put(0.60053483,0.3834612){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Class Logits}\end{tabular}}}}%
+    \put(0.65572433,0.22036362){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Class Logits}\end{tabular}}}}%
+    \put(0.65772732,0.20499477){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{y(C=4/5)}$\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=20]{nesy_cbm_architecture.pdf}}%
-    \put(0.65690923,0.20809919){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Class Logits}\end{tabular}}}}%
+    \put(0.35197153,0.08053967){\color[rgb]{0,0,0.0745098}\transparent{0.87444901}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{$\mathbf{1}-\mathbf{\alpha}$}\end{tabular}}}}%
+    \put(0.62286358,0.1318679){\color[rgb]{0,0,0.0745098}\transparent{0.87444901}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{$\alpha$}\end{tabular}}}}%
+    \put(0.36030192,0.52105462){\color[rgb]{0,0,0.0745098}\transparent{0.87444901}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{HybridCBM skip embedding}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=21]{nesy_cbm_architecture.pdf}}%
-    \put(0.62408198,0.11969368){\color[rgb]{0,0,0.0745098}\transparent{0.87444901}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{$\alpha$}\end{tabular}}}}%
-    \put(0.36178794,0.50848371){\color[rgb]{0,0,0.0745098}\transparent{0.87444901}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{HybridCBM skip embedding}\end{tabular}}}}%
+    \put(0.89535659,0.37016919){\color[rgb]{0,0,0}\transparent{0.94933897}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Class }\\\textbf{Prediction}\\\textbf{\&  OOD Score}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=22]{nesy_cbm_architecture.pdf}}%
-    \put(0.89629724,0.35775207){\color[rgb]{0,0,0}\transparent{0.94933897}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Class }\\\textbf{Prediction}\\\textbf{\&  OOD Score}\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=23]{nesy_cbm_architecture.pdf}}%
-    \put(0.54493708,0.19337038){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$a \in \{0,1\}^{R}$\end{tabular}}}}%
-    \put(0.55164451,0.28985148){\color[rgb]{0,0,0}\transparent{0.91189402}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{$\mathbf{a}^{\mathrm{hard}}$}\end{tabular}}}}%
-    \put(0.16277268,0.0398555){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{l}_{neural} = \mathrm{MLP}_\phi(\mathbf{x})$\end{tabular}}}}%
+    \put(0.54325402,0.30719534){\color[rgb]{0,0,0}\transparent{0.91189402}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{$\mathbf{a}^{\mathrm{hard}}$}\end{tabular}}}}%
   \end{picture}%
 \endgroup%

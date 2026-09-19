@@ -266,12 +266,23 @@
        y="-0.0109625"
        width="1.021048"
        height="1.021925">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <style
        id="style9">
@@ -304,12 +315,23 @@
        y="-0.050000001"
        width="1.1"
        height="1.1">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <filter
        id="shadow-26"
@@ -317,12 +339,23 @@
        y="-0.050000001"
        width="1.1"
        height="1.1">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <filter
        id="shadow-7"
@@ -330,12 +363,23 @@
        y="-0.050000001"
        width="1.1"
        height="1.1">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <filter
        id="shadow-9"
@@ -343,12 +387,23 @@
        y="-0.050000001"
        width="1.1"
        height="1.1">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <filter
        id="shadow-3"
@@ -356,12 +411,23 @@
        y="-0.050000001"
        width="1.1"
        height="1.1">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <filter
        id="shadow-1"
@@ -369,12 +435,23 @@
        y="-0.050000001"
        width="1.1"
        height="1.1">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <filter
        id="shadow-94"
@@ -382,12 +459,23 @@
        y="-0.050000001"
        width="1.1"
        height="1.1">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <marker
        id="arrowBlack-4"
@@ -409,12 +497,23 @@
        y="-0.050000001"
        width="1.1"
        height="1.1">
-      <feDropShadow
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="1.2" />
+      <feOffset
          dx="0"
          dy="1.2"
-         stdDeviation="1.2"
+         result="offsetblur" />
+      <feFlood
          flood-color="#000"
          flood-opacity="0.12" />
+      <feComposite
+         in2="offsetblur"
+         operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
     <marker
        id="arrowBlack-57"
