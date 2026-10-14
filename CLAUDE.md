@@ -29,9 +29,9 @@ The other `cbm/run_*.py` and `nesy/run_*.py` scripts are one-off experiments for
 
 ## Gotchas
 
-- **Data layout differs from the README:** the CTU splits live directly in `data/` (`train/val/test_known/test_unknown.parquet` and `vocab.json`); CIC lives in `data/cic/`. Parquet files are gitignored. `data/cic/test_unknown.parquet` (627 MB) has to be generated or requested.
+- **Data layout:** the CTU splits live directly in `data/` (`train/val/test_known/test_unknown.parquet` and `vocab.json`; these are committed). `data/ctu/vocab.json` is an unused copy. CIC lives in `data/cic/`, where only `vocab.json` is committed; the parquets must be generated with `04_make_splits_ciciot23.py` (`test_unknown.parquet` is about 627 MB).
 - **Hard-coded author paths:** `cbm/run_experiments.sh`, `nesy/run_alpha_sweep.sh`, `config.py` (`DB_PATH`), and `cbm/make_paper_figures.py` / `make_alpha_figure.py` point at `/home/Ngari/Research/...`. Edit these before running them.
-- `config.py` / `cic_config.py` are used only by the split scripts (`02_make_splits.py`, `04_make_splits_ciciot23.py`, and diverging copies under `data/`). Training hyperparameters are module-level constants at the top of each `train.py`; label IDs and feature columns are read from `vocab.json`.
+- `config.py` / `cic_config.py` are used only by the split scripts (`02_make_splits.py`, `04_make_splits_ciciot23.py`, run from the repo root; the copies under `data/` differ only in comments and fail to import their config). Training hyperparameters are module-level constants at the top of each `train.py`; label IDs and feature columns are read from `vocab.json`.
 - Checkpoint filenames encode hyperparameters, and evaluate scripts rebuild the same name to find them: CBM `{ds}_{Model}{_g<gamma>}.pt`; NeSy `{ds}_{nesy|rule_only}_s{seed}{_sp<λs>}{_a<λα>}.pt`. Default (0) values get no suffix. `run_alpha_sweep.sh` skips any checkpoint that already exists.
 - `paper/` is gitignored and kept local only.
 
