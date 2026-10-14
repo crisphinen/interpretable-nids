@@ -38,7 +38,7 @@ N_EPOCHS = 50
 PATIENCE = 10
 BATCH_SIZE = 512
 LAMBDA_CONCEPT = 0.5
-RESULTS_DIR = PROJECT_ROOT / "cbm" / "results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "cbm"
 
 
 # data loading

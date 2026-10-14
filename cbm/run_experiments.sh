@@ -35,4 +35,4 @@ echo "--- Evaluating CIC-IoT-2023 ---"
 $PYTHON -m cbm.evaluate --dataset cic
 
 echo ""
-echo "All experiments complete. Results in cbm/results/"
+echo "All experiments complete. Results in results/cbm/"
