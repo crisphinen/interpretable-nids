@@ -40,11 +40,17 @@ interpretable-nids/
 │   ├── evaluate.py         # Evaluation + multi-seed aggregation
 │   └── baselines.py        # Shared baseline utilities
 ├── data/
-│   ├── 02_make_splits.py         # CTU-IoT-23 train/val/test split
-│   ├── 04_make_splits_ciciot23.py # CIC-IoT-2023 split
-│   ├── ctu/                      # CTU parquet splits + vocab
-│   └── cic/                      # CIC parquet splits + vocab
-│                                 # (test_unknown.parquet: download separately, see below)
+│   ├── train.parquet       # CTU-IoT-23 splits (included):
+│   ├── val.parquet         #   known classes in train/val/test_known,
+│   ├── test_known.parquet  #   unknown classes in test_unknown
+│   ├── test_unknown.parquet
+│   ├── vocab.json          # CTU feature columns, label IDs, categorical vocabularies
+│   ├── ctu/vocab.json      # copy of data/vocab.json (not read by the code)
+│   └── cic/                # CIC-IoT-2023 splits + vocab.json
+│                           # (only vocab.json is included; generate the parquets, see below)
+├── preprocess/             # Raw-data download and DuckDB build scripts
+├── 02_make_splits.py       # CTU-IoT-23 split script (writes to data/)
+├── 04_make_splits_ciciot23.py # CIC-IoT-2023 split script (writes to data/cic/)
 ├── results/
 │   ├── cbm/                # Trained CBM checkpoints (.pt) + eval JSONs
 │   └── nesy/               # Trained NeSy checkpoints (.pt) + eval JSONs (5 seeds)
@@ -72,17 +78,23 @@ CUDA 11.8 is recommended. For CPU-only, replace `torch>=2.4.0` with the appropri
 
 ### CTU-IoT-23
 
-Download from [Stratosphere Laboratory](https://www.stratosphereips.org/datasets-iot23). Pre-split parquet files are included in `data/ctu/`.
+Download from [Stratosphere Laboratory](https://www.stratosphereips.org/datasets-iot23). The pre-split parquet files and `vocab.json` are included directly in `data/`, so no preprocessing is needed to train or evaluate on CTU-IoT-23. To regenerate them, run `python 02_make_splits.py` from the repo root. It reads the flow database set by `DB_PATH` and `DUCKDB_BIN` in `config.py`; edit both for your machine.
 
 ### CIC-IoT-2023
 
-Download from the [CIC website](https://www.unb.ca/cic/datasets/iotdataset-2023.html). Then run:
+Only `data/cic/vocab.json` is included. The parquet splits must be generated:
+
+1. Download the CSVs from the [CIC website](https://www.unb.ca/cic/datasets/iotdataset-2023.html).
+2. Build the DuckDB database with `python preprocess/merge_ciciot23.py --csv-dir <csv folder> --out data/ciciot23.duckdb`. The script uses the DuckDB CLI binary; its path is set by `DUCKDB_BIN` at the top of the script.
+3. Set `DUCKDB_BIN` in `config.py` to the same binary, then run from the repo root:
 
 ```bash
-python data/04_make_splits_ciciot23.py
+python 04_make_splits_ciciot23.py
 ```
 
-> **Note:** `data/cic/test_unknown.parquet` (627 MB) is excluded from this repository due to GitHub's file-size limit. Generate it by running the split script on the raw CIC data, or request it from the authors.
+This writes `train`, `val`, `test_known` and `test_unknown` parquet files to `data/cic/`. `test_unknown.parquet` is about 627 MB, which is over GitHub's file-size limit. You can also request it from the authors.
+
+> **Note:** use the split scripts at the repo root. The copies in `data/` cannot run, because they import `config.py` / `cic_config.py` from `data/`, where those files don't exist.
 
 ---
 
