@@ -94,8 +94,6 @@ python 04_make_splits_ciciot23.py
 
 This writes `train`, `val`, `test_known` and `test_unknown` parquet files to `data/cic/`. `test_unknown.parquet` is about 627 MB, which is over GitHub's file-size limit. You can also request it from the authors.
 
-> **Note:** use the split scripts at the repo root. The copies in `data/` cannot run, because they import `config.py` / `cic_config.py` from `data/`, where those files don't exist.
-
 ---
 
 ## Reproducing Results
