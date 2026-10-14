@@ -105,4 +105,4 @@ if __name__ == "__main__":
         km = max(rows, key=lambda r: r['auroc_maha'])
         print(f"  peak activation-Mahalanobis AUROC = {km['auroc_maha']:.3f} at k={km['k']} "
               f"(k=10 baseline = {[r for r in rows if r['k']==10][0]['auroc_maha']:.3f})")
-    Path("/tmp/claude-1002/-home-Ngari-Research/49e29f2b-be51-452f-a13c-f21bafc8287b/scratchpad/ksweep.json").write_text(json.dumps(out, indent=2))
+    (ROOT / "results" / "nesy" / "ksweep_prototype.json").write_text(json.dumps(out, indent=2))

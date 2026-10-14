@@ -1,11 +1,11 @@
 #!/bin/bash
 # run all cbm training and evaluation experiments
-# execute from: /home/Ngari/Research/work/hyper_iot/
+# can be run from any directory; set PYTHON to choose the interpreter
 # usage: bash cbm/run_experiments.sh
 
 set -e
-PYTHON=/home/Ngari/Research/venv310/bin/python3
-PROJ=/home/Ngari/Research/work/hyper_iot
+PYTHON="${PYTHON:-python3}"
+PROJ="$(cd "$(dirname "$0")/.." && pwd)"
 
 cd "$PROJ"
 

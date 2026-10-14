@@ -5,8 +5,8 @@ import os
 ROOT        = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR    = os.path.join(ROOT, 'data')
 RESULTS_DIR = os.path.join(ROOT, 'results')
-DB_PATH     = '/home/Ngari/Research/iot23_3.duckdb'
-DUCKDB_BIN  = '/home/Ngari/Research/duckdb'
+DB_PATH     = os.environ.get('IOT23_DB', os.path.join(DATA_DIR, 'iot23_3.duckdb'))
+DUCKDB_BIN  = os.environ.get('DUCKDB_BIN', 'duckdb')   # DuckDB CLI; found on PATH by default
 
 # class definitions
 KNOWN_CLASSES   = ['Benign', 'C&C-HeartBeat', 'DDoS', 'Okiru']

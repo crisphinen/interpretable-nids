@@ -4,6 +4,7 @@ __pycache__/
 .ipynb_checkpoints/
 
 # raw data — download from CTU/CIC websites
+downloads/
 data/ctu/*.parquet
 data/cic/*.parquet
 
