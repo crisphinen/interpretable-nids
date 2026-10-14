@@ -66,7 +66,7 @@ def pull_known_with_ts():
 
 
 def encode_like_main(df, vocab):
-    """Reproduce data/02_make_splits.py feature encoding on the raw pull."""
+    """Reproduce 02_make_splits.py feature encoding on the raw pull."""
     for col in C.CAT_FEATURES:
         cmap = vocab["cat_vocabs"][col]
         df[col + "_id"] = df[col].map(cmap).fillna(0).astype(np.float32)
