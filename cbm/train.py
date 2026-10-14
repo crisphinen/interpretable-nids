@@ -271,6 +271,9 @@ def main():
     parser.add_argument("--gamma", type=float, default=0.0,
                         help="Concept-fidelity regulariser weight (0=off). "
                              "Applies to JointCBM and HybridCBM only.")
+    parser.add_argument("--overwrite", action="store_true",
+                        help="Retrain and replace checkpoints that already exist "
+                             "(default: skip them, keeping the archived run).")
     args = parser.parse_args()
 
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
@@ -298,7 +301,13 @@ def main():
         "SequentialCBM": SequentialCBM(n_features, n_concepts, n_classes, EMBED_DIM),
         "HybridCBM":     HybridCBM(n_features, n_concepts, n_classes, EMBED_DIM),
     }
-    models_to_train = [(name, all_models[name]) for name in args.models]
+    models_to_train = []
+    for name in args.models:
+        ckpt_path = RESULTS_DIR / f"{args.dataset}_{name}{gamma_tag}.pt"
+        if ckpt_path.exists() and not args.overwrite:
+            print(f"[skip] {ckpt_path} exists (pass --overwrite to retrain)")
+            continue
+        models_to_train.append((name, all_models[name]))
 
     for model_name, model in models_to_train:
         model = model.to(device)

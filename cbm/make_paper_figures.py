@@ -382,8 +382,8 @@ def make_f1_comparison():
         return json.loads(path.read_text()).get(model, {}).get("weighted_f1", float("nan"))
 
     nesy_ctu = np.mean([json.loads(f.read_text())["known_f1"]
-                        for f in sorted(NESY_RES.glob("ctu_nesy_s*_eval.json"))])
-    nesy_cic_files = sorted(NESY_RES.glob("cic_nesy_s*_eval.json"))
+                        for f in sorted(NESY_RES.glob("ctu_nesy_s[0-9]_eval.json"))])
+    nesy_cic_files = sorted(NESY_RES.glob("cic_nesy_s[0-9]_eval.json"))
     nesy_cic = np.mean([json.loads(f.read_text())["known_f1"]
                         for f in nesy_cic_files]) if nesy_cic_files else float("nan")
 

@@ -32,7 +32,7 @@ interpretable-nids/
 │   ├── train.py            # Training entry point
 │   ├── evaluate.py         # Evaluation + OOD AUROC scoring
 │   ├── baselines.py        # DecisionTree, RandomForest, SHAP, Post-hoc CBM baselines
-│   ├── make_figures.py     # All paper figures
+│   ├── make_paper_figures.py # Paper figures (also make_alpha_figure.py, make_confounding_figure.py)
 │   └── run_experiments.sh  # Full experiment script
 ├── nesy/                   # NeSy-NIDS code
 │   ├── model.py            # Rule bank, alpha-gate, inference-time binarisation
@@ -84,7 +84,7 @@ Download from [Stratosphere Laboratory](https://www.stratosphereips.org/datasets
 
 Only `data/cic/vocab.json` is included. The parquet splits must be generated:
 
-1. Download the CSVs from the [CIC website](https://www.unb.ca/cic/datasets/iotdataset-2023.html).
+1. Download the CSVs from the [CIC website](https://www.unb.ca/cic/datasets/iotdataset-2023.html) with `python preprocess/download_cciot23_csv.py`, run from the repo root. It saves one folder per class under `downloads/csv/`. The folder name becomes the class label, and the script renames the server's `DDoS-PSHACK_FLOOD` / `DDoS-RSTFINFLOOD` folders to the names the config expects. A manual download skips that renaming, and those two classes then drop out of the split without any error.
 2. Build the DuckDB database with `python preprocess/merge_ciciot23.py`. By default it reads CSVs from `downloads/csv/` and writes `data/ciciot23.duckdb`; use `--csv-dir` / `--out` to change either.
 3. Run from the repo root:
 
@@ -105,6 +105,8 @@ This writes `train`, `val`, `test_known` and `test_unknown` parquet files to `da
 ```bash
 cd interpretable-nids
 bash cbm/run_experiments.sh          # trains all CBM variants on CTU and CIC
+                                     # (skips models whose checkpoint already exists;
+                                     #  use python -m cbm.train ... --overwrite to retrain)
 python -m cbm.evaluate --dataset ctu
 python -m cbm.evaluate --dataset cic
 ```
@@ -121,10 +123,12 @@ python -m nesy.evaluate --dataset cic --multi_seed 5
 ### Regenerate all paper figures
 
 ```bash
-python -m cbm.make_figures
+python -m cbm.make_paper_figures
+python -m cbm.make_alpha_figure
+python -m cbm.make_confounding_figure
 ```
 
-Figures are written to `figures/`.
+Figures are written to `paper/figures/`. Set `EXTRA_FIG_DIRS=dir1:dir2` to also copy the first two scripts' output elsewhere.
 
 ---
 
