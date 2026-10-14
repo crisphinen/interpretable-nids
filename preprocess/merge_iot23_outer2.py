@@ -22,8 +22,7 @@ SCENARIOS_DIR       = "data/opt/Malware-Project/BigDataset/IoTScenarios"
 MERGED_SUFFIX       = "_merged_outer.csv"
 STATS_OUTPUT        = "merge_statistics.csv"
 DUCKDB_MEMORY_LIMIT = "100GB"
-#DUCKDB_SPILL_DIR    = "/tmp/duckdb_spill"
-DUCKDB_SPILL_DIR = "/mnt/678fc01a-1165-4fc8-83f8-481ccd9508b3/Ngari/duckdb_spill"
+DUCKDB_SPILL_DIR    = os.environ.get("DUCKDB_SPILL_DIR", "/tmp/duckdb_spill")
 BROADCAST_PREFIXES = ("224.", "225.", "226.", "227.", "228.", "229.",
                       "230.", "231.", "232.", "233.", "234.", "235.",
                       "236.", "237.", "238.", "239.")

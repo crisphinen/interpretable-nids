@@ -4,7 +4,7 @@
 # reads all per-chunk csv files per category, injects label from directory name,
 # normalises column names (spaces -> underscores), writes into a single table 'flows'.
 #
-# output:  ~/Research/work/hyper_iot/data/ciciot23.duckdb
+# output:  data/ciciot23.duckdb (the DB_PATH in cic_config.py)
 #
 # usage:
 #   python merge_ciciot23.py [--csv-dir PATH] [--out PATH]
@@ -16,9 +16,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-DUCKDB_BIN  = Path.home() / "Research" / "duckdb"
-DEFAULT_CSV = Path.home() / "Research" / "downloads" / "csv"
-DEFAULT_OUT = Path.home() / "Research" / "work" / "hyper_iot" / "data" / "ciciot23.duckdb"
+ROOT        = Path(__file__).resolve().parent.parent
+DUCKDB_BIN  = os.environ.get("DUCKDB_BIN", "duckdb")   # DuckDB CLI; found on PATH by default
+DEFAULT_CSV = ROOT / "downloads" / "csv"   # where download_cciot23_csv.py saves when run from the repo root
+DEFAULT_OUT = ROOT / "data" / "ciciot23.duckdb"
 
 
 # run sql against duckdb cli and return stdout.

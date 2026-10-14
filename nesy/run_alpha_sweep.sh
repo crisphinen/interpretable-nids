@@ -7,8 +7,8 @@
 #
 # usage: bash nesy/run_alpha_sweep.sh
 set -u
-PY=/home/Ngari/Research/venv310/bin/python3
-cd /home/Ngari/Research
+PY="${PYTHON:-python3}"
+cd "$(dirname "$0")/.."
 RES=results/nesy
 
 LAMBDAS="0 0.05 0.1 0.2 0.5 1.0"

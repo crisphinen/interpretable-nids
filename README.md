@@ -78,19 +78,21 @@ CUDA 11.8 is recommended. For CPU-only, replace `torch>=2.4.0` with the appropri
 
 ### CTU-IoT-23
 
-Download from [Stratosphere Laboratory](https://www.stratosphereips.org/datasets-iot23). The pre-split parquet files and `vocab.json` are included directly in `data/`, so no preprocessing is needed to train or evaluate on CTU-IoT-23. To regenerate them, run `python 02_make_splits.py` from the repo root. It reads the flow database set by `DB_PATH` and `DUCKDB_BIN` in `config.py`; edit both for your machine.
+Download from [Stratosphere Laboratory](https://www.stratosphereips.org/datasets-iot23). The pre-split parquet files and `vocab.json` are included directly in `data/`, so no preprocessing is needed to train or evaluate on CTU-IoT-23. To regenerate them, run `python 02_make_splits.py` from the repo root. It reads the IoT-23 flow database at `data/iot23_3.duckdb` (override with `IOT23_DB=<path>`) through the DuckDB CLI, which must be on your `PATH` or set with `DUCKDB_BIN=<path>`.
 
 ### CIC-IoT-2023
 
 Only `data/cic/vocab.json` is included. The parquet splits must be generated:
 
 1. Download the CSVs from the [CIC website](https://www.unb.ca/cic/datasets/iotdataset-2023.html).
-2. Build the DuckDB database with `python preprocess/merge_ciciot23.py --csv-dir <csv folder> --out data/ciciot23.duckdb`. The script uses the DuckDB CLI binary; its path is set by `DUCKDB_BIN` at the top of the script.
-3. Set `DUCKDB_BIN` in `config.py` to the same binary, then run from the repo root:
+2. Build the DuckDB database with `python preprocess/merge_ciciot23.py`. By default it reads CSVs from `downloads/csv/` and writes `data/ciciot23.duckdb`; use `--csv-dir` / `--out` to change either.
+3. Run from the repo root:
 
 ```bash
 python 04_make_splits_ciciot23.py
 ```
+
+Both steps use the DuckDB CLI: install it on your `PATH`, or point `DUCKDB_BIN` at the binary.
 
 This writes `train`, `val`, `test_known` and `test_unknown` parquet files to `data/cic/`. `test_unknown.parquet` is about 627 MB, which is over GitHub's file-size limit. You can also request it from the authors.
 

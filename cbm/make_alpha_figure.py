@@ -7,6 +7,7 @@
 # usage: python -m cbm.make_alpha_figure
 
 import json
+import os
 from pathlib import Path
 
 import matplotlib
@@ -19,8 +20,8 @@ NESY_RES = PROJECT_ROOT / "results" / "nesy"
 
 OUTDIRS = [
     PROJECT_ROOT / "paper" / "figures",
-    Path("/home/Ngari/Research/writing/latex/figures"),
-    Path("/home/Ngari/Research/writing/latex_conf/figures"),
+    # extra copies, e.g. LaTeX project folders: EXTRA_FIG_DIRS=dir1:dir2
+    *(Path(p) for p in os.environ.get("EXTRA_FIG_DIRS", "").split(os.pathsep) if p),
 ]
 for d in OUTDIRS:
     d.mkdir(parents=True, exist_ok=True)
