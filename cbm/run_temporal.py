@@ -25,7 +25,7 @@ import pandas as pd
 import torch
 from sklearn.metrics import f1_score
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "data"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 import config as C  # DB_PATH, DUCKDB_BIN, KNOWN_CLASSES, NUMERIC/CAT_FEATURES, ...
 
 from cbm.concepts import ctu_concept_labels, CTU_CONCEPTS

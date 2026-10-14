@@ -10,8 +10,8 @@ from pathlib import Path
 
 # paths
 BASE   = Path(__file__).parent
-RES    = BASE / "results"
-NRES   = BASE.parent / "nesy" / "results"
+RES    = BASE.parent / "results" / "cbm"
+NRES   = BASE.parent / "results" / "nesy"
 OUTDIR = BASE / "figures"
 OUTDIR.mkdir(exist_ok=True)
 
@@ -231,7 +231,7 @@ def make_ood_auroc():
         ev0  = json.loads((RES / f"{ds}_eval_results.json").read_text())
         ev   = {"0": ev0,
                 "0.5": json.loads((RES / f"{ds}_eval_results_g0.5.json").read_text())}
-        nesy_files = sorted(NRES.glob(f"{ds}_nesy_s*_eval.json"))
+        nesy_files = sorted(NRES.glob(f"{ds}_nesy_s[0-9]_eval.json"))
         nesy_aurocs = [json.loads(f.read_text())["ood_auroc"] for f in nesy_files]
         return base, ev, ev0, nesy_aurocs
 
@@ -544,9 +544,9 @@ def make_f1_comparison():
     cic_base  = json.loads((RES / "cic_cbm_baselines.json").read_text())
 
     nesy_ctu = np.mean([json.loads(f.read_text())["known_f1"]
-                        for f in sorted(NRES.glob("ctu_nesy_s*_eval.json"))])
+                        for f in sorted(NRES.glob("ctu_nesy_s[0-9]_eval.json"))])
     nesy_cic = np.mean([json.loads(f.read_text())["known_f1"]
-                        for f in sorted(NRES.glob("cic_nesy_s*_eval.json"))])
+                        for f in sorted(NRES.glob("cic_nesy_s[0-9]_eval.json"))])
 
     labels = [
         "MLP\nBaseline",

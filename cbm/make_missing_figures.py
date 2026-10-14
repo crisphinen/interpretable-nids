@@ -216,7 +216,7 @@ def make_auroc_vs_f1():
 
     def _load_nesy(ds):
         points = []
-        seed_files = sorted(NESY_RES.glob(f"{ds}_nesy_s*_eval.json"))
+        seed_files = sorted(NESY_RES.glob(f"{ds}_nesy_s[0-9]_eval.json"))
         for sf in seed_files:
             d = json.loads(sf.read_text())
             points.append((f"NeSy-NIDS s{d['seed']}", d["known_f1"], d["ood_auroc"]))

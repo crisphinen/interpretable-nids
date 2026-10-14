@@ -23,7 +23,7 @@ from sklearn.metrics import f1_score, roc_auc_score
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-RESULTS_DIR = PROJECT_ROOT / "nesy" / "results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "nesy"
 
 
 # data loading
