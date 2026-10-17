@@ -133,7 +133,7 @@ def scorers():
         print(f"   {ds:5s} " + "  ".join(f"{k} {v['mean']:.3f} ({v['std']:.3f})" for k, v in d.items()))
     head("tab:scorer_arch / tab:kfs_scorer: Mahal | Energy | Comb, mean (std)")
     for ds, f in (("ctuk", "scorer_factorial_ctuk_ctuko.json"), ("ctuko", "scorer_factorial_ctuk_ctuko.json"),
-                  ("cicr", "scorer_factorial_cicr.json")):
+                  ("cicr", "scorer_factorial_cicr.json"), ("ton", "scorer_factorial_ton.json")):
         rows = [r for r in LOAD(CBM / f) if r["dataset"] == ds]
         for v in ARCH:
             rs = [r for r in rows if r["variant"] == v]
@@ -229,6 +229,22 @@ def geometry():
         print(f"   k_T sweep {ds}: {json.dumps(k)[:400]}")
 
 
+def transfer_and_selection():
+    head("tab:transfer (supplement): held-out corpus, statistic: slope | MAE (baseline) | spearman | best config")
+    for o in LOAD(CBM / "geometry_transfer.json"):
+        print(f"   {o['held_out']:5s} {o['statistic']:11s} {o['slope']:+.3f} | {o['mae']:.3f} ({o['mae_baseline']:.3f}) | "
+              f"{o['spearman']:+.2f} | {'yes' if o['top_correct'] else 'no'}")
+    head("tab:selection (supplement) and TON scorer column: true mahal/energy | perm mahal/energy | correct perm, mix")
+    rows = LOAD(CBM / "scorer_selection_ctuk_cicr_ton.json")
+    truth = lambda r: r["true_mahal"] >= r["true_energy"]
+    for ds in ("ctuk", "cicr", "ton"):
+        for v in ARCH:
+            rs = [r for r in rows if r["dataset"] == ds and r["variant"] == v]
+            ok = lambda k: sum(truth(r) == (r[f"{k}_mahal"] >= r[f"{k}_energy"]) for r in rs)
+            print(f"   {ds:5s} {v:14s} " + " ".join(f"{np.mean([r[k] for r in rs]):.3f}" for k in
+                  ("true_mahal", "true_energy", "perm_mahal", "perm_energy")) + f" | {ok('perm')}/5 {ok('mix')}/5")
+
+
 if __name__ == "__main__":
-    for f in (protocol, table_main, splits, scorers, openset, fidelity, selectivity, geometry):
+    for f in (protocol, table_main, splits, scorers, openset, fidelity, selectivity, geometry, transfer_and_selection):
         f()

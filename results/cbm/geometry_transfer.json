@@ -1,0 +1,233 @@
+[
+  {
+    "held_out": "ctuk",
+    "statistic": "within_var",
+    "slope": -1.7744563633069825,
+    "mae": 0.19782747336457052,
+    "mae_baseline": 0.16723967800000003,
+    "spearman": -0.35795328142380417,
+    "predicted_best": "JointCBM_g0",
+    "true_best": "SequentialCBM",
+    "top_correct": false
+  },
+  {
+    "held_out": "ctuk",
+    "statistic": "fisher",
+    "slope": 0.06529957879459683,
+    "mae": 0.16943549773174235,
+    "mae_baseline": 0.16723967800000003,
+    "spearman": -0.34282536151279197,
+    "predicted_best": "JointCBM_g0",
+    "true_best": "SequentialCBM",
+    "top_correct": false
+  },
+  {
+    "held_out": "ctuk",
+    "statistic": "ridge_lda",
+    "slope": 0.00013979253254294883,
+    "mae": 0.17979135835777077,
+    "mae_baseline": 0.16723967800000003,
+    "spearman": -0.3757508342602892,
+    "predicted_best": "JointCBM_g0",
+    "true_best": "SequentialCBM",
+    "top_correct": false
+  },
+  {
+    "held_out": "ctuk",
+    "statistic": "silhouette",
+    "slope": 0.33561893767088646,
+    "mae": 0.14904096128074765,
+    "mae_baseline": 0.16723967800000003,
+    "spearman": -0.3397107897664071,
+    "predicted_best": "JointCBM_g0",
+    "true_best": "SequentialCBM",
+    "top_correct": false
+  },
+  {
+    "held_out": "ctuk",
+    "statistic": "nc_margin",
+    "slope": 0.20149569926497354,
+    "mae": 0.15216219001860362,
+    "mae_baseline": 0.16723967800000003,
+    "spearman": -0.2849833147942158,
+    "predicted_best": "JointCBM_g0",
+    "true_best": "SequentialCBM",
+    "top_correct": false
+  },
+  {
+    "held_out": "ctuk",
+    "statistic": "entropy",
+    "slope": 0.0059009500634389,
+    "mae": 0.1673548099656587,
+    "mae_baseline": 0.16723967800000003,
+    "spearman": -0.38064516129032255,
+    "predicted_best": "JointCBM_g0",
+    "true_best": "SequentialCBM",
+    "top_correct": false
+  },
+  {
+    "held_out": "ctuk",
+    "statistic": "f1",
+    "slope": -0.021852074204250036,
+    "mae": 0.16813609077775304,
+    "mae_baseline": 0.16723967800000003,
+    "spearman": 0.17246652019884584,
+    "predicted_best": "SequentialCBM",
+    "true_best": "SequentialCBM",
+    "top_correct": true
+  },
+  {
+    "held_out": "cicr",
+    "statistic": "within_var",
+    "slope": 0.6156348461928486,
+    "mae": 0.029730432714465464,
+    "mae_baseline": 0.04451481177777774,
+    "spearman": -0.6556173526140155,
+    "predicted_best": "SequentialCBM",
+    "true_best": "JointCBM_g0",
+    "top_correct": false
+  },
+  {
+    "held_out": "cicr",
+    "statistic": "fisher",
+    "slope": 0.0598174440670586,
+    "mae": 0.07535688513325885,
+    "mae_baseline": 0.04451481177777774,
+    "spearman": 0.5995550611790879,
+    "predicted_best": "JointCBM_g0.1",
+    "true_best": "JointCBM_g0",
+    "top_correct": false
+  },
+  {
+    "held_out": "cicr",
+    "statistic": "ridge_lda",
+    "slope": 0.002995238853985848,
+    "mae": 0.6711101670709498,
+    "mae_baseline": 0.04451481177777774,
+    "spearman": 0.4091212458286986,
+    "predicted_best": "JointCBM_g1.0",
+    "true_best": "JointCBM_g0",
+    "top_correct": false
+  },
+  {
+    "held_out": "cicr",
+    "statistic": "silhouette",
+    "slope": 0.2632042578732558,
+    "mae": 0.06868909159288454,
+    "mae_baseline": 0.04451481177777774,
+    "spearman": 0.7499443826473859,
+    "predicted_best": "JointCBM_g0.1",
+    "true_best": "JointCBM_g0",
+    "top_correct": false
+  },
+  {
+    "held_out": "cicr",
+    "statistic": "nc_margin",
+    "slope": 0.24739604170795404,
+    "mae": 0.08299243530028073,
+    "mae_baseline": 0.04451481177777774,
+    "spearman": 0.5421579532814237,
+    "predicted_best": "JointCBM_g0.1",
+    "true_best": "JointCBM_g0",
+    "top_correct": false
+  },
+  {
+    "held_out": "cicr",
+    "statistic": "entropy",
+    "slope": -0.4153377996854759,
+    "mae": 0.06416250290250361,
+    "mae_baseline": 0.04451481177777774,
+    "spearman": -0.7023359288097887,
+    "predicted_best": "SequentialCBM",
+    "true_best": "JointCBM_g0",
+    "top_correct": false
+  },
+  {
+    "held_out": "cicr",
+    "statistic": "f1",
+    "slope": -0.005548569273340628,
+    "mae": 0.04483573246447284,
+    "mae_baseline": 0.04451481177777774,
+    "spearman": -0.17241379310344826,
+    "predicted_best": "SequentialCBM",
+    "true_best": "JointCBM_g0",
+    "top_correct": false
+  },
+  {
+    "held_out": "ton",
+    "statistic": "within_var",
+    "slope": 2.0011997421662047,
+    "mae": 0.14617220106364384,
+    "mae_baseline": 0.12280081600000003,
+    "spearman": -0.4642936596218019,
+    "predicted_best": "SequentialCBM",
+    "true_best": "JointCBM_g1.0",
+    "top_correct": false
+  },
+  {
+    "held_out": "ton",
+    "statistic": "fisher",
+    "slope": -0.04526113885116939,
+    "mae": 0.14467308771869186,
+    "mae_baseline": 0.12280081600000003,
+    "spearman": -0.511012235817575,
+    "predicted_best": "SequentialCBM",
+    "true_best": "JointCBM_g1.0",
+    "top_correct": false
+  },
+  {
+    "held_out": "ton",
+    "statistic": "ridge_lda",
+    "slope": -0.00025286160210413375,
+    "mae": 0.15300123118373096,
+    "mae_baseline": 0.12280081600000003,
+    "spearman": -0.5795328142380423,
+    "predicted_best": "SequentialCBM",
+    "true_best": "JointCBM_g1.0",
+    "top_correct": false
+  },
+  {
+    "held_out": "ton",
+    "statistic": "silhouette",
+    "slope": -0.09242848949977052,
+    "mae": 0.1363285558297044,
+    "mae_baseline": 0.12280081600000003,
+    "spearman": -0.43359288097886545,
+    "predicted_best": "HybridCBM",
+    "true_best": "JointCBM_g1.0",
+    "top_correct": false
+  },
+  {
+    "held_out": "ton",
+    "statistic": "nc_margin",
+    "slope": -0.11320321769621254,
+    "mae": 0.14891287135635434,
+    "mae_baseline": 0.12280081600000003,
+    "spearman": -0.39443826473859844,
+    "predicted_best": "SequentialCBM",
+    "true_best": "JointCBM_g1.0",
+    "top_correct": false
+  },
+  {
+    "held_out": "ton",
+    "statistic": "entropy",
+    "slope": 0.11255078097350694,
+    "mae": 0.13021131181730652,
+    "mae_baseline": 0.12280081600000003,
+    "spearman": 0.37352614015572855,
+    "predicted_best": "JointCBM_g0",
+    "true_best": "JointCBM_g1.0",
+    "top_correct": false
+  },
+  {
+    "held_out": "ton",
+    "statistic": "f1",
+    "slope": 0.12803181276906453,
+    "mae": 0.12535512080574815,
+    "mae_baseline": 0.12280081600000003,
+    "spearman": 0.2992213570634038,
+    "predicted_best": "JointCBM_g0.5",
+    "true_best": "JointCBM_g1.0",
+    "top_correct": false
+  }
+]

@@ -87,6 +87,8 @@ $PY -m cbm.run_lofo --make-folds                # data/{ctuk,cicr}_lofo_*/ (CTU 
 $PY -m cbm.run_lofo --train --device cuda       # JointCBM gamma=0, 5 seeds per fold
 $PY -m cbm.run_lofo --score --device cuda
 $PY -m cbm.run_scorer_factorial --datasets cicr # true-best CIC scorer; CIC column of the scorer table
+$PY -m cbm.run_scorer_factorial --datasets ton  # TON_IoT column of the scorer table
+$PY -m cbm.run_scorer_selection --datasets ctuk cicr ton --device cuda   # synthetic-outlier selection rule
 ```
 
 ## Known-class geometry
@@ -95,6 +97,7 @@ $PY -m cbm.run_scorer_factorial --datasets cicr # true-best CIC scorer; CIC colu
 bash nesy/run_kt_sweep.sh ctuk                  # NeSy k_T in {2,5,20} x 5 seeds (k_T=10 is the main model)
 bash nesy/run_kt_sweep.sh cicr
 $PY -m cbm.run_geometry --device cuda           # signflip and LOCO tables, confounding figure, NeSy r
+$PY -m cbm.run_geometry_transfer                # leave-one-corpus-out prediction test
 ```
 
 ## Sweeps and per-class F1
