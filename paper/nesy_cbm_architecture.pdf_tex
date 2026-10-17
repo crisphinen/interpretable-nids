@@ -65,7 +65,7 @@
     \put(0.63713348,0.47330377){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Linear}\\\textbf{Classifier}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=4]{nesy_cbm_architecture.pdf}}%
     \put(0.21976895,0.46291079){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Concept}\\\textbf{Encoder}\end{tabular}}}}%
-    \put(0.22503227,0.43130287){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}(2-layer MLP)\end{tabular}}}}%
+    \put(0.22503227,0.43130287){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}(3-layer MLP)\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=5]{nesy_cbm_architecture.pdf}}%
     \put(0.31389883,0.23321403){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Rule Bank \& Evaluation}\end{tabular}}}}%
     \put(0.31318543,0.22037715){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{differentiable threshold scoring}\end{tabular}}}}%
@@ -76,7 +76,7 @@
     \put(0.25389427,0.11534427){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\theta_2$\end{tabular}}}}%
     \put(0.37997987,0.18399933){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{Differentiable}\\\textit{scoring}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=7]{nesy_cbm_architecture.pdf}}%
-    \put(0.37391591,0.12352869){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$k$-annealed gates;}\\\textit{binarised at inference}\end{tabular}}}}%
+    \put(0.37391591,0.12352869){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textit{$k$-annealed gates;}\\\textit{binarised for audit/OOD}\end{tabular}}}}%
     \put(0.19872678,0.14255066){\color[rgb]{0.06666667,0.06666667,0.06666667}\rotatebox{90}{\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$\theta_i$\end{tabular}}}}}%
     \put(0.19891789,0.20370569){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$R{=}8$\end{tabular}}}}%
     \put(0.25027087,0.20227887){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l} expert defined rules\end{tabular}}}}%
@@ -95,14 +95,15 @@
     \put(0,0){\includegraphics[width=\unitlength,page=12]{nesy_cbm_architecture.pdf}}%
     \put(0.79305387,0.3425452){\color[rgb]{0.06666667,0.06666667,0.06666667}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Mahalanobis}\\\textbf{OODDetector}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=13]{nesy_cbm_architecture.pdf}}%
-    \put(0.51313362,0.22922393){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Binary Rule }\\\textbf{ Activation}\end{tabular}}}}%
-    \put(0.51073809,0.20526978){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$a\in\{0,1\}^{R}$\end{tabular}}}}%
+    \put(0.51313362,0.22922393){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Rule}\\\textbf{Activations}\end{tabular}}}}%
+    \put(0.51073809,0.19926978){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{a}^{\mathrm{soft}},\mathbf{a}^{\mathrm{hard}}$\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=14]{nesy_cbm_architecture.pdf}}%
+    \put(0.552,0.170){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{a}^{\mathrm{soft}}$\end{tabular}}}}%
     \put(0.50262044,0.13701019){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Linear rule Head}\end{tabular}}}}%
-    \put(0.49557909,0.12645249){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{l}_{\mathrm{rule}}$ = \\$\mathbf{W}\mathbf{a}^{\mathrm{hard}}$\\+ $\mathbf{b}$\end{tabular}}}}%
+    \put(0.49557909,0.12645249){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{l}_{\mathrm{rule}}$ = \\$\mathbf{W}\mathbf{a}^{\mathrm{soft}}$\\+ $\mathbf{b}$\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=15]{nesy_cbm_architecture.pdf}}%
     \put(0.6563715,0.13227599){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{$\alpha$-Gate}\end{tabular}}}}%
-    \put(0.66285332,0.11508868){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}(interpretability dial)\end{tabular}}}}%
+    \put(0.66285332,0.11508868){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}(learned weight)\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=16]{nesy_cbm_architecture.pdf}}%
     \put(0.23708514,0.08580464){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Neural Head}\\\textbf{(Fallback)}\end{tabular}}}}%
     \put(0.22848837,0.05829578){\color[rgb]{0,0,0}\transparent{0.947137}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l} $\mathbf{l}_{\mathrm{neural}} $\\= $\mathrm{MLP}_\phi(\mathbf{x})$\end{tabular}}}}%

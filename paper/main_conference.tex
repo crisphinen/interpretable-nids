@@ -32,10 +32,9 @@
     Carbondale, IL~62901~USA
     (e-mail: c.ngari@siu.edu, nweng@siu.edu).
     Corresponding author: N.~C.~Macharia.}%
-  \thanks{Code and pre-trained models will be made publicly available upon
-    acceptance, including the full concept and rule definitions with initial
-    thresholds, per-dataset feature lists, and the train/validation/test split and
-    evaluation-subset indices and scripts.}%
+  \thanks{Code, data splits, pre-trained models, saved results and a script that
+    maps them to every table are available at
+    \url{https://github.com/crisphinen/interpretable-nids}.}%
 }
 
 \begin{document}
@@ -47,7 +46,7 @@
 \maketitle
 
 \begin{abstract}
-Machine learning can detect cyberattacks in Internet of Things (IoT) networks, but two problems limit its use: operators cannot see why a model raises an alert, and new kinds of attack are mistaken for known ones. We test whether interpretable models solve both. We compare Concept Bottleneck Models (CBMs), which classify traffic through human-defined concepts, with NeSy-NIDS, which learns thresholds for expert-written rules and combines them with a neural network. On CTU-IoT-23 and CIC-IoT-2023, both models classify known traffic as accurately as a standard neural network (weighted F1 within 0.002). On later CTU-IoT-23 traffic, every model misses one attack class. Explanations only partly account for decisions: giving a CBM the declared concept values instead of its learned ones lowers F1 from 0.933 to below 0.50, and NeSy-NIDS agrees with its neural part on 97--100\% of flows but with its rules on only 32--55\%. For unfamiliar attacks, pulling concepts closer to their definitions has no consistent effect, the best detection score depends on the dataset and the model, and two ways of choosing that score from familiar traffic each failed on a dataset. A CBM that learns its concepts before its classifier loses accuracy but detects unfamiliar CTU-IoT-23 attacks as well as the neural network. Seven measures of how well familiar classes separate track detection on CIC-IoT-2023 and TON\_IoT, but on CTU-IoT-23 one model configuration drives the trend, and none predicts detection on an unseen dataset. Interpretable intrusion detectors should therefore be evaluated across several training runs, models and datasets.
+Machine learning can detect attacks in Internet of Things (IoT) networks, but operators cannot see why a model raises an alert, and new kinds of attack are mistaken for known ones. We test whether interpretable models solve both. We compare Concept Bottleneck Models (CBMs), which classify traffic through human-defined concepts, with NeSy-NIDS, which learns thresholds for expert-written rules alongside a neural network. On CTU-IoT-23 and CIC-IoT-2023, both models classify known traffic as accurately as a standard neural network. On later CTU-IoT-23 traffic every model misses one attack class, and on an unseen device's traffic every model's mean F1 falls from 0.93 to 0.52 or below. Explanations only partly account for decisions: giving a CBM the declared concept values instead of its learned ones lowers F1 from 0.933 to below 0.50, and NeSy-NIDS agrees with its neural part on 97--100\% of flows but with its rules on only 32--55\%. For unfamiliar attacks, pulling concepts closer to their definitions has no consistent effect, the best detection score depends on dataset and model, and two ways of choosing it from familiar traffic each failed on a dataset. A CBM that learns its concepts before its classifier loses accuracy but detects unfamiliar CTU-IoT-23 attacks as well as the neural network. Seven measures of how well familiar classes separate track detection on CIC-IoT-2023 and TON\_IoT, but on CTU-IoT-23 one model configuration drives the trend, and none predicts detection on an unseen dataset. Interpretable intrusion detectors should be evaluated across several training runs, models and datasets.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -65,12 +64,12 @@ In this paper, we study both problems together by building interpretability into
 \smallskip
 \noindent\textbf{Contributions.}
 \begin{enumerate}
-  \item \textbf{Accuracy without full fidelity.} Both interpretable architectures match an unconstrained MLP on known classes, but their declared concepts and rules only partly account for their predictions.
+  \item \textbf{Accuracy without full fidelity.} Both interpretable architectures match an unconstrained MLP on known classes from devices seen in training, but their declared concepts and rules only partly account for their predictions, and on a held-out CTU device every model fails to classify known traffic.
   \item \textbf{Geometry is associated with detectability, not a validated predictor.} Concept-fidelity regularisation has no monotone effect on OOD detection, and known-class geometry tracks OOD AUROC in a consistent direction on two of three corpora; on the third the association rests on a single configuration, and fitted on two corpora none predicts detectability on the third.
   \item \textbf{Scorer selection remains open.} The best OOD scorer depends on both dataset and architecture, and neither of two selection procedures that use only known traffic recovers it on every corpus.
 \end{enumerate}
 
-\noindent\textbf{Scope.} The building blocks, concept bottlenecks~\cite{koh2020concept}, sigmoid-relaxed threshold rules~\cite{petersen2022logic,yang2022ste}, per-class Mahalanobis scoring~\cite{lee2018simple} and neural/rule hybridisation, are established, and we claim no new state-of-the-art score. The contribution is an empirical characterisation of where interpretable open-set IoT NIDS hold up and where they do not, with evaluation guidance in the spirit of~\cite{arp2022dos}; we make no streaming, concept-drift or false-alert-rate claims.
+\noindent\textbf{Scope.} The building blocks, concept bottlenecks~\cite{koh2020concept}, sigmoid-relaxed threshold rules~\cite{petersen2022logic,yang2022ste}, per-class Mahalanobis scoring~\cite{lee2018simple} and neural/rule hybridisation, are established, and we claim no new state-of-the-art score. The contribution is an empirical characterisation of where interpretable open-set IoT NIDS hold up and where they do not, with evaluation guidance in the spirit of~\cite{arp2022dos}; we make no streaming, concept-drift or false-alert-rate claims. The findings are stated for the models and the concept and rule vocabularies we authored, and for test traffic from devices seen in training (Section~\ref{sec:acc}).
 
 \section{Related Work}\label{sec:related}
 
@@ -133,7 +132,7 @@ The known sets are: CTU \{Benign, C\&C-HeartBeat, DDoS, Okiru\}; CIC \{Benign, D
 
 \textbf{Preprocessing.} CIC and TON numeric features are standardised with a scaler fit on the training split. CTU features enter in raw units (missing values set to $-1$), with categorical fields integer-encoded from vocabularies built on known-class flows. Concept and rule thresholds were written from documented attack signatures and known-class statistics. No preprocessing statistic or concept or rule threshold uses a held-out family. The submitted CTU list (37 features) was an exception: it was selected by random-forest importance on a sample that included every CTU label, the held-out families among them, which may favour CTU OOD separability (CIC and TON use fixed lists). All CTU results here therefore use the same selection re-run on known-class training rows only (31 features; NeSy-NIDS adds back the two counters its expert rules read), and the submitted list is kept as an ablation. The re-selection leaves the accuracy and open-set findings in place, and it raises rather than lowers the AUROC of the configurations most sensitive to the feature list (Table~\ref{tab:main}, AUROC$^\S$). Every split and evaluation subset is drawn deterministically by the scripts we release.
 
-\textbf{Robustness splits.} We repeat the CBM evaluation on an alternative known set per dataset (CTU \{Benign, DDoS, Okiru, C\&C\}, promoting C\&C to known and demoting C\&C-HeartBeat to unknown; CIC \{Benign, DDoS-ICMP\_Flood, Mirai-udpplain, Recon-PortScan, VulnerabilityScan\}) and on a timestamp-ordered CTU split, in which each known class is ordered by capture time and the earliest 70\% trains and the latest 15\% tests. For CTU, the feature list is re-selected by the same random-forest procedure on each experiment's own known-class training rows, so the family it holds out (and any test-period flow) never informs its features. Each of these splits draws its own class-balanced sample; a control that uses the main split's 31-feature list on the same sample separates the effect of re-selection from that of the sample, and the accuracy and open-set conclusions hold under both.
+\textbf{Robustness splits.} We repeat the CBM evaluation on an alternative known set per dataset (CTU \{Benign, DDoS, Okiru, C\&C\}, promoting C\&C to known and demoting C\&C-HeartBeat to unknown; CIC \{Benign, DDoS-ICMP\_Flood, Mirai-udpplain, Recon-PortScan, VulnerabilityScan\}) and on a timestamp-ordered CTU split, in which each known class is ordered by capture time and the earliest 70\% trains and the latest 15\% tests. For CTU, the feature list is re-selected by the same random-forest procedure on each experiment's own known-class training rows, so the family it holds out (and any test-period flow) never informs its features. The alternative split draws its own class-balanced sample, since its known classes differ, while the temporal split reorders the main split's sample by time; a control that uses the main split's 31-feature list on the same sample separates the effect of re-selection from that of the sample, and the accuracy and open-set conclusions hold under both.
 
 \subsection{Concept Bottleneck Models}
 \label{sec:cbm}
@@ -282,9 +281,9 @@ where $l_c$ is the $c$-th class logit. $\tau$ is the 95th percentile of scores o
 \subsection{Baselines, Metrics and Training}
 \label{sec:eval}
 
-The MLP baseline has the same encoder as the CBM followed by a linear classifier and is scored with Mahalanobis on its 64-dimensional embedding. A decision tree (DT; depth chosen from $\{5,10,15,\infty\}$ by validation F1) is paired with per-class Mahalanobis on the raw training features, and a random forest (RF~\cite{breiman2001random}; 100 trees, depth 10) is scored with $1{-}\max(\hat{p})$. We report weighted F1 on the known test split, and AUROC and TPR at 5\% FPR with known test flows as negatives and held-out unknown flows as positives. All hyperparameters and early stopping use the known-class validation split. Adam ($\mathrm{lr}{=}10^{-3}$, batch 512); CBMs train for up to 50 epochs (patience 10) with $\lambda{=}0.5$, chosen from $\{0.1,0.5,1.0\}$ by known-class validation F1, which varies by at most $0.002$ across that grid; on the original-feature splits, raising $\lambda$ from $0.1$ to $1.0$ raises concept accuracy on both datasets but moves OOD AUROC in opposite directions (CTU $0.790{\to}0.884$, CIC $0.752{\to}0.724$, five seeds; Supplementary Table~\ref{tab:lambda}); NeSy-NIDS trains for up to 60 epochs (patience 12) with $\lambda_\alpha\in\{0,0.1\}$.
+The MLP baseline has the same encoder as the CBM followed by a linear classifier and is scored with Mahalanobis on its 64-dimensional embedding. A decision tree (DT; depth chosen from $\{5,10,15,\infty\}$ by validation F1) is paired with per-class Mahalanobis on the raw training features, and a random forest (RF~\cite{breiman2001random}; 100 trees, depth 10) is scored with $1{-}\max(\hat{p})$. We report weighted F1 on the known test split, and AUROC and TPR at 5\% FPR with known test flows as negatives and held-out unknown flows as positives. All hyperparameters and early stopping use the known-class validation split. Adam ($\mathrm{lr}{=}10^{-3}$, batch 512); CBMs train for up to 50 epochs (patience 10) with $\lambda{=}0.5$, the middle of the grid $\{0.1,0.5,1.0\}$: validation F1 differs by at most $0.0005$ between $\lambda{=}0.1$ and $0.5$, and $\lambda{=}1.0$ is unstable on CTU, where one of five seeds collapses (F1 $0.73$). Raising $\lambda$ from $0.1$ to $1.0$ raises concept accuracy (CTU $0.70{\to}0.94$, CIC $0.87{\to}0.98$) but moves OOD AUROC in opposite directions (CTU $0.810{\to}0.830$, CIC $0.743{\to}0.703$; five seeds, Supplementary Table~\ref{tab:lambda}); NeSy-NIDS trains for up to 60 epochs (patience 12) with $\lambda_\alpha\in\{0,0.1\}$.
 
-\textbf{Evaluation subsets.} Each analysis draws its own 5{,}000/5{,}000 evaluation subset and reuses it for every model and seed it compares (the NeSy scorer ablation, Table~\ref{tab:scorer}, draws one per seed), so a model can differ slightly between tables: the CIC MLP scores $0.807{\pm}.007$ in Table~\ref{tab:main}, $0.807{\pm}.008$ in the scorer\,$\times$\,architecture analysis and $0.815$ (seed~0) in the post-hoc detector comparison. This range ($0.008$) is below the gaps we interpret (${\ge}0.05$), and we compare values only within one analysis.
+\textbf{Evaluation subsets.} All models share the training, validation and test splits of their corpus. Every row of Tables~\ref{tab:main}, \ref{tab:scorer} and~\ref{tab:ood_baselines}, and the NeSy-NIDS $\lambda_\alpha$ and $k_T$ sweeps, are scored on one fixed set of flows per corpus: $20{,}000$ training flows fit each scorer, AUROC compares $5{,}000$ known-test with $5{,}000$ unknown flows, and TPR uses all test flows. The scorer\,$\times$\,architecture and scorer-selection analyses draw a separate subset per corpus, so a model can differ slightly between tables (CIC MLP $0.807{\pm}.007$ vs.\ $0.807{\pm}.008$; CTU MLP $0.874$ vs.\ $0.879$); we compare values only within one analysis.
 
 \section{Results}
 
@@ -295,13 +294,15 @@ The MLP baseline has the same encoder as the CBM followed by a linear classifier
 Table~\ref{tab:main} shows NeSy-NIDS and every JointCBM variant tracking the MLP on both datasets. Paired per-seed F1 differences from the MLP have means of at most $0.0001$ in magnitude on CTU-IoT-23 (no seed beyond $0.0004$) and $-0.0004$ to $+0.0002$ on CIC-IoT-2023 (no seed beyond $0.0026$). These differences are well inside seed variation; we do not test statistical equivalence. For JointCBM ($\gamma{=}0$) the match also holds per class: every class is within $0.002$ of the MLP. The weighted F1 hides a spread across classes: the weakest are CTU Okiru ($0.86$) and DDoS ($0.90$), and CIC Recon-PortScan ($0.64$), VulnerabilityScan ($0.70$) and Benign ($0.76$).
 \end{sloppypar}
 
-The rule-only head reaches only $0.566$ on CTU-IoT-23 and $0.750$ on CIC-IoT-2023, so the neural fallback covers traffic the eight rule templates do not. SequentialCBM and Post-hoc CBM lose much of their accuracy (CTU $0.567$/$0.576$; CIC $0.732$/$0.746$): consistent with a linear classifier over separately learned concepts being unable to recover the class boundary. The $\gamma$ variants have near-identical F1 in the main runs; one heavily regularised run in the supplementary $(\lambda,\gamma)$ grid ($\lambda{=}1.0$, $\gamma{=}0.5$, seed~0) fell to F1 $0.748$.
+The rule-only head reaches only $0.566$ on CTU-IoT-23 and $0.750$ on CIC-IoT-2023, so the neural fallback covers traffic the eight rule templates do not. SequentialCBM and Post-hoc CBM lose much of their accuracy (CTU $0.567$/$0.576$; CIC $0.732$/$0.746$): consistent with a linear classifier over separately learned concepts being unable to recover the class boundary. The $\gamma$ variants have near-identical F1 in the main runs; in the supplementary $(\lambda,\gamma)$ grid two of the fifteen CTU runs at $\lambda{=}1.0$ collapse (F1 $0.73$--$0.74$).
 
 \textbf{Robustness.} On the alternative known sets the MLP reaches F1 $0.935$ (CTU) and $0.820$ (CIC), and every JointCBM variant matches it within $0.001$ on both. The timestamp-ordered split lowers four-class weighted F1 from $0.933$ to $0.646$--$0.648$ for every model except SequentialCBM ($0.330$; Table~\ref{tab:temporal}). The CTU \emph{DDoS} label spans two capture regimes (a high-rate flood, then a near-zero-rate capture), so the temporal split trains on one and tests on the other, and every model scores F1 $0.00$ on DDoS on every seed; on the same sample with the main split's 31-feature list DDoS also collapses for every model and seed except two JointCBM $\gamma{=}0.5$ seeds, so the cause is the label's temporal structure, not feature selection. On the three temporally-coherent families the interpretable models match the MLP in aggregate (Coh-3 $0.862$--$0.863$) while trading per-class strengths (JointCBM $\gamma{=}0$: Benign $0.841$ vs.\ $0.958$, Okiru $0.961$ vs.\ $0.844$); only SequentialCBM, which loses Benign, falls behind. The accuracy match is therefore a matched-distribution result.
 
+\textbf{Device-disjoint splits.} Apart from Benign, each CTU known class comes from only 4--7 infected hosts, and two of them (192.168.1.198 and 192.168.100.111) have at least 3{,}450 flows in every known class. Holding out each in turn, we test on that host's known-class flows and train and validate on the other hosts' flows (features re-selected on the training rows, plus a control with the main 31-feature list; five seeds, every model). Five-seed mean known-class F1 falls from $0.933$ to $0.42$ on host .198 and to $0.14$--$0.23$ on host .111 for every model ($0.52$ for one NeSy-NIDS variant with the 31-feature list). Each host produces a few repeated flow patterns per class that the other hosts do not (host .198's $3{,}450$ Benign test flows are only three distinct feature vectors). With the re-selected features, every run on host .198 scores F1 $0.00$ on Benign, which the MLP labels Okiru, and on one more class, and every run on host .111 scores below $0.03$ on DDoS and Okiru, which the MLP labels C\&C-HeartBeat (Supplementary Section~\ref{sec:device}). With the known test flows themselves out of distribution, OOD AUROC no longer isolates novel attack types. On host .198 it ranges from $0.53$ (MLP) to $0.87$ (SequentialCBM; NeSy-NIDS $0.84$); on host .111 it is below $0.5$ for every model and seed (means $0.09$--$0.38$), so the held-out host's known flows score as more novel than the unknown flows, $89\%$ and over $99\%$ of which come from other hosts that also produce known-class traffic. The CTU results therefore concern novel attack types on devices seen in training; our merged flow table does not retain the capture identifier, so we did not build a capture-disjoint split.
+
 \begin{table*}[!t]
 \renewcommand{\arraystretch}{1.0}
-\caption{Weighted F1 on the known-class test split; OOD AUROC and TPR@5\%FPR (known vs.\ held-out unknown test flows). F1 is the five-seed mean (seed std ${\le}0.0015$; SequentialCBM, Post-hoc CBM and rule-only ${\le}0.0152$); AUROC and TPR show mean$\pm$std over five seeds. \textbf{Bold} marks the highest observed mean in each OOD column, not an established ranking. OOD scores are per-class Mahalanobis fitted on training vectors: activations for the CBM, NeSy and MLP rows, concept-probe outputs for Post-hoc CBM, and $^\ddagger$raw features for DT (this score does not use the tree, so it has no seed variance); $^\dagger$RF uses $1{-}\max\hat{p}$. CBM, MLP, Post-hoc CBM, DT and RF rows share the same evaluation flows. CTU-IoT-23 uses the known-class-only feature selection (leak-free; Section~\ref{sec:datasets}); $^\S$AUROC with the originally submitted 37-feature CTU list on the same rows (ablation); its F1 differs from the F1 column by at most $0.003$.}
+\caption{Weighted F1 on the known-class test split; OOD AUROC and TPR@5\%FPR (known vs.\ held-out unknown test flows). F1 is the five-seed mean (seed std ${\le}0.0015$; SequentialCBM, Post-hoc CBM and rule-only ${\le}0.0152$); AUROC and TPR show mean$\pm$std over five seeds. Rows are grouped as the unconstrained MLP, the CBMs, NeSy-NIDS and the classical DT/RF baselines, whose OOD scores are not computed on a learned representation. \textbf{Bold} marks the highest observed mean in each OOD column, not an established ranking. OOD scores are per-class Mahalanobis fitted on training vectors: activations for the CBM, NeSy and MLP rows, concept-probe outputs for Post-hoc CBM, and $^\ddagger$raw features for DT (this score does not use the tree, so it has no seed variance); $^\dagger$RF uses $1{-}\max\hat{p}$. All rows share the same training, validation and evaluation flows. CTU-IoT-23 uses the known-class-only feature selection (leak-free; Section~\ref{sec:datasets}); $^\S$AUROC with the originally submitted 37-feature CTU list on the same rows (ablation); its F1 differs from the F1 column by at most $0.003$.}
 \label{tab:main}
 \centering
 \small
@@ -330,7 +331,7 @@ JointCBM ($\gamma{=}1.0$)
   & $0.9331$ & $0.834{\pm}.050$ & $0.520{\pm}.088$ & $0.833{\pm}.029$
   & $0.8182$ & $0.699{\pm}.013$ & $0.352{\pm}.028$ \\
 SequentialCBM
-  & $0.5673$ & $0.872{\pm}.026$ & $0.550{\pm}.049$ & $0.782{\pm}.042$
+  & $0.5673$ & $0.872{\pm}.026$ & $\mathbf{0.550{\pm}.049}$ & $0.782{\pm}.042$
   & $0.7321$ & $0.667{\pm}.005$ & $0.177{\pm}.015$ \\
 HybridCBM
   & $0.9331$ & $0.822{\pm}.055$ & $0.461{\pm}.049$ & $0.772{\pm}.073$
@@ -340,14 +341,14 @@ Post-hoc CBM
   & 0.7457 & $0.652{\pm}.018$ & $0.234{\pm}.029$ \\
 \midrule
 NeSy-NIDS
-  & $0.9331$ & $0.904{\pm}.014$ & $\mathbf{0.586{\pm}.098}$ & $0.885{\pm}.020$
-  & $0.8186$ & $0.657{\pm}.028$ & $0.252{\pm}.056$ \\
+  & $0.9331$ & $0.904{\pm}.014$ & $0.493{\pm}.061$ & $0.885{\pm}.020$
+  & $0.8186$ & $0.647{\pm}.027$ & $0.217{\pm}.056$ \\
 NeSy + $\alpha$-reg ($\lambda_\alpha{=}0.1$)
-  & 0.9330 & $\mathbf{0.909{\pm}.014}$ & $0.575{\pm}.101$ & $\mathbf{0.896{\pm}.016}$
-  & 0.8198 & $0.691{\pm}.018$ & $0.253{\pm}.081$ \\
+  & 0.9330 & $\mathbf{0.909{\pm}.014}$ & $0.488{\pm}.033$ & $\mathbf{0.896{\pm}.016}$
+  & 0.8198 & $0.672{\pm}.016$ & $0.187{\pm}.051$ \\
 Rule-only
-  & 0.5660 & $0.870{\pm}.011$ & $0.427{\pm}.022$ & $0.870{\pm}.011$
-  & 0.7498 & $0.668{\pm}.038$ & $0.189{\pm}.066$ \\
+  & 0.5660 & $0.870{\pm}.011$ & $0.426{\pm}.022$ & $0.870{\pm}.011$
+  & 0.7498 & $0.660{\pm}.029$ & $0.156{\pm}.036$ \\
 \midrule
 DT$^\ddagger$
   & 0.9337 & $0.679{\pm}.000$ & $0.251{\pm}.000$ & $0.557{\pm}.000$
@@ -388,11 +389,11 @@ NeSy-NIDS           & $0.917$ & $0.786$ & $0.00$ & $0.883$ & $0.646$ & $0.862$ &
 \subsection{Open-Set Detection}
 \label{sec:ood}
 
-\textbf{CTU-IoT-23.} Under the leak-free feature selection the highest observed means come from NeSy-NIDS with the $\alpha$ penalty ($0.909{\pm}.014$) and NeSy-NIDS ($0.904{\pm}.014$), followed by the MLP ($0.874{\pm}.002$), SequentialCBM ($0.872{\pm}.026$) and Post-hoc CBM ($0.871{\pm}.024$); the NeSy-MLP gap is about two seed std. The four JointCBM variants reach $0.81$--$0.84$ (seed std $0.04$--$0.05$), HybridCBM $0.822$, and the DT and RF baselines $0.679$ and $0.657$. SequentialCBM, whose concept head is trained on the concept labels alone and frozen, detects as well as the MLP despite a closed-set F1 of only $0.567$. With the originally submitted feature list on the same rows, SequentialCBM and HybridCBM reach only $0.782$ and $0.772$ and Post-hoc CBM $0.805$, so known-class-only selection raises them, while the MLP moves from $0.894$ to $0.874$ and NeSy-NIDS from $0.885$ to $0.904$ (Table~\ref{tab:main}, AUROC$^\S$).
+\textbf{CTU-IoT-23.} Under the leak-free feature selection the highest observed means come from NeSy-NIDS with the $\alpha$ penalty ($0.909{\pm}.014$) and NeSy-NIDS ($0.904{\pm}.014$), followed by the MLP ($0.874{\pm}.002$), SequentialCBM ($0.872{\pm}.026$) and Post-hoc CBM ($0.871{\pm}.024$); the NeSy-MLP gap is about two seed std. The four JointCBM variants reach $0.81$--$0.84$ (seed std $0.04$--$0.05$), HybridCBM $0.822$, and the DT and RF baselines $0.679$ and $0.657$. SequentialCBM, whose concept head is trained on the concept labels alone and frozen, detects as well as the MLP despite a closed-set F1 of only $0.567$. With the originally submitted feature list on the same rows, SequentialCBM and HybridCBM reach only $0.782$ and $0.772$ and Post-hoc CBM $0.805$, so known-class-only selection raises them, while the MLP moves from $0.894$ to $0.874$ and NeSy-NIDS from $0.885$ to $0.904$ (Table~\ref{tab:main}, AUROC$^\S$). NeSy-NIDS also reads the two rule counters that the re-selection drops (Section~\ref{sec:datasets}); given the same 33 columns, the MLP reaches $0.878{\pm}.001$, JointCBM $\gamma{=}0$ $0.804{\pm}.021$, SequentialCBM $0.852{\pm}.038$ and HybridCBM $0.790{\pm}.069$, so the two counters do not account for NeSy-NIDS's higher mean.
 
-\textbf{CIC-IoT-2023.} The MLP ($0.807{\pm}.007$) and the DT's raw-feature Mahalanobis ($0.802$) have the highest AUROC. The JointCBM variants reach $0.699$--$0.717$; SequentialCBM and HybridCBM reach $0.667$ and $0.669$, and NeSy-NIDS with Mahalanobis only $0.657$ ($0.691$ with the $\alpha$ penalty). Unlike on CTU, SequentialCBM is among the weakest detectors here. The low-dimensional concept and rule spaces separate these unknowns less well than the 64-dimensional MLP embedding and 39 raw features; we ran no dimension-matched control.
+\textbf{CIC-IoT-2023.} The MLP ($0.807{\pm}.007$) and the DT's raw-feature Mahalanobis ($0.802$) have the highest AUROC. The JointCBM variants reach $0.699$--$0.717$; SequentialCBM and HybridCBM reach $0.667$ and $0.669$, and NeSy-NIDS with Mahalanobis only $0.647$ ($0.672$ with the $\alpha$ penalty). Unlike on CTU, SequentialCBM is among the weakest detectors here. The low-dimensional concept and rule spaces separate these unknowns less well than the 64-dimensional MLP embedding and 39 raw features. A dimension-matched control, the JointCBM architecture trained without concept labels ($\lambda{=}\gamma{=}0$, an unsupervised 8-unit bottleneck; five seeds), reaches $0.719{\pm}.023$, the same as JointCBM, so on CIC the gap to the MLP is accounted for by the 8-unit width rather than by the concepts. On CTU the same control is unstable ($0.561{\pm}.154$; seeds $0.44$--$0.86$, F1 $0.867$) and concept supervision recovers most of the loss (JointCBM $0.823$); on TON\_IoT it reaches $0.544{\pm}.115$ against $0.650{\pm}.044$ for JointCBM and $0.552{\pm}.027$ for the MLP.
 
-\textbf{Concept-fidelity regularisation is not a lever.} The sign of $\Delta{=}\gamma_{1.0}{-}\gamma_0$ is opposite on the two main splits, and across five dataset/split combinations it is positive on two and negative on three, with $|\Delta|\le0.06$ (Table~\ref{tab:gamma_splits}). In a joint $(\lambda,\gamma)$ grid (three seeds per cell; Supplementary Section~\ref{sec:lambdagamma}) the sign of the $\gamma$ effect also depends on $\lambda$. Effects this small need multi-seed replication under a fixed scoring protocol.
+\textbf{Concept-fidelity regularisation is not a lever.} The sign of $\Delta{=}\gamma_{1.0}{-}\gamma_0$ is opposite on the two main splits, and across five dataset/split combinations it is positive on two and negative on three, with $|\Delta|\le0.06$ (Table~\ref{tab:gamma_splits}). In a joint $(\lambda,\gamma)$ grid (five seeds per cell; Supplementary Section~\ref{sec:lambdagamma}) the size of the $\gamma$ effect also changes with $\lambda$: on CTU it grows from $-0.004$ at $\lambda{=}0.1$ to $+0.030$ at $\lambda{=}1.0$, and on CIC it shrinks from $-0.040$ to $-0.003$. Effects this small need multi-seed replication under a fixed scoring protocol.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -412,7 +413,7 @@ Alternative & CIC & $0.763$ & $0.765$ & $0.765$ & $0.712$ & $-0.051$ \\
 \end{tabular}
 \end{table}
 
-\textbf{Which scorer works depends on the representation.} Table~\ref{tab:scorer} compares per-class Mahalanobis on the NeSy rule vector with two binary-native distances to the nearest known-class centroid (Hamming, Jaccard), the logit-space energy score $-\log\sum_c e^{l_c}$~\cite{liu2020energy}, and a $z$-normalised Mahalanobis$+$energy average. On CTU the two rule-vector distances and per-class Mahalanobis all work ($0.86$--$0.90$) while energy is below chance ($0.46$). On CIC no activation-space scorer exceeds $0.66$ and only the energy-based scorers detect ($0.747$--$0.763$). The Gaussian assumption is therefore not what limits the binary rule space; whether that space separates known from unknown flows at all is. Across the MLP and the six CBM configurations the ranking also depends on architecture (Table~\ref{tab:scorer_arch}). On CTU Mahalanobis is better for every architecture, by $0.23$--$0.49$, and also with the submitted feature list. On CIC energy is better for the four JointCBM variants ($0.732$--$0.769$ vs.\ $0.702$--$0.722$), while Mahalanobis stays better for the MLP, SequentialCBM and HybridCBM. On TON\_IoT energy is better for all seven ($0.640$--$0.713$ vs.\ $0.550$--$0.644$). No scorer is best across the three datasets and all architectures.
+\textbf{Which scorer works depends on the representation.} Table~\ref{tab:scorer} compares per-class Mahalanobis on the NeSy rule vector with two binary-native distances to the nearest known-class centroid (Hamming, Jaccard), the logit-space energy score $-\log\sum_c e^{l_c}$~\cite{liu2020energy}, and a $z$-normalised Mahalanobis$+$energy average. On CTU the two rule-vector distances and per-class Mahalanobis all work ($0.86$--$0.90$) while energy is below chance ($0.46$). On CIC no activation-space scorer exceeds $0.65$ and only the energy-based scorers detect ($0.721$--$0.743$). The Gaussian assumption is therefore not what limits the binary rule space; whether that space separates known from unknown flows at all is. Across the MLP and the six CBM configurations the ranking also depends on architecture (Table~\ref{tab:scorer_arch}). On CTU Mahalanobis is better for every architecture, by $0.23$--$0.49$, and also with the submitted feature list. On CIC energy is better for the four JointCBM variants ($0.732$--$0.769$ vs.\ $0.702$--$0.722$), while Mahalanobis stays better for the MLP, SequentialCBM and HybridCBM. On TON\_IoT energy is better for all seven ($0.640$--$0.713$ vs.\ $0.550$--$0.644$). No scorer is best across the three datasets and all architectures.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -423,11 +424,11 @@ Alternative & CIC & $0.763$ & $0.765$ & $0.765$ & $0.712$ & $-0.051$ \\
 \toprule
 Scorer & Space & CTU-IoT-23 & CIC-IoT-2023 \\
 \midrule
-Mahalanobis (per-class) & activations & \textbf{0.904} (.014) & 0.657 (.028) \\
-Hamming to centroid     & activations & 0.858 (.007) & 0.650 (.008) \\
-Jaccard to centroid     & activations & 0.888 (.007) & 0.640 (.015) \\
-Energy                  & logits      & 0.461 (.076) & 0.747 (.028) \\
-Mahalanobis $+$ Energy  & both        & 0.661 (.105) & \textbf{0.763} (.020) \\
+Mahalanobis (per-class) & activations & \textbf{0.904} (.014) & 0.647 (.027) \\
+Hamming to centroid     & activations & 0.858 (.008) & 0.640 (.006) \\
+Jaccard to centroid     & activations & 0.888 (.006) & 0.633 (.010) \\
+Energy                  & logits      & 0.460 (.077) & 0.721 (.032) \\
+Mahalanobis $+$ Energy  & both        & 0.643 (.104) & \textbf{0.743} (.021) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -510,18 +511,18 @@ CIC & HybridCBM     & 5.2 (0.2) & 0.131 (.008) & 0.676 & 0.16 \\
 CIC & NeSy-NIDS     & 4.2 (0.6) & 0.145 (.017) & 0.641 & 0.20 \\
 \bottomrule
 \end{tabular}}
-\end{table} Because unknown flows outnumber known ones about $17{:}1$ in this pool, the unrejected unknowns mainly lower known-class precision, so macro-F1 depends on prevalence. Per-family AUROC ranges widely, and the two architectures catch different families (Supplementary Section~\ref{sec:openset_supp}): for JointCBM it runs from near-perfect (CTU C\&C-Mirai $0.994$; CIC DDoS-PSHACK\_Flood $0.993$) to below chance (CIC Mirai-greip\_flood $0.15$, DDoS-UDP\_Fragmentation $0.24$), so a strong pooled AUROC does not mean the deployed detector flags every novel family at a usable rate. Against five post-hoc detectors on the seed-0 MLP (Table~\ref{tab:ood_baselines}), the confidence scores (MSP~\cite{hendrycks2017baseline}, ODIN, energy) sit near or below chance on CTU and are modest on CIC, while the feature-space detectors (deep kNN~\cite{sun2022knnood} and Mahalanobis) are strongest; we make no state-of-the-art claim.
+\end{table} Because unknown flows outnumber known ones about $17{:}1$ in this pool, the unrejected unknowns mainly lower known-class precision, so macro-F1 depends on prevalence. Per-family AUROC ranges widely, and the two architectures catch different families (Supplementary Section~\ref{sec:openset_supp}): for JointCBM it runs from near-perfect (CTU C\&C-Mirai $0.994$; CIC DDoS-PSHACK\_Flood $0.993$) to below chance (CIC Mirai-greip\_flood $0.15$, DDoS-UDP\_Fragmentation $0.24$), so a strong pooled AUROC does not mean the deployed detector flags every novel family at a usable rate. At the operating threshold NeSy-NIDS flags fewer than $1\%$ of the flows of 8 of the 29 CIC families, among them XSS ($0.6\%$), SQL injection ($0.3\%$) and backdoor malware ($0.6\%$), and JointCBM $6.5$--$15.6\%$ of the injection, web and brute-force families. Accurate classification of familiar traffic therefore does not establish dependable detection of unfamiliar attacks, and for these families neither interpretable model offers it. Against five post-hoc detectors on the MLP (five seeds; Table~\ref{tab:ood_baselines}), the confidence scores (MSP~\cite{hendrycks2017baseline}, ODIN, energy) sit near or below chance on CTU and are modest on CIC, while the feature-space detectors (deep kNN~\cite{sun2022knnood} and Mahalanobis) are strongest; we make no state-of-the-art claim.
 
 \begin{table}[t]
 \centering\footnotesize
-\caption{Post-hoc OOD detectors on the unconstrained MLP (AUROC; seed-0 model on its own evaluation subset).}
+\caption{Post-hoc OOD detectors on the unconstrained MLP (AUROC, mean$\pm$std over five seeds, on the evaluation flows of Table~\ref{tab:main}).}
 \label{tab:ood_baselines}
 \begin{tabular}{lccccc}
 \toprule
 Dataset & MSP & ODIN & Energy & kNN & Mahal. \\
 \midrule
-CTU-IoT-23   & 0.281 & 0.367 & 0.442 & \textbf{0.876} & 0.869 \\
-CIC-IoT-2023 & 0.619 & 0.714 & 0.607 & \textbf{0.840} & 0.815 \\
+CTU-IoT-23   & $.302{\pm}.068$ & $.364{\pm}.067$ & $.377{\pm}.072$ & $\mathbf{.879{\pm}.003}$ & $.874{\pm}.002$ \\
+CIC-IoT-2023 & $.609{\pm}.012$ & $.698{\pm}.013$ & $.607{\pm}.019$ & $\mathbf{.828{\pm}.007}$ & $.807{\pm}.007$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -572,7 +573,7 @@ Probe accuracy, soft minus thresholded concepts & $0.001$--$0.084$ & $0.041$--$0
 \midrule
 \multicolumn{3}{@{}l}{\textbf{NeSy-NIDS}} \\
 Rule-head weight $\alpha$ & $0.38$--$0.89$ & $0.32$--$0.95$ \\
-OOD AUROC across the $\lambda_\alpha$ sweep & $0.893$--$0.909$ & $0.657$--$0.691$ \\
+OOD AUROC across the $\lambda_\alpha$ sweep & $0.893$--$0.909$ & $0.647$--$0.673$ \\
 Prediction agrees with neural-only head & $100\%$ & $97$--$99\%$ \\
 Prediction agrees with rule-only head & $32$--$51\%$ & $45$--$55\%$ \\
 Hard conjunction agrees with thresholded soft product & ${>}99.9\%$ & $99.7$--$99.9\%$ \\
@@ -581,7 +582,7 @@ Soft activations within $0.1$ of $0$ or $1$ & $0.87$--$0.96$ & $0.75$--$0.80$ \\
 \end{tabular}}
 \end{table}
 
-\textbf{NeSy-NIDS.} The hard conjunction almost always agrees with thresholding the soft product, most soft activations are already near $0$ or $1$ before the cut (known test split), and classifying from the hard activations changes $0.0\%$ (CTU) and $0.9\%$ (CIC) of known test predictions at $\lambda_\alpha{=}0$ ($0.0\%$ and up to $3.2\%$ across the sweep), so binarisation has little effect on the blended predictions. At $\lambda_\alpha{=}0$ the deployed prediction agrees with the neural-only head on $100\%$ and $99\%$ of flows and with the rule-only head on only $32\%$ and $45\%$ (seed std $17$ and $9$ points); raising $\lambda_\alpha$ over $\{0,0.05,0.1,0.2,0.5,1.0\}$ increases $\alpha$ at essentially constant known-class validation F1 (about $0.933$ CTU, $0.818$--$0.819$ CIC), and rule agreement rises only modestly with it (CTU $32\%$ to $51\%$, CIC $45$--$55\%$), staying well below the neural agreement (Table~\ref{tab:fidelity}). OOD AUROC stays within $0.016$ on CTU and rises by $0.02$--$0.03$ on CIC as $\alpha$ grows; we do not attribute that rise to greater rule reliance. The rules fire in two regimes (Fig.~\ref{fig:ruleactiv}): selectively on CTU-IoT-23, leaving within-class variance for the Mahalanobis scorer, but near-deterministically on CIC-IoT-2023, which coincides with the lower CIC AUROC. The learned thresholds drift reproducibly across seeds on CIC (mean pairwise correlation of the per-condition drifts $0.73$) but not on CTU ($0.05$; Fig.~\ref{fig:threshdrift}); reproducibility is not semantic validation. Rule quality is also uneven (Table~\ref{tab:rulequality}): precision against each rule's declared target class shows the name often mismatches behaviour (\texttt{okiru\_low\_rate} fires mostly on Benign, \texttt{vuln\_scan} almost never on VulnerabilityScan, and \texttt{benign\_low\_rate} as often on Mirai as on Benign), and several CIC thresholds vary strongly across seeds. In both architectures the inspectable layer records concept or rule activation faithfully but does not by itself explain the classification.
+\textbf{NeSy-NIDS.} The hard conjunction almost always agrees with thresholding the soft product, most soft activations are already near $0$ or $1$ before the cut (known test split), and classifying from the hard activations changes $0.0\%$ (CTU) and $0.9\%$ (CIC) of known test predictions at $\lambda_\alpha{=}0$ ($0.0\%$ and up to $3.2\%$ across the sweep), so binarisation has little effect on the blended predictions. At $\lambda_\alpha{=}0$ the deployed prediction agrees with the neural-only head on $100\%$ and $99\%$ of flows and with the rule-only head on only $32\%$ and $45\%$ (seed std $17$ and $9$ points); raising $\lambda_\alpha$ over $\{0,0.05,0.1,0.2,0.5,1.0\}$ increases $\alpha$ at essentially constant known-class validation F1 (about $0.933$ CTU, $0.818$--$0.819$ CIC), and rule agreement rises only modestly with it (CTU $32\%$ to $51\%$, CIC $45$--$55\%$), staying well below the neural agreement (Table~\ref{tab:fidelity}). OOD AUROC stays within $0.016$ on CTU and rises by $0.01$--$0.03$ on CIC as $\alpha$ grows; we do not attribute that rise to greater rule reliance. The rules fire in two regimes (Fig.~\ref{fig:ruleactiv}): selectively on CTU-IoT-23, leaving within-class variance for the Mahalanobis scorer, but near-deterministically on CIC-IoT-2023, which coincides with the lower CIC AUROC. The learned thresholds drift reproducibly across seeds on CIC (mean pairwise correlation of the per-condition drifts $0.73$) but not on CTU ($0.05$; Fig.~\ref{fig:threshdrift}); reproducibility is not semantic validation. Rule quality is also uneven (Table~\ref{tab:rulequality}): precision against each rule's declared target class shows the name often mismatches behaviour (\texttt{okiru\_low\_rate} fires mostly on Benign, \texttt{vuln\_scan} almost never on VulnerabilityScan, and \texttt{benign\_low\_rate} as often on Mirai as on Benign), and several CIC thresholds vary strongly across seeds. These weak rules were already weak at their expert initial thresholds (target precision $0.31$, $0.01$ and $0.26$ before training), so the weakness lies in the authored rules rather than in learning; training mostly widens CIC coverage, sometimes at a cost in precision (\texttt{short\_connection\_flood} $0.80{\to}0.63$). In both architectures the inspectable layer records concept or rule activation faithfully but does not by itself explain the classification.
 
 
 
@@ -590,34 +591,34 @@ Soft activations within $0.1$ of $0$ or $1$ & $0.87$--$0.96$ & $0.75$--$0.80$ \\
 \caption{Per-rule quality of the NeSy-NIDS rule bank on the known test split (mean over
 five seeds). Cov.: fraction of flows activating the rule. Prec.: fraction of activating flows
 in the rule's dominant class. Target prec.: fraction in the rule's declared target class
-(Table~\ref{tab:rulebank}), seed std in parentheses. Thr.: relative std of the learned
-threshold across seeds.}
+(Table~\ref{tab:rulebank}), seed std in parentheses. Init.: target precision at the expert
+initial thresholds, before training. Thr.: relative std of the learned threshold across seeds.}
 \label{tab:rulequality}
 \setlength{\tabcolsep}{4pt}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{lcccccc}
+\begin{tabular}{lccccccc}
 \toprule
-Rule & Cov. & Dominant & Prec. & Target & Target prec. & Thr. \\
+Rule & Cov. & Dominant & Prec. & Target & Target prec. & Init. & Thr. \\
 \midrule
-\multicolumn{7}{@{}l}{\textbf{CTU-IoT-23}} \\
-ddos\_high\_rate & 0.23 & DDoS & 0.76 & DDoS & 0.76 (0.00) & 0.00 \\
-cc\_heartbeat\_beaconing & 0.30 & C\&C-HB & 0.66 & C\&C-HB & 0.66 (0.00) & 0.06 \\
-benign\_single\_probe & 0.58 & Benign & 0.38 & Benign & 0.38 (0.00) & 0.00 \\
-okiru\_low\_rate & 0.63 & Benign & 0.35 & Okiru & 0.31 (0.00) & 0.00 \\
-asymmetric\_flood & 0.52 & DDoS & 0.44 & DDoS & 0.43 (0.10) & 0.09 \\
-persistent\_connection & 0.15 & C\&C-HB & 0.63 & C\&C-HB & 0.63 (0.00) & 0.02 \\
-incomplete\_handshake & 0.38 & C\&C-HB & 0.63 & C\&C-HB & 0.63 (0.16) & 0.07 \\
-ddos\_short\_burst & 0.23 & DDoS & 0.76 & DDoS & 0.76 (0.00) & 0.00 \\
+\multicolumn{8}{@{}l}{\textbf{CTU-IoT-23}} \\
+ddos\_high\_rate & 0.23 & DDoS & 0.76 & DDoS & 0.76 (0.00) & 0.76 & 0.00 \\
+cc\_heartbeat\_beaconing & 0.30 & C\&C-HB & 0.66 & C\&C-HB & 0.66 (0.00) & 0.65 & 0.06 \\
+benign\_single\_probe & 0.58 & Benign & 0.38 & Benign & 0.38 (0.00) & 0.38 & 0.00 \\
+okiru\_low\_rate & 0.63 & Benign & 0.35 & Okiru & 0.31 (0.00) & 0.31 & 0.00 \\
+asymmetric\_flood & 0.52 & DDoS & 0.44 & DDoS & 0.43 (0.10) & 0.48 & 0.09 \\
+persistent\_connection & 0.15 & C\&C-HB & 0.63 & C\&C-HB & 0.63 (0.00) & 0.63 & 0.02 \\
+incomplete\_handshake & 0.38 & C\&C-HB & 0.63 & C\&C-HB & 0.63 (0.16) & 0.76 & 0.07 \\
+ddos\_short\_burst & 0.23 & DDoS & 0.76 & DDoS & 0.76 (0.00) & 0.76 & 0.00 \\
 \midrule
-\multicolumn{7}{@{}l}{\textbf{CIC-IoT-2023}} \\
-syn\_flood\_ddos & 0.20 & DDoS-SYN & 1.00 & DDoS-SYN & 1.00 (0.00) & 0.48 \\
-udp\_mirai\_flood & 0.09 & Mirai & 0.85 & Mirai & 0.85 (0.14) & 0.20 \\
-recon\_port\_scan & 0.04 & Recon & 0.74 & Recon & 0.74 (0.00) & 0.12 \\
-vuln\_scan & 0.00 & DDoS-SYN & 0.67 & VulnScan & 0.01 (0.00) & 0.28 \\
-benign\_low\_rate & 0.70 & Mirai & 0.28 & Benign & 0.28 (0.02) & 2.90 \\
-large\_payload\_flood & 0.06 & Benign & 0.59 & Benign & 0.59 (0.06) & 1.91 \\
-high\_entropy\_scan & 0.00 & Recon & 0.46 & Recon & 0.46 (0.05) & 0.42 \\
-short\_connection\_flood & 0.29 & DDoS-SYN & 0.63 & DDoS-SYN & 0.63 (0.09) & 0.55 \\
+\multicolumn{8}{@{}l}{\textbf{CIC-IoT-2023}} \\
+syn\_flood\_ddos & 0.20 & DDoS-SYN & 1.00 & DDoS-SYN & 1.00 (0.00) & 1.00 & 0.48 \\
+udp\_mirai\_flood & 0.09 & Mirai & 0.85 & Mirai & 0.85 (0.14) & 0.76 & 0.20 \\
+recon\_port\_scan & 0.04 & Recon & 0.74 & Recon & 0.74 (0.00) & 0.74 & 0.12 \\
+vuln\_scan & 0.00 & DDoS-SYN & 0.67 & VulnScan & 0.01 (0.00) & 0.01 & 0.28 \\
+benign\_low\_rate & 0.70 & Mirai & 0.28 & Benign & 0.28 (0.02) & 0.26 & 2.90 \\
+large\_payload\_flood & 0.06 & Benign & 0.59 & Benign & 0.59 (0.06) & 0.67 & 1.91 \\
+high\_entropy\_scan & 0.00 & Recon & 0.46 & Recon & 0.46 (0.05) & 0.44 & 0.42 \\
+short\_connection\_flood & 0.29 & DDoS-SYN & 0.63 & DDoS-SYN & 0.63 (0.09) & 0.80 & 0.55 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -625,7 +626,7 @@ short\_connection\_flood & 0.29 & DDoS-SYN & 0.63 & DDoS-SYN & 0.63 (0.09) & 0.5
 \subsection{Known-Class Geometry: Consistent on Two Corpora, Configuration-Driven on CTU}
 \label{sec:ksweep}
 
-Across the ten NeSy-NIDS models, mean within-class rule-activation variance tracks OOD AUROC ($r{=}0.971$), but the models form two dataset clusters, so this correlation cannot separate a property of the representation from a property of the dataset. We therefore test known-class statistics across the thirty CBM concept-space models per dataset (six configurations $\times$ five seeds) on three corpora. On TON\_IoT the JointCBM variants reach known-class F1 $0.879$--$0.898$ (MLP $0.876$) and concept-space AUROC $0.65$, above the MLP embedding's $0.55$.
+Across the ten NeSy-NIDS models, mean within-class rule-activation variance tracks OOD AUROC ($r{=}0.973$), but the models form two dataset clusters, so this correlation cannot separate a property of the representation from a property of the dataset. We therefore test known-class statistics across the thirty CBM concept-space models per dataset (six configurations $\times$ five seeds) on three corpora. On TON\_IoT the JointCBM variants reach known-class F1 $0.879$--$0.898$ (MLP $0.876$) and concept-space AUROC $0.65$, above the MLP embedding's $0.55$.
 
 \begin{figure}[t]
   \centering
@@ -661,7 +662,7 @@ Unknown/known distance ratio$^\dagger$ & $+0.65$ & $+0.59$ & $+0.56$ & $+0.72$ \
 {\footnotesize $^\ast$CTU without SequentialCBM (25 models). $^\dagger$Uses the unknown flows, so it is a proxy of AUROC, not an independent predictor.}
 \end{table}
 
-\textbf{A manipulation and an interpretation.} Retraining NeSy-NIDS at annealing steepness $k_T\in\{2,5,10,20\}$ (five seeds, constant known-class F1) raises within-class variance on CIC ($0.024{\to}0.037$) but AUROC follows only weakly ($r{=}0.32$, $0.63$ at $k_T{\le}5$ vs.\ $0.66$ at $k_T{\ge}10$); on CTU variance barely moves ($0.125$--$0.128$) and is not positively associated with AUROC ($r{=}-0.15$). This is consistent with a known-class-conditional scorer depending on where the unknown flows fall, not on the known classes alone; we state the result only for the settings tested.
+\textbf{A manipulation and an interpretation.} Retraining NeSy-NIDS at annealing steepness $k_T\in\{2,5,10,20\}$ (five seeds, constant known-class F1) raises within-class variance on CIC ($0.024{\to}0.037$) but AUROC follows only weakly ($r{=}0.44$, $0.61$ at $k_T{\le}5$ vs.\ $0.65$ at $k_T{\ge}10$); on CTU variance barely moves ($0.125$--$0.128$) and is not positively associated with AUROC ($r{=}-0.15$). This is consistent with a known-class-conditional scorer depending on where the unknown flows fall, not on the known classes alone; we state the result only for the settings tested.
 
 \section{Discussion}\label{sec:discussion}
 
@@ -670,11 +671,11 @@ Unknown/known distance ratio$^\dagger$ & $+0.65$ & $+0.59$ & $+0.56$ & $+0.72$ \
 \phantomsection\label{sec:compute}
 \textbf{Computational cost.} On CTU-IoT-23, JointCBM adds 296 parameters to the MLP and NeSy-NIDS has 13{,}313, all under $0.4$\,MB in \texttt{float32}. Per-flow (batch-1) latency on one thread of an Intel Core i9-9820X is $96$\,$\mu$s (MLP), $109$\,$\mu$s (JointCBM) and about $590$\,$\mu$s (NeSy-NIDS, an un-vectorised per-rule loop), measured with the submitted 37-feature input.
 
-\textbf{Limitations and next steps.} (i)~\emph{Authored vocabulary.} The concepts and rules were written by us from documented attack signatures~\cite{mirsky2018kitsune,meidan2018nbaiot} and not validated by operators or independent experts; an operator study of the vocabulary is the next step. (ii)~\emph{Capture overlap and sampling.} Splits are random at the flow level and each is a single class-balanced sample; capture-, session- and device-disjoint splits (harder to build with 4--7 source hosts per CTU family) and multi-sample or full-corpus evaluation remain to be tested (Section~\ref{sec:datasets}). (iii)~\emph{Scorer selection.} Neither selection rule we tested picks the better scorer on every corpus (Section~\ref{sec:ood}); richer pseudo-unknowns are the next step. (iv)~\emph{Geometry as a predictor.} No known-class statistic transfers across corpora (Section~\ref{sec:ksweep}); more corpora are needed to test any corpus-level property. (v)~\emph{Timing} was measured only on a desktop CPU, not on gateway hardware. (vi)~\emph{Coverage.} The post-hoc detector comparison uses the seed-0 MLP and the $(\lambda,\gamma)$ grid three seeds; NeSy-NIDS and the temporal/alternative splits cover two datasets, the geometry three. All corpora are fixed-vector flow representations with hand-authored concepts, so packet-sequence, graph and learned-concept representations remain to be studied.
+\textbf{Limitations and next steps.} (i)~\emph{Authored vocabulary.} The concepts and rules were written by us from documented attack signatures~\cite{mirsky2018kitsune,meidan2018nbaiot} and not validated by operators or independent experts; an operator study of the vocabulary is the next step. (ii)~\emph{Device shift and sampling.} The main splits are random at the flow level, so test flows come from devices seen in training. Holding out a CTU device breaks known-class classification for every model (Section~\ref{sec:acc}), and a capture-disjoint split, which needs the capture identifier our merged flow table does not keep, was not built; each split is also a single class-balanced sample. A corpus with many devices per attack class and multi-sample or full-corpus evaluation are the next steps. (iii)~\emph{Scorer selection.} Neither selection rule we tested picks the better scorer on every corpus (Section~\ref{sec:ood}); richer pseudo-unknowns are the next step. (iv)~\emph{Geometry as a predictor.} No known-class statistic transfers across corpora (Section~\ref{sec:ksweep}); more corpora are needed to test any corpus-level property. (v)~\emph{Timing} was measured only on a desktop CPU, not on gateway hardware. (vi)~\emph{Coverage.} NeSy-NIDS and the temporal, alternative and device splits cover one or two datasets, the geometry three. All corpora are fixed-vector flow representations with hand-authored concepts, so packet-sequence, graph and learned-concept representations remain to be studied.
 
 \section{Conclusion}\label{sec:conclusion}
 
-Interpretable IoT intrusion detectors can match an unconstrained MLP on known classes, but their inspectable concepts and rules do not account for their decisions, and their open-set detection depends on dataset, architecture and scorer; the known-class statistics we measured are associated with detectability on two corpora, through a single configuration on the third, and none predicts it on a corpus it was not fitted on. Evaluations of interpretable NIDS should report decision fidelity alongside accuracy, support open-set claims with multiple seeds, architectures, datasets and leak-free feature selection, and check pooled correlations with a leave-one-configuration-out analysis. The most important next steps are a capture-disjoint evaluation, a scorer-selection rule that holds on every corpus, and more corpora for testing whether any known-class property predicts detectability.
+The interpretable IoT intrusion detectors we tested, with our authored concept and rule vocabularies, can match an unconstrained MLP on known classes from devices seen in training, but their inspectable concepts and rules do not account for their decisions, their open-set detection depends on dataset, architecture and scorer, and at a usable threshold they miss nearly all flows of several unfamiliar attack families; the known-class statistics we measured are associated with detectability on two corpora, through a single configuration on the third, and none predicts it on a corpus it was not fitted on. Evaluations of interpretable NIDS should report decision fidelity alongside accuracy, support open-set claims with multiple seeds, architectures, datasets and leak-free feature selection, and check pooled correlations with a leave-one-configuration-out analysis. The most important next steps are an evaluation on a corpus with many devices per attack class, since holding out a CTU device breaks known-class classification for every model, a scorer-selection rule that holds on every corpus, and more corpora for testing whether any known-class property predicts detectability.
 
 
 \bibliographystyle{IEEEtran}

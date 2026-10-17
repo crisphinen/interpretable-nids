@@ -120,6 +120,10 @@ def nesy_part(device):
     out = {"ten_model": [], "kt": {}}
     for ds in ("ctuk", "cicr"):
         Xva, yva, _ = load_known_split(ds, device, "val"); yva = yva.cpu().numpy()
+        # AUROC on the evaluation flows of the main results table (nesy/run_shared_eval.py)
+        sh = RESULTS_DIR / f"shared_eval_{ds}.json"
+        shared = {(r["variant"], r["seed"]): r["auroc_mahal"] for r in json.loads(sh.read_text())
+                  if r["model"] == "nesy"} if sh.exists() else {}
         pts = []
         for k in (2, 5, 10, 20):
             for s in range(5):
@@ -127,7 +131,8 @@ def nesy_part(device):
                 ck, ev = RESULTS_DIR / f"{ds}_nesy_s{s}{tag}.pt", RESULTS_DIR / f"{ds}_nesy_s{s}{tag}_eval.json"
                 if ck.exists() and ev.exists():
                     e = json.loads(ev.read_text())
-                    pts.append({"k_T": k, "seed": s, "wcv": wcv(ck, Xva, yva), "auroc": e["ood_auroc_mahal"],
+                    au = shared.get(("main" if k == 10 else f"k{k}", s), e["ood_auroc_mahal"])
+                    pts.append({"k_T": k, "seed": s, "wcv": wcv(ck, Xva, yva), "auroc": au,
                                 "f1": e["test_f1"]})
         per_k = {k: {m: float(np.mean([p[m] for p in pts if p["k_T"] == k])) for m in ("wcv", "auroc", "f1")}
                  for k in (2, 5, 10, 20) if any(p["k_T"] == k for p in pts)}

@@ -41,7 +41,7 @@ STYLE = {
 }
 plt.rcParams.update(STYLE)
 
-C_ALPHA = "#59a14f"   # learned gate (rule reliance)
+C_ALPHA = "#59a14f"   # learned rule-head weight alpha
 C_AUROC = "#4e79a7"   # OOD AUROC
 C_F1    = "#f28e2b"   # known-class F1
 
@@ -67,7 +67,7 @@ def _panel(ax, d, title):
     f1      = np.array([d[k]["f1"] for k in keys])
 
     ax.errorbar(x, alpha, yerr=a_std, marker="o", color=C_ALPHA, lw=1.6,
-                capsize=2.5, label=r"$\alpha$ (rule reliance)")
+                capsize=2.5, label=r"$\alpha$ (rule-head weight)")
     ax.errorbar(x, auroc, yerr=au_std, marker="s", color=C_AUROC, lw=1.6,
                 capsize=2.5, label="OOD AUROC")
     ax.plot(x, f1, marker="^", color=C_F1, lw=1.6, ls="--",

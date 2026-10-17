@@ -10,8 +10,12 @@
 #                                                            [Lee et al. 2018]
 # Protocol as elsewhere: fit on train, AUROC on test_known vs test_unknown
 # (5,000 / 5,000 subsample, seed 42). Uses results/cbm/ms/{ds}_MLPBaseline_s0.pt.
+# With --seeds N the MLP seeds 0..N-1 are scored on the evaluation flows of the main results table
+# (np.random.seed(42), then the training, known and unknown subsets in the order of
+# cbm.evaluate.ood_auroc), and per-seed values plus mean/std go to ood_baselines_{ds}_seeds.json.
 #
 # usage: python -m cbm.run_ood_baselines --device cuda
+#        python -m cbm.run_ood_baselines --datasets ctuk cicr --seeds 5 --device cuda
 import argparse, json
 from pathlib import Path
 import numpy as np
@@ -31,16 +35,23 @@ def _auroc(s_in, s_out):
     return float(roc_auc_score(y, np.concatenate([s_in, s_out])))
 
 
-def run(ds, device, seed=0):
+def run(ds, device, seed=0, shared=False):
     (Xtr, ytr, _), _, nf, nk, nc, _ = load_dataset(ds)
     (Xte, _, _), _, Xun, _, _ = load_test_data(ds)
     ck = torch.load(RES / "ms" / f"{ds}_MLPBaseline_s{seed}.pt", map_location=device, weights_only=False)
     model = MLPBaseline(nf, nk, EMBED_DIM).to(device); model.load_state_dict(ck["model_state_dict"]); model.eval()
-    rng = np.random.RandomState(42)
-    Xte = Xte[rng.choice(len(Xte), min(5000, len(Xte)), replace=False)]
-    Xun = Xun[rng.choice(len(Xun), min(5000, len(Xun)), replace=False)]
-    if len(Xtr) > 20000:
-        idx = rng.choice(len(Xtr), 20000, replace=False); Xtr, ytr = Xtr[idx], ytr[idx]
+    if shared:                                    # flows of the main results table
+        np.random.seed(42)
+        if len(Xtr) > 20000:
+            idx = np.random.choice(len(Xtr), 20000, replace=False); Xtr, ytr = Xtr[idx], ytr[idx]
+        Xte = Xte[np.random.choice(len(Xte), 5000, replace=False)] if len(Xte) > 5000 else Xte
+        Xun = Xun[np.random.choice(len(Xun), 5000, replace=False)] if len(Xun) > 5000 else Xun
+    else:
+        rng = np.random.RandomState(42)
+        Xte = Xte[rng.choice(len(Xte), min(5000, len(Xte)), replace=False)]
+        Xun = Xun[rng.choice(len(Xun), min(5000, len(Xun)), replace=False)]
+        if len(Xtr) > 20000:
+            idx = rng.choice(len(Xtr), 20000, replace=False); Xtr, ytr = Xtr[idx], ytr[idx]
     T = lambda a: torch.tensor(a, dtype=torch.float32, device=device)
 
     @torch.no_grad()
@@ -81,8 +92,17 @@ def run(ds, device, seed=0):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--device", default="cuda")
     ap.add_argument("--datasets", nargs="+", default=["ctu", "cic"])
+    ap.add_argument("--seeds", type=int, default=0, help="score MLP seeds 0..N-1 on the main-table flows")
     args = ap.parse_args()
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
+    if args.seeds:
+        for ds in args.datasets:
+            per = {s: run(ds, device, seed=s, shared=True) for s in range(args.seeds)}
+            agg = {k: {"mean": float(np.mean([per[s][k] for s in per])), "std": float(np.std([per[s][k] for s in per]))}
+                   for k in per[0]}
+            (RES / f"ood_baselines_{ds}_seeds.json").write_text(json.dumps({"seeds": per, "summary": agg}, indent=2))
+            print(ds, {k: f"{v['mean']:.3f}±{v['std']:.3f}" for k, v in agg.items()})
+        return
     res = {ds: run(ds, device) for ds in args.datasets}
     out = "r2_ood_baselines.json" if args.datasets == ["ctu", "cic"] else f"ood_baselines_{'_'.join(args.datasets)}.json"
     (RES / out).write_text(json.dumps(res, indent=2)); print(f"wrote {out}")

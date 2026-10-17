@@ -19,6 +19,9 @@
 # usage: python 06_make_kfs_splits.py [--sample-seed 42] [--rf-seed 42]
 #        python 06_make_kfs_splits.py --split alt       -> data/ctualt, data/ctualt_o
 #        python 06_make_kfs_splits.py --split temporal  -> data/ctut,   data/ctut_o
+#        python 06_make_kfs_splits.py --split device --holdout-host 192.168.1.198 --tag _h198
+#            -> data/ctud_h198, data/ctud_o_h198: every known-class flow of the held-out host is
+#               test-only; train/val come from the other hosts
 
 import argparse
 import json
@@ -64,12 +67,17 @@ ALT_KNOWN = ["Benign", "C&C", "DDoS", "Okiru"]
 ALT_UNKNOWN_PRIMARY = ["C&C-HeartBeat", "Attack", "C&C-HeartBeat-Attack"]
 
 
-def pull(con, cols, label, limit, seed, extra=()):
+def pull(con, cols, label, limit, seed, extra=(), host=None, exclude_host=None):
     sel = ", ".join(f'"{c}"' for c in cols + CAT_FEATURES + ["detailed_label", *extra])
     order = f"hash(rowid, {seed})"
     lim = f"limit {limit}" if limit else ""
-    q = f"select {sel} from preprocessed_sorted where detailed_label = ? order by {order} {lim}"
-    return con.execute(q, [label]).df()
+    where, params = "detailed_label = ?", [label]
+    if host:
+        where += " and src_ip = ?"; params.append(host)
+    if exclude_host:
+        where += " and src_ip <> ?"; params.append(exclude_host)
+    q = f"select {sel} from preprocessed_sorted where {where} order by {order} {lim}"
+    return con.execute(q, params).df()
 
 
 def main():
@@ -80,7 +88,8 @@ def main():
     ap.add_argument("--use-rerun-selection", action="store_true",
                     help="use this run's forest selection instead of the documented list")
     ap.add_argument("--tag", default="", help="suffix for the output dirs, e.g. _r1 -> data/ctuk_r1/")
-    ap.add_argument("--split", choices=["random", "alt", "temporal"], default="random",
+    ap.add_argument("--holdout-host", help="device split: source IP whose known-class flows are test-only")
+    ap.add_argument("--split", choices=["random", "alt", "temporal", "device"], default="random",
                     help="random: main split (ctuk/ctuko); alt: alternative known set (ctualt); "
                          "temporal: same sample as main, each class split by capture time (ctut)")
     args = ap.parse_args()
@@ -94,8 +103,15 @@ def main():
 
     # 1. deterministic sample: known classes capped, unknowns in full
     known_parts = []
+    n_test = int(TEST_FRAC * SAMPLES_PER_CLASS)
     for cls in known_classes:
-        part = pull(con, cands, cls, SAMPLES_PER_CLASS, args.sample_seed, ts)
+        if args.split == "device":
+            te = pull(con, cands, cls, n_test, args.sample_seed, host=args.holdout_host).assign(_part="test")
+            tv = pull(con, cands, cls, SAMPLES_PER_CLASS - n_test, args.sample_seed,
+                      exclude_host=args.holdout_host).assign(_part="trainval")
+            part = pd.concat([tv, te], ignore_index=True)
+        else:
+            part = pull(con, cands, cls, SAMPLES_PER_CLASS, args.sample_seed, ts)
         print(f"  known   {cls:28s} {len(part):>7,}")
         known_parts.append(part)
     unk_parts = []
@@ -115,7 +131,12 @@ def main():
 
     # 2. 70/15/15: stratified at random, or per class by capture time (earliest 70% train,
     # next 15% val, latest 15% test; timestamps compared only within a class)
-    if args.split == "temporal":
+    if args.split == "device":
+        tv = known[known["_part"] == "trainval"]
+        test_known = known[known["_part"] == "test"].reset_index(drop=True)
+        train, val = train_test_split(tv, test_size=TEST_FRAC / (1 - TEST_FRAC),
+                                      stratify=tv["label_id"], random_state=args.sample_seed)
+    elif args.split == "temporal":
         parts = {"train": [], "val": [], "test": []}
         for lid, g in known.groupby("label_id", sort=True):
             g = g.sort_values("ts", kind="mergesort")
@@ -191,7 +212,7 @@ def main():
     else:
         # same-sample control: the documented 31-feature known-only list on these rows
         doc_restore = [f for f in NESY_RULE_FEATURES if f not in PAPER_KFS_NUMERIC]
-        base = "ctualt" if args.split == "alt" else "ctut"
+        base = {"alt": "ctualt", "temporal": "ctut", "device": "ctud"}[args.split]
         datasets = {base: selected,
                     base + "_o": {"feature_cols": PAPER_KFS_NUMERIC + cat_ids,
                                   "nesy_feature_cols": PAPER_KFS_NUMERIC + doc_restore + cat_ids,

@@ -1,0 +1,68 @@
+
+============================================================
+  NeSy-NIDS Evaluation - ctud_h198  model=rule_only
+============================================================
+
+Loading checkpoint: /mnt/4tbnvme/Ngari/projects/interpretable-nids/results/nesy/ctud_h198_rule_only_s2.pt
+Loading data...
+
+  Known val samples: 13500   train: 62999   test_known: 13800
+  Unknown (OOD) samples: 10000
+
+Computing metrics...
+
+============================================================
+  Results - CTUD_H198  rule_only  seed=2
+============================================================
+  Known F1 (weighted)    : 0.7937  (test_known: 0.4169)
+  OOD AUROC (Mahal)       : 0.8253
+  OOD AUROC (Energy)      : 0.0861
+  OOD AUROC (Comb-Avg)    : 0.4839
+  OOD AUROC (Comb-Max)    : 0.5570
+  OOD AUROC (Comb-Ada)    : 0.4839  (w_s=0.50, w_e=0.50)
+  TPR @ 5% FPR (Mahal)    : 0.4422
+  TPR @ 5% FPR (Comb-Avg) : 0.1062
+  Threshold tau           : 1.2349
+  Unk rejection rate      : 12.5%
+  Known rejection rate    : 6.5%
+  Mean rule crispness    : 1.0000  (soft, within 0.1: 0.9472)
+
+------------------------------------------------------------
+  Rule Analysis (k=10.0)
+------------------------------------------------------------
+
+  Rule                              Crisp   DAcc(hi)   DAcc(lo)
+  --------------------------------------------------------------
+  ddos_high_rate                    1.000    -0.0308    +0.0000
+  cc_heartbeat_beaconing            1.000    -0.2241    -0.1696
+  benign_single_probe               1.000    -0.1132    +0.0014
+  okiru_low_rate                    1.000    -0.0873    -0.0556
+  asymmetric_flood                  1.000    -0.0458    -0.3282
+  persistent_connection             1.000    -0.2747    -0.1765
+  incomplete_handshake              1.000    -0.3974    -0.1790
+  ddos_short_burst                  1.000    -0.1390    +0.0000
+
+  Rule class selectivity (mean activation per class at k=10.0):
+  Rule                                Benign  C&C-HeartB        DDoS       Okiru
+  --------------------------------------------------------------------------------
+  ddos_high_rate                       0.002       0.003       0.694       0.338
+  cc_heartbeat_beaconing               0.793       0.176       0.083       0.000
+  benign_single_probe                  0.579       0.410       0.191       0.658
+  okiru_low_rate                       0.582       0.718       0.220       0.662
+  asymmetric_flood                     0.998       0.986       0.819       1.000
+  persistent_connection                0.426       0.736       0.807       0.343
+  incomplete_handshake                 0.814       0.746       0.004       0.002
+  ddos_short_burst                     0.002       0.003       0.694       0.338
+
+  Learned thresholds:
+    ddos_high_rate                : feat[5]gttheta=1000.000
+    cc_heartbeat_beaconing        : feat[9]gttheta=1.239, feat[9]lttheta=2.496, feat[5]gttheta=-0.715, feat[5]lttheta=5.956
+    benign_single_probe           : feat[14]lttheta=1.565, feat[5]lttheta=100.000
+    okiru_low_rate                : feat[5]lttheta=500.000, feat[15]lttheta=2.098
+    asymmetric_flood              : feat[33]lttheta=1.121, feat[14]gttheta=0.501
+    persistent_connection         : feat[15]gttheta=-0.342
+    incomplete_handshake          : feat[10]gttheta=2.129, feat[20]lttheta=1.840
+    ddos_short_burst              : feat[5]gttheta=1000.000, feat[15]lttheta=0.601
+
+  Saved: /mnt/4tbnvme/Ngari/projects/interpretable-nids/results/nesy/ctud_h198_rule_only_s2_eval.json
+  Saved: /mnt/4tbnvme/Ngari/projects/interpretable-nids/results/nesy/ctud_h198_rule_only_s2_selectivity.json

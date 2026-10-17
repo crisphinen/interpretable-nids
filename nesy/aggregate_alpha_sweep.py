@@ -26,7 +26,14 @@ def cell(ds, la):
     if not rows:
         return None
     a = np.array([r["gate_alpha"] for r in rows])
-    au = np.array([r["ood_auroc_mahal"] for r in rows])
+    # AUROC on the evaluation flows of the main results table when available (nesy/run_shared_eval.py)
+    sh = RES / f"shared_eval_{ds}.json"
+    if sh.exists():
+        v = "main" if float(la) == 0 else f"a{la}"
+        m = {r["seed"]: r["auroc_mahal"] for r in json.load(open(sh)) if r["model"] == "nesy" and r["variant"] == v}
+        au = np.array([m[r["seed"]] for r in rows])
+    else:
+        au = np.array([r["ood_auroc_mahal"] for r in rows])
     f1 = np.array([r["known_f1"] for r in rows])
     return {"alpha": a.mean(), "alpha_std": a.std(), "f1": f1.mean(), "f1_std": f1.std(),
             "auroc": au.mean(), "auroc_std": au.std(), "n_seeds": len(rows)}

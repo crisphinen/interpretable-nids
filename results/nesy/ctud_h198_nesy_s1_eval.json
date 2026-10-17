@@ -1,0 +1,95 @@
+{
+  "dataset": "ctud_h198",
+  "model": "nesy",
+  "seed": 1,
+  "known_f1": 0.8769248927150488,
+  "test_f1": 0.41684376455085986,
+  "test_f1_per_class": [
+    0.0005795421616922632,
+    1.0,
+    0.0,
+    0.6667955160417472
+  ],
+  "protocol": "per-class Mahalanobis fit on train; AUROC/TPR on test_known vs unknown; F1/tau on val",
+  "ood_auroc_mahal": 0.8852226199999998,
+  "ood_auroc_energy": 0.27487014,
+  "ood_auroc_comb_avg": 0.55797898,
+  "ood_auroc_comb_max": 0.55983804,
+  "ood_auroc_comb_ada": 0.55797898,
+  "tpr_at_5fpr_mahal": 0.7156,
+  "tpr_at_5fpr_comb_avg": 0.4472,
+  "tau": 0.5401585866113334,
+  "unk_rejection_rate": 0.452,
+  "known_rejection_rate": 0.25,
+  "mean_crispness": 1.0,
+  "soft_crispness_0.1": 0.8718240261077881,
+  "gate_alpha": 0.4026485085487366,
+  "crispness_per_rule": {
+    "ddos_high_rate": 1.0,
+    "cc_heartbeat_beaconing": 1.0,
+    "benign_single_probe": 1.0,
+    "okiru_low_rate": 1.0,
+    "asymmetric_flood": 1.0,
+    "persistent_connection": 1.0,
+    "incomplete_handshake": 1.0,
+    "ddos_short_burst": 1.0
+  },
+  "editing_results": {
+    "ddos_high_rate": {
+      "base_acc": 0.8788888454437256,
+      "acc_forced_hi": 0.8788148164749146,
+      "acc_forced_lo": 0.8788888454437256,
+      "delta_hi": -7.402896881103516e-05,
+      "delta_lo": 0.0
+    },
+    "cc_heartbeat_beaconing": {
+      "base_acc": 0.8788888454437256,
+      "acc_forced_hi": 0.8789629340171814,
+      "acc_forced_lo": 0.8788888454437256,
+      "delta_hi": 7.408857345581055e-05,
+      "delta_lo": 0.0
+    },
+    "benign_single_probe": {
+      "base_acc": 0.8788888454437256,
+      "acc_forced_hi": 0.8788888454437256,
+      "acc_forced_lo": 0.8788148164749146,
+      "delta_hi": 0.0,
+      "delta_lo": -7.402896881103516e-05
+    },
+    "okiru_low_rate": {
+      "base_acc": 0.8788888454437256,
+      "acc_forced_hi": 0.8788888454437256,
+      "acc_forced_lo": 0.8788148164749146,
+      "delta_hi": 0.0,
+      "delta_lo": -7.402896881103516e-05
+    },
+    "asymmetric_flood": {
+      "base_acc": 0.8788888454437256,
+      "acc_forced_hi": 0.8788888454437256,
+      "acc_forced_lo": 0.8787407279014587,
+      "delta_hi": 0.0,
+      "delta_lo": -0.0001481175422668457
+    },
+    "persistent_connection": {
+      "base_acc": 0.8788888454437256,
+      "acc_forced_hi": 0.8788148164749146,
+      "acc_forced_lo": 0.8788888454437256,
+      "delta_hi": -7.402896881103516e-05,
+      "delta_lo": 0.0
+    },
+    "incomplete_handshake": {
+      "base_acc": 0.8788888454437256,
+      "acc_forced_hi": 0.8788888454437256,
+      "acc_forced_lo": 0.8788148164749146,
+      "delta_hi": 0.0,
+      "delta_lo": -7.402896881103516e-05
+    },
+    "ddos_short_burst": {
+      "base_acc": 0.8788888454437256,
+      "acc_forced_hi": 0.8787407279014587,
+      "acc_forced_lo": 0.8788888454437256,
+      "delta_hi": -0.0001481175422668457,
+      "delta_lo": 0.0
+    }
+  }
+}

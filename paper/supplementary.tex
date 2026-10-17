@@ -37,10 +37,9 @@ numbering.
 (Section~\ref{sec:features}), all CTU-IoT-23 results in the main article and in the
 finding-bearing supplementary tables (this control, the $\alpha$-gate sweep and head-agreement,
 the per-family open-set breakdown, the concept-accuracy and leakage probe, the per-class table and
-the temporal split) use the leak-free known-class-only feature selection. Two supporting analyses
-below, the $\lambda$-sweep and the CTU half of the $(\lambda,\gamma)$ grid, report the original
-$37$-feature runs as an ablation; their conclusions are qualitative and unaffected by the feature
-list, and the paired original-vs-known-only comparison is in Table~\ref{tab:kfs}. Every split is
+the temporal split, the $\lambda$ sensitivity and the $(\lambda,\gamma)$ grid) use the leak-free
+known-class-only feature selection; the paired comparison with the originally submitted feature list
+is in Table~\ref{tab:kfs}. Every split is
 drawn deterministically by the released scripts, and the released code includes a script that
 prints every table value from the released results.
 
@@ -54,9 +53,9 @@ On CTU-IoT-23, $\alpha$ rises from $0.38$ ($\lambda_\alpha{=}0$) to $0.89$
 the known-class \emph{validation} F1 (the model-selection split reported in this sweep)
 stays near $0.933$ on CTU and $0.818$--$0.819$ on CIC; the corresponding
 held-out \emph{test} F1 is $0.933$ on CTU (Table~\ref{M-tab:main}). OOD AUROC is flat on CTU
-(within $0.016$ across the sweep) and rises on CIC, from $0.657$ at
-$\lambda_\alpha{=}0$ to $0.675$--$0.691$ for every $\lambda_\alpha{\ge}0.05$, a
-gain of $0.02$--$0.03$ (about one seed std) that accompanies the increase in $\alpha$; as the
+(within $0.016$ across the sweep) and rises on CIC, from $0.647$ at
+$\lambda_\alpha{=}0$ to $0.658$--$0.673$ for every $\lambda_\alpha{\ge}0.05$, a
+gain of $0.01$--$0.03$ (up to about one seed std) that accompanies the increase in $\alpha$; as the
 next paragraph shows, it is not evidence that the decision moved onto the rules.
 
 \textbf{Does raising $\alpha$ actually move the decision onto the rules? No.} A larger
@@ -106,7 +105,7 @@ $\lambda_\alpha$ & 0 & 0.05 & 0.1 & 0.2 & 0.5 & 1.0 \\
 CTU $\alpha$      & 0.38 & 0.58 & 0.69 & 0.81 & 0.86 & 0.89 \\
 CTU AUROC         & 0.904 & 0.900 & 0.909 & 0.900 & 0.899 & 0.893 \\
 CIC $\alpha$      & 0.32 & 0.81 & 0.86 & 0.90 & 0.93 & 0.95 \\
-CIC AUROC         & 0.657 & 0.679 & 0.691 & 0.675 & 0.675 & 0.684 \\
+CIC AUROC         & 0.647 & 0.658 & 0.672 & 0.659 & 0.660 & 0.673 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -182,32 +181,32 @@ therefore uses the declared predicates directly.
 \section{Sensitivity to the Concept-Supervision Weight \texorpdfstring{$\lambda$}{lambda}}
 \label{sec:lambda}
 
-Known-class F1 is invariant to the concept-supervision weight $\lambda$ ($\pm0.002$ on
-both datasets), so we fixed $\lambda{=}0.5$ in the main paper and varied $\gamma$.
-Raising $\lambda$ raises concept accuracy on both datasets and moves OOD AUROC in
-dataset-dependent directions ($+0.09$ on CTU-IoT-23, $-0.03$ on CIC-IoT-2023 from
-$\lambda{=}0.1$ to $1.0$), without affecting classification (Table~\ref{tab:lambda}).
+Table~\ref{tab:lambda} varies the concept-supervision weight $\lambda$ for JointCBM ($\gamma{=}0$)
+on the main splits, with the training and evaluation flows of main Table~\ref{M-tab:main}; the
+$\lambda{=}0.5$ column consists of the Table~\ref{M-tab:main} models themselves. Known-class F1 is
+unchanged between $\lambda{=}0.1$ and $0.5$ (validation F1 within $0.0005$); at $\lambda{=}1.0$ one of
+five CTU seeds collapses (test F1 $0.734$), lowering the CTU mean to $0.893$. Raising $\lambda$ raises
+concept accuracy on both datasets and moves OOD AUROC in opposite directions, by $+0.020$ on
+CTU-IoT-23 and $-0.040$ on CIC-IoT-2023 from $\lambda{=}0.1$ to $1.0$.
 
 \begin{table}[t]
 \centering\small
-\caption{Sensitivity to the concept-supervision weight $\lambda$
-(JointCBM, $\gamma{=}0$, mean over five seeds; AUROC $\pm$1 std). These are the
-original-feature runs, reported as an ablation (Section~\ref{sec:features}); they are not the
-known-class-only models of main Table~\ref{M-tab:main}, and are shown only to establish the
-$\lambda$ trend, which is qualitatively unaffected by the feature list.}
+\caption{Sensitivity to the concept-supervision weight $\lambda$ (JointCBM, $\gamma{=}0$, main
+splits, mean over five seeds; AUROC $\pm$1 std). The $\lambda{=}0.5$ column is the JointCBM
+($\gamma{=}0$) row of main Table~\ref{M-tab:main}.}
 \label{tab:lambda}
 \setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{lccc}
 \toprule
 & $\lambda{=}0.1$ & $\lambda{=}0.5$ & $\lambda{=}1.0$ \\
 \midrule
-CTU F1            & 0.9327 & 0.9325 & 0.9326 \\
-CTU concept-acc   & 0.650  & 0.856  & 0.905  \\
-CTU OOD AUROC     & 0.790$\pm$0.030 & 0.805$\pm$0.023 & 0.884$\pm$0.010 \\
+CTU F1            & 0.9331 & 0.9330 & 0.8931 \\
+CTU concept-acc   & 0.700  & 0.874  & 0.935  \\
+CTU OOD AUROC     & 0.810$\pm$0.021 & 0.823$\pm$0.044 & 0.830$\pm$0.041 \\
 \midrule
-CIC F1            & 0.8201 & 0.8192 & 0.8189 \\
-CIC concept-acc   & 0.872  & 0.968  & 0.981  \\
-CIC OOD AUROC     & 0.752$\pm$0.015 & 0.748$\pm$0.012 & 0.724$\pm$0.021 \\
+CIC F1            & 0.8196 & 0.8183 & 0.8184 \\
+CIC concept-acc   & 0.865  & 0.963  & 0.975  \\
+CIC OOD AUROC     & 0.743$\pm$0.018 & 0.717$\pm$0.017 & 0.703$\pm$0.013 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -215,18 +214,17 @@ CIC OOD AUROC     & 0.752$\pm$0.015 & 0.748$\pm$0.012 & 0.724$\pm$0.021 \\
 \section{Temporal (Timestamp-Ordered) Split on CTU-IoT-23}
 \label{sec:temporal}
 
-Random flow partitioning can leak device or session identity between train and test. A
-strict device- or session-disjoint split is harder for the CTU attacks, which come from
-very few source hosts (Okiru: 4, DDoS: 7, C\&C-HeartBeat: 5 source IPs), so we instead
-build the known-class splits in time: we take the same per-class sample as the main
+Random flow partitioning can leak device or session identity between train and test. The CTU
+attacks come from very few source hosts (Okiru: 4, DDoS: 7, C\&C-HeartBeat: 5 source IPs);
+Section~\ref{sec:device} holds out a device, and here we build the known-class splits in time: we take the same per-class sample as the main
 split, order the flows of each known class by capture timestamp (timestamps are compared
 only within a class), and assign that class's earliest 70\% to training, the next 15\% to
 validation and the latest 15\% to test (five seeds; within each class, test strictly
 follows train; the held-out unknown families are unchanged). Timestamp ordering does not by itself guarantee a session- or
 capture-disjoint split, individual sessions or captures may straddle the train/test
-boundary, so we claim temporal ordering, not capture-, session- or device-disjointness;
-the small number of source hosts makes a strict capture-disjoint split harder but we do not
-claim it impossible, and it remains untested. This protocol probes a property of the CTU-IoT-23 labelling:
+boundary, so we claim temporal ordering, not capture-, session- or device-disjointness.
+A capture-disjoint split needs the capture identifier, which our merged flow table does not
+keep, and remains untested. This protocol probes a property of the CTU-IoT-23 labelling:
 the \emph{DDoS} family is temporally bimodal, a high-rate flood capture (September 2018,
 median Rate ${\approx}9.3{\times}10^{5}$\,pps) and near-zero-rate captures (December 2018
 onward, median Rate ${<}1$), so a timestamp split can train on one DDoS regime and test on the
@@ -246,6 +244,64 @@ SequentialCBM is the exception, losing Benign (F1$_4$ $0.330$, Coh-3 $0.441$). N
 highest temporal-split AUROC ($0.888{\pm}0.025$; $0.901{\pm}0.030$ with the $\alpha$-gate penalty of
 Section~\ref{sec:alpha}), and the JointCBM $\gamma$ ordering shifts relative to the alternative split.
 
+\section{Device-Disjoint Splits on CTU-IoT-23}
+\label{sec:device}
+
+Two CTU hosts, 192.168.1.198 and 192.168.100.111, have at least $3{,}450$ flows in each of the
+four known classes. For each, we take that host's flows as the known test set ($3{,}450$ per
+class) and draw the training and validation flows, in the usual numbers, from all other hosts; the unknown test flows are those of the main split. The feature list is
+re-selected on each split's training rows (36 features for host .198, 33 for host .111), and a
+control uses the main split's 31-feature list on the same rows. Every model of main
+Table~\ref{M-tab:main} is trained with five seeds and scored on the shared evaluation flows; for
+host .198 one class has only $14{,}699$ training flows instead of $16{,}100$, because C\&C-HeartBeat
+has fewer flows on the other hosts. \texttt{06\_make\_kfs\_splits.py --split device} builds the
+splits (\texttt{ctud\_h198}, \texttt{ctud\_h111} and the \texttt{\_o} controls).
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{Device-disjoint CTU splits: known-class weighted F1 (five-seed mean) and OOD AUROC
+(mean$\pm$std, five seeds) with the re-selected features, and AUROC with the main 31-feature list
+(31f). With the 31-feature list, F1 is $0.417$ on host .198 ($0.517$ for NeSy-NIDS ($\alpha$)) and
+$0.149$--$0.227$ on host .111. Main split for reference: F1 $0.933$, AUROC $0.82$--$0.91$.}
+\label{tab:device}
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{3}{c}{Host 192.168.1.198} & \multicolumn{3}{c}{Host 192.168.100.111} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Model & F1 & AUROC & AUROC 31f & F1 & AUROC & AUROC 31f \\
+\midrule
+MLP baseline               & $0.417$ & $0.528{\pm}.020$ & $0.529{\pm}.013$ & $0.228$ & $0.219{\pm}.045$ & $0.383{\pm}.015$ \\
+JointCBM $\gamma{=}0$      & $0.417$ & $0.738{\pm}.113$ & $0.824{\pm}.081$ & $0.223$ & $0.211{\pm}.102$ & $0.111{\pm}.048$ \\
+JointCBM $\gamma{=}0.1$    & $0.417$ & $0.809{\pm}.073$ & $0.770{\pm}.084$ & $0.214$ & $0.235{\pm}.085$ & $0.113{\pm}.043$ \\
+JointCBM $\gamma{=}0.5$    & $0.417$ & $0.784{\pm}.050$ & $0.816{\pm}.083$ & $0.200$ & $0.256{\pm}.088$ & $0.114{\pm}.029$ \\
+JointCBM $\gamma{=}1.0$    & $0.417$ & $0.819{\pm}.048$ & $0.789{\pm}.062$ & $0.196$ & $0.161{\pm}.015$ & $0.093{\pm}.028$ \\
+SequentialCBM              & $0.417$ & $0.865{\pm}.001$ & $0.866{\pm}.002$ & $0.192$ & $0.170{\pm}.013$ & $0.202{\pm}.030$ \\
+HybridCBM                  & $0.417$ & $0.821{\pm}.033$ & $0.822{\pm}.041$ & $0.152$ & $0.215{\pm}.038$ & $0.230{\pm}.042$ \\
+NeSy-NIDS                  & $0.417$ & $0.843{\pm}.042$ & $0.846{\pm}.045$ & $0.161$ & $0.284{\pm}.043$ & $0.279{\pm}.044$ \\
+NeSy-NIDS ($\alpha$)       & $0.417$ & $0.847{\pm}.045$ & $0.847{\pm}.045$ & $0.136$ & $0.278{\pm}.058$ & $0.280{\pm}.043$ \\
+Rule-only                  & $0.416$ & $0.770{\pm}.032$ & $0.770{\pm}.032$ & $0.177$ & $0.193{\pm}.035$ & $0.193{\pm}.035$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Known-class classification fails for every model. Each host's traffic in a class is a few
+repeated flow patterns: the $3{,}450$ Benign test flows of host .198 are three distinct feature
+vectors and its Okiru flows six, against $7{,}970$ and $166$ distinct vectors in the training
+rows of those classes. With the re-selected features, every model and seed on host .198 scores F1
+$0.00$ on Benign and on one more class (DDoS, or C\&C-HeartBeat for SequentialCBM and rule-only),
+which fixes weighted F1 at $0.417$ (with the 31-feature list, two NeSy-NIDS ($\alpha$) seeds reach
+$0.67$ on Benign); the MLP (seed 0) classifies $3{,}448$ of the $3{,}450$ Benign flows as Okiru and all DDoS
+flows as Benign. On host .111 every model and seed with the re-selected features scores F1 below $0.03$ on DDoS
+and Okiru (with the 31-feature list SequentialCBM reaches $0.54$ on DDoS); the MLP (seed 0) classifies $3{,}407$ of the DDoS and $3{,}409$ of the Okiru flows as C\&C-HeartBeat. Because the known test flows are themselves unlike the
+training data, AUROC no longer isolates novel attack types. On host .111 it is below $0.5$ for
+every model and seed (all 100 runs): the held-out host's known flows score as more novel than the unknown flows, over $99.9\%$
+of which come from other hosts that also produce known-class flows ($89\%$ for host .198, where
+$3{,}516$ unknown flows come from the held-out host itself). On host .198 SequentialCBM and NeSy-NIDS score highest and
+the MLP lowest, but with every model losing two of the four known classes these values do not
+measure open-set detection on a new device.
+
 \section{Rule Selectivity and Threshold Drift}
 \label{sec:selectivity}
 
@@ -259,7 +315,7 @@ variance for Mahalanobis to work with; others fire across several classes
 (\texttt{okiru\_low\_rate}: $0.79$ on Okiru but $0.87$ on Benign and $0.61$ on C\&C-HeartBeat). On CIC-IoT-2023 firing is
 near-deterministic (\texttt{syn\_flood\_ddos} at $1.00$ on DDoS-SYN,
 \texttt{benign\_low\_rate} at $0.97$ on Benign but also $0.91$ on Mirai), within-class variance is close to
-zero, and Mahalanobis has little to separate on (AUROC $0.657$). These two activation
+zero, and Mahalanobis has little to separate on (AUROC $0.647$). These two activation
 regimes coincide with the observed CTU-versus-CIC difference in Mahalanobis AUROC, but,
 as the main paper establishes, known-class activation geometry does not by itself govern
 detectability, so we report the pattern as descriptive, not causal
@@ -291,10 +347,9 @@ correlations fall to $|r|\le0.22$ and Fisher ratio, silhouette and closed-set F1
 SequentialCBM combines the least separable concept space and the lowest closed-set F1 with one
 of the highest CTU AUROCs, so this single configuration sets the CTU direction. The
 unknown/known ratio, which uses the unknown flows, is positive everywhere ($r_6$ $0.70$--$0.92$).
-These are associations with Mahalanobis AUROC measured \emph{within} each corpus, not a test that
-a known-class statistic predicts AUROC on an unseen corpus or selects between scorers; the strong
-$r_6$ values rest on six points, and the one selection procedure we tried, the leave-family-out
-proxy of Section~\ref{sec:lofo}, did not reliably choose the scorer. The LOCO analysis thus
+These are associations with Mahalanobis AUROC measured \emph{within} each corpus, and the strong
+$r_6$ values rest on six points. Prediction on a held-out corpus and scorer selection are tested
+separately (Sections~\ref{sec:lofo} and~\ref{sec:transfer}), and neither succeeds. The LOCO analysis thus
 locates the CTU reversal in one configuration rather than in the corpus.
 
 \begin{table}[t]
@@ -388,8 +443,8 @@ The control also bears on the geometry reading. The CTU correlations of main
 Table~\ref{M-tab:signflip} are opposite in sign to CIC-IoT-2023 and TON\_IoT, and
 Section~\ref{sec:loco} traces the direction to SequentialCBM, the CBM configuration whose AUROC
 changes most with the feature list. Under the leak-free list no CTU association holds without that
-configuration, and we do not test whether any statistic predicts detectability on an unseen corpus
-or selects a scorer.
+configuration, and Section~\ref{sec:transfer} shows that no statistic predicts detectability on a
+held-out corpus.
 
 \textbf{Per-split selection for the robustness experiments.} The known-only selection above is
 fitted on the primary random split's known-class training rows, which is not automatically
@@ -849,27 +904,23 @@ CIC & VulnerabilityScan & 0.699 / 0.697 \\
 \label{sec:lambdagamma}
 
 $\lambda$ (BCE concept supervision) and $\gamma$ (added L2 concept fidelity) both push the
-predicted concepts toward the same labels, so we sweep them jointly (JointCBM, three seeds
-per cell) rather than as two 1-D slices, to check that the conclusions are not an artifact
-of holding one fixed (Table~\ref{tab:lambdagamma}; CTU on the original-feature split as in
-Table~\ref{tab:lambda}, CIC on the main split). Three points hold in 2-D. (i) $\gamma$
-is not a reliable lever: its effect on OOD AUROC is small ($|\Delta|\le0.046$) and its
-\emph{sign depends on} $\lambda$, positive at $\lambda{=}0.5$ on CTU-IoT-23 ($+0.046$) but
-negative at $\lambda{=}1.0$ ($-0.027$), and negative throughout CIC-IoT-2023. (ii) $\lambda$
-has a larger effect, but only on CTU-IoT-23 (down the $\gamma{=}0$ column, $+0.092$), not on
-CIC-IoT-2023 ($-0.033$); this is why the 1-D $\lambda$ sweep looked larger than the $\gamma$
-sweep. (iii) Known-class F1 is nearly constant across the grid ($0.816$--$0.821$ on CIC; $0.932$--$0.933$
-on CTU) with a single exception, CTU $\lambda{=}1.0,\gamma{=}0.5$, seed~0, where F1 fell to
-$0.748$ (the other two seeds of that cell are $0.933$/$0.933$); this run is \emph{included}
-in the reported cell mean. It shows that heavy dual regularisation can destabilise
-training; in the other 53 runs of the grid known-class F1 stays within the ranges above. The
-$\lambda$--$\gamma$ interaction (a sign flip in $\gamma$'s effect across $\lambda$) is one more
-instance of no single tunable factor governing open-set detectability.
+predicted concepts toward the same labels, so we sweep them jointly (JointCBM, five seeds per
+cell, main splits, evaluation flows of main Table~\ref{M-tab:main}; the $\lambda{=}0.5$ row is the
+JointCBM rows of that table) rather than as two 1-D slices (Table~\ref{tab:lambdagamma}). Three
+points hold in 2-D. (i) $\gamma$ is not a reliable lever: its effect $\gamma_{1.0}{-}\gamma_0$ is at
+most $0.040$ and changes with $\lambda$, growing from $-0.004$ at $\lambda{=}0.1$ to $+0.030$ at
+$\lambda{=}1.0$ on CTU-IoT-23 and shrinking from $-0.040$ to $-0.003$ on CIC-IoT-2023. (ii) $\lambda$
+moves AUROC by a similar amount in opposite directions on the two corpora (down the $\gamma{=}0$
+column, $+0.020$ on CTU, $-0.040$ on CIC). (iii) Known-class F1 is nearly constant across the grid
+($0.816$--$0.821$ on CIC; $0.932$--$0.933$ on CTU) except for two CTU runs at $\lambda{=}1.0$
+($\gamma{=}0$ seed~1 and $\gamma{=}1.0$ seed~2), where F1 falls to $0.734$ and $0.736$; both are
+\emph{included} in the cell means, and they show that strong concept supervision can destabilise
+training. No single tunable factor governs open-set detectability.
 
 \begin{table}[t]
 \centering\small
-\caption{Joint $(\lambda,\gamma)$ sweep: JointCBM OOD AUROC (mean over three seeds; std in
-parentheses). $\lambda$ down rows, $\gamma$ across columns.}
+\caption{Joint $(\lambda,\gamma)$ sweep: JointCBM OOD AUROC on the main splits (mean over five
+seeds; std in parentheses). $\lambda$ down rows, $\gamma$ across columns.}
 \label{tab:lambdagamma}
 \setlength{\tabcolsep}{6pt}
 \begin{tabular}{lccc}
@@ -877,14 +928,14 @@ parentheses). $\lambda$ down rows, $\gamma$ across columns.}
 & $\gamma{=}0$ & $\gamma{=}0.5$ & $\gamma{=}1.0$ \\
 \midrule
 \multicolumn{4}{@{}l}{\textbf{CTU-IoT-23}} \\
-$\lambda{=}0.1$ & 0.798 (.037) & 0.792 (.043) & 0.817 (.022) \\
-$\lambda{=}0.5$ & 0.817 (.017) & 0.868 (.027) & 0.863 (.009) \\
-$\lambda{=}1.0$ & 0.890 (.007) & 0.876 (.007) & 0.863 (.026) \\
+$\lambda{=}0.1$ & 0.810 (.021) & 0.801 (.040) & 0.806 (.047) \\
+$\lambda{=}0.5$ & 0.823 (.044) & 0.844 (.036) & 0.834 (.050) \\
+$\lambda{=}1.0$ & 0.830 (.041) & 0.854 (.029) & 0.860 (.037) \\
 \midrule
 \multicolumn{4}{@{}l}{\textbf{CIC-IoT-2023}} \\
-$\lambda{=}0.1$ & 0.747 (.020) & 0.727 (.026) & 0.710 (.024) \\
-$\lambda{=}0.5$ & 0.729 (.014) & 0.707 (.006) & 0.702 (.018) \\
-$\lambda{=}1.0$ & 0.714 (.016) & 0.715 (.006) & 0.706 (.005) \\
+$\lambda{=}0.1$ & 0.743 (.018) & 0.724 (.023) & 0.703 (.020) \\
+$\lambda{=}0.5$ & 0.717 (.017) & 0.702 (.007) & 0.699 (.013) \\
+$\lambda{=}1.0$ & 0.703 (.013) & 0.704 (.005) & 0.700 (.007) \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -249,14 +249,20 @@ def make_auroc_vs_f1(datasets=("ctu", "cic")):
                 pts.append(("PostHocCBM", ph["test_f1"], ph["ood_auroc"], 0.0, 0.0))
         seeds = [json.loads((NESY_RES / f"{ds}_nesy_s{i}_eval.json").read_text())
                  for i in range(5) if (NESY_RES / f"{ds}_nesy_s{i}_eval.json").exists()]
+        sh_f = NESY_RES / f"shared_eval_{ds}.json"     # AUROC on the main-table flows
+        shared = json.loads(sh_f.read_text()) if sh_f.exists() else []
+        sh_au = lambda model: {r["seed"]: r["auroc_mahal"] for r in shared
+                               if r["model"] == model and r["variant"] == "main"}
         if seeds:
             f1 = np.array([d.get("test_f1", d["known_f1"]) for d in seeds])
-            au = np.array([d["ood_auroc_mahal"] for d in seeds])
+            m = sh_au("nesy")
+            au = np.array([m.get(d["seed"], d["ood_auroc_mahal"]) for d in seeds])
             pts.append(("NeSy", f1.mean(), au.mean(), f1.std(), au.std()))
         ro = [json.loads(f.read_text()) for f in sorted(NESY_RES.glob(f"{ds}_rule_only_s[0-9]_eval.json"))]
         if ro:
             f1 = np.array([d.get("test_f1", d["known_f1"]) for d in ro])
-            au = np.array([d.get("ood_auroc_mahal", d.get("ood_auroc")) for d in ro])
+            m = sh_au("rule_only")
+            au = np.array([m.get(d.get("seed"), d.get("ood_auroc_mahal", d.get("ood_auroc"))) for d in ro])
             pts.append(("RuleOnly", f1.mean(), au.mean(), f1.std(), au.std()))
         if five_seed:
             return pts

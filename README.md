@@ -103,6 +103,31 @@ prints every value in the manuscript and supplement tables from `results/`.
 
 ---
 
+## From results to tables
+
+`python checks/paper_values.py` prints every value below from these files. Splits are the parquet folders under `data/` (indices are fixed by the deterministic split scripts); every table uses seeds 0–4 unless stated.
+
+| Manuscript table or figure | Split(s) | Results file(s) | Driver |
+|---|---|---|---|
+| Main results (F1, AUROC, TPR; submitted-list AUROC column) | `ctuk`, `ctuko`, `cicr` | `results/cbm/multiseed_{ds}_v2.json`, `results/cbm/baselines_{ds}.json`, `results/nesy/{ds}_{nesy,rule_only}_s*_eval.json` (F1), `results/nesy/shared_eval_{ds}.json` (AUROC, TPR) | `cbm/run_kfs_control.py`, `cbm/run_multiseed.py`, `nesy/run_kfs_control.sh`, `cbm/run_baselines.py` |
+| Temporal split; JointCBM AUROC vs γ on every split | `ctut`, `ctut_o`, `ctualt`, `ctualt_o`, `cicr_alt` | `results/cbm/multiseed_{ds}_v2_seeds.json`, `results/nesy/ctut*_eval.json` | `cbm/run_multiseed.py` |
+| NeSy-NIDS scorer ablation | `ctuk`, `cicr` | `results/nesy/shared_eval_{ds}.json` | `nesy/run_shared_eval.py` |
+| Mahalanobis vs. energy by architecture | `ctuk`, `cicr`, `ton` | `results/cbm/scorer_factorial_{ctuk_ctuko,cicr,ton}.json` | `cbm/run_scorer_factorial.py` |
+| Leave-family-out scorer selection | `{ctuk,cicr}_lofo_*` | `results/cbm/lofo.json` | `cbm/run_lofo.py` |
+| Synthetic-outlier scorer selection | `ctuk`, `cicr`, `ton` | `results/cbm/scorer_selection_ctuk_cicr_ton.json` | `cbm/run_scorer_selection.py` |
+| Open-set (C+1), per-family, confusion matrix | `ctuk`, `cicr` | `results/cbm/openset_{ctuk,cicr}.json` | `cbm/run_openset.py` |
+| Post-hoc detectors on the MLP | `ctuk`, `cicr` | `results/cbm/ood_baselines_{ds}_seeds.json` | `cbm/run_ood_baselines.py --seeds 5` |
+| Device-disjoint splits | `ctud_h198`, `ctud_h111` and the `ctud_o_*` controls | `results/cbm/multiseed_{ds}_v2.json`, `results/nesy/shared_eval_{ds}.json`, `results/nesy/{ds}_*_eval.json` | `06_make_kfs_splits.py --split device`, `cbm/run_multiseed.py`, `nesy/run_kfs_control.sh` |
+| 8-unit bottleneck control | `ctuk`, `cicr`, `ton` | `results/cbm/bottleneck8_{ds}.json` | `cbm/run_bottleneck_control.py` |
+| Restored-features control | `ctuk_n` | `results/cbm/multiseed_ctuk_n_v2.json` | `08_make_ctuk_n.py`, `cbm/run_multiseed.py` |
+| Fidelity, branch agreement, α sweep, rule quality, threshold drift | `ctuk`, `cicr` | `results/cbm/fidelity_{ds}.json`, `results/nesy/fidelity_{ds}.json`, `results/nesy/rule_init_{ds}.json` | `cbm/run_fidelity.py`, `nesy/run_fidelity.py`, `nesy/run_rule_init.py` |
+| Known-class geometry, LOCO, confounding figure, k_T sweep | `ctuk`, `cicr`, `ton` | `results/cbm/geometry.json` | `cbm/run_geometry.py` |
+| Leave-one-corpus-out geometry transfer | `ctuk`, `cicr`, `ton` | `results/cbm/geometry_transfer.json` | `cbm/run_geometry_transfer.py` |
+| λ sensitivity and (λ, γ) grid | `ctuk`, `cicr` | `results/cbm/lambdagrid_{ds}_seeds.json` | `cbm/run_lambda_grid.py` |
+| Per-class F1 | `ctuk`, `cicr` | `results/cbm/perclass_{ds}.json` | `cbm/run_perclass.py` |
+
+---
+
 ## Pre-trained Models
 
 | Path | Contents |

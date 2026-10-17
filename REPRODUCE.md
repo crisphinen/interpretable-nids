@@ -15,6 +15,9 @@ Set `PY=python` (or the full path to your interpreter) and pick a GPU with `CUDA
 $PY 06_make_kfs_splits.py                        # data/ctuk (known-only features), data/ctuko (submitted list)
 $PY 06_make_kfs_splits.py --split alt            # data/ctualt, data/ctualt_o
 $PY 06_make_kfs_splits.py --split temporal       # data/ctut, data/ctut_o
+$PY 06_make_kfs_splits.py --split device --holdout-host 192.168.1.198 --tag _h198     # data/ctud_h198, data/ctud_o_h198
+$PY 06_make_kfs_splits.py --split device --holdout-host 192.168.100.111 --tag _h111   # data/ctud_h111, data/ctud_o_h111
+$PY 08_make_ctuk_n.py                            # data/ctuk_n: ctuk rows, MLP/CBM input = NeSy-NIDS's 33 columns
 ```
 
 ## CTU-IoT-23 main runs, scorers and post-hoc detectors
@@ -25,7 +28,8 @@ bash nesy/run_kfs_control.sh ctuk ctuko         # NeSy-NIDS, NeSy + alpha-reg, r
 $PY -m cbm.run_multiseed --aggregate
 $PY -m cbm.run_scorer_factorial --datasets ctuk ctuko
 $PY -m nesy.scorer_ablation --datasets ctuk ctuko
-$PY -m cbm.run_ood_baselines --datasets ctuk ctuko
+$PY -m nesy.run_shared_eval --datasets ctuk ctuko   # NeSy-NIDS rows on the evaluation flows of the CBM rows
+$PY -m cbm.run_ood_baselines --datasets ctuk --seeds 5 --device cuda
 ```
 
 ## CIC-IoT-2023 split and runs
@@ -36,8 +40,8 @@ $PY -m cbm.run_multiseed --dataset cicr --seeds 5 --device cuda
 bash nesy/run_kfs_control.sh cicr
 $PY -m cbm.run_multiseed --aggregate
 $PY -m cbm.run_baselines --datasets ctuk ctuko cicr             # Post-hoc CBM, DT, RF
-$PY -m nesy.scorer_ablation --datasets cicr                     # CIC column of the NeSy scorer table
-$PY -m cbm.run_ood_baselines --datasets cicr                    # CIC row of the post-hoc detector table
+$PY -m nesy.run_shared_eval --datasets cicr                     # NeSy-NIDS rows and scorer table, CIC
+$PY -m cbm.run_ood_baselines --datasets cicr --seeds 5 --device cuda   # CIC row of the post-hoc detector table
 ```
 
 The Post-hoc CBM classifier is fit on the training split; rerun `cbm.run_baselines` after any
@@ -51,6 +55,20 @@ for ds in ctualt ctut ctualt_o ctut_o; do $PY -m cbm.run_multiseed --dataset $ds
 $PY -m cbm.run_multiseed --dataset cicr_alt --seeds 5 --device cuda \
     --variants MLPBaseline JointCBM_g0 JointCBM_g0.1 JointCBM_g0.5 JointCBM_g1.0
 bash nesy/run_kfs_control.sh ctut ctut_o
+$PY -m nesy.run_shared_eval --datasets ctut
+```
+
+## Device-disjoint splits and controls
+
+```bash
+for ds in ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111; do
+  $PY -m cbm.run_multiseed --dataset $ds --seeds 5 --device cuda; done
+bash nesy/run_kfs_control.sh ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111
+$PY -m nesy.run_shared_eval --datasets ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111
+$PY -m cbm.run_bottleneck_control --datasets ctuk cicr ton --device cuda   # 8-unit bottleneck, no concept labels
+$PY -m cbm.run_multiseed --dataset ctuk_n --seeds 5 --device cuda \
+    --variants MLPBaseline JointCBM_g0 SequentialCBM HybridCBM              # restored-features control
+$PY -m cbm.run_multiseed --aggregate
 ```
 
 ## TON_IoT
@@ -71,6 +89,7 @@ bash nesy/run_alpha_sweep.sh cicr
 $PY -m cbm.run_fidelity --datasets ctuk cicr    # concept intervention, CBM rows of the fidelity table
 $PY -m nesy.run_fidelity --datasets ctuk cicr   # branch agreement, NeSy rows, rule quality, drift r,
                                                 # hard_pred (predictions changed by hard activations)
+$PY -m nesy.run_rule_init --datasets ctuk cicr  # rule quality at the initial expert thresholds
 $PY -m nesy.make_fidelity_figures               # results/figures/threshold_drift5_*, rule_selectivity1_*
 ```
 
@@ -103,13 +122,13 @@ $PY -m cbm.run_geometry_transfer                # leave-one-corpus-out predictio
 ## Sweeps and per-class F1
 
 ```bash
-$PY -m cbm.run_lambdagamma --dataset ctu --device cuda    # original-feature CTU split, as the lambda table
-$PY -m cbm.run_lambdagamma --dataset cicr --device cuda
+$PY -m cbm.run_lambda_grid --dataset ctuk --device cuda   # lambda x gamma x 5 seeds; gamma=0 is the lambda table
+$PY -m cbm.run_lambda_grid --dataset cicr --device cuda
 $PY -m cbm.run_perclass --datasets ctuk cicr
 ```
 
-The lambda-sensitivity table is stored in `results/cbm/lambda_sensitivity.json`, written by
-`cbm/run_lambda_sweep.py` on the original-feature splits.
+The lambda = 0.5 cells reuse the main-table JointCBM checkpoints, so that column reproduces the
+main results table exactly.
 
 ## Manuscript tables and figures
 

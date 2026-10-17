@@ -1,0 +1,20 @@
+
+============================================================
+  NeSy-NIDS Training
+  dataset=ctud_o_h198  model=nesy  seed=1  device=cuda
+  lambda_sparse=0.0  lambda_alpha=0.0
+============================================================
+
+Loading data...
+  Train: (62999, 33), Val: (13500, 33)
+  Classes: 4, Rules: 8
+  Parameters: 13,313
+  [nesy_ctud_o_h198_s1] Epoch   1/60  k=1.3  loss=0.6790  val_f1=0.8314  patience=0/12  alpha=0.470
+  [nesy_ctud_o_h198_s1] Epoch  10/60  k=4.0  loss=0.3873  val_f1=0.8524  patience=2/12  alpha=0.415
+  [nesy_ctud_o_h198_s1] Epoch  20/60  k=7.0  loss=0.2790  val_f1=0.8764  patience=3/12  alpha=0.389
+  [nesy_ctud_o_h198_s1] Epoch  30/60  k=10.0  loss=0.2774  val_f1=0.8768  patience=1/12  alpha=0.387
+  [nesy_ctud_o_h198_s1] Epoch  40/60  k=10.0  loss=0.2778  val_f1=0.8735  patience=3/12  alpha=0.388
+  [nesy_ctud_o_h198_s1] Early stop at epoch 49 (best epoch 37)
+
+  Best val F1: 0.8770
+  Saved: /mnt/4tbnvme/Ngari/projects/interpretable-nids/results/nesy/ctud_o_h198_nesy_s1.pt

@@ -1,0 +1,452 @@
+[
+  {
+    "lambda": 0.1,
+    "gamma": 0.0,
+    "seed": 0,
+    "source": "trained",
+    "val_f1": 0.8194390047176833,
+    "test_f1": 0.818675899594965,
+    "auroc": 0.7133131399999999,
+    "concept_acc": 0.8973466666666667
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.0,
+    "seed": 1,
+    "source": "trained",
+    "val_f1": 0.8186901165047038,
+    "test_f1": 0.8201271085007352,
+    "auroc": 0.7533477399999999,
+    "concept_acc": 0.90873
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.0,
+    "seed": 2,
+    "source": "trained",
+    "val_f1": 0.8192029585472472,
+    "test_f1": 0.8204486255708913,
+    "auroc": 0.7534248,
+    "concept_acc": 0.8800566666666667
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.0,
+    "seed": 3,
+    "source": "trained",
+    "val_f1": 0.8192013892077343,
+    "test_f1": 0.8189047407755792,
+    "auroc": 0.7308916,
+    "concept_acc": 0.9348066666666667
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.0,
+    "seed": 4,
+    "source": "trained",
+    "val_f1": 0.81823953362314,
+    "test_f1": 0.8199474485592595,
+    "auroc": 0.7641397,
+    "concept_acc": 0.7025866666666667
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.5,
+    "seed": 0,
+    "source": "trained",
+    "val_f1": 0.8200838236078504,
+    "test_f1": 0.8191999815143367,
+    "auroc": 0.68618692,
+    "concept_acc": 0.9668399999999999
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.5,
+    "seed": 1,
+    "source": "trained",
+    "val_f1": 0.8181834616130712,
+    "test_f1": 0.8193337925964248,
+    "auroc": 0.7350221,
+    "concept_acc": 0.9525433333333333
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.5,
+    "seed": 2,
+    "source": "trained",
+    "val_f1": 0.8190694993426848,
+    "test_f1": 0.8202527240098988,
+    "auroc": 0.73688332,
+    "concept_acc": 0.9536833333333334
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.5,
+    "seed": 3,
+    "source": "trained",
+    "val_f1": 0.81860239302028,
+    "test_f1": 0.8191865624082595,
+    "auroc": 0.7504026,
+    "concept_acc": 0.95593
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 0.5,
+    "seed": 4,
+    "source": "trained",
+    "val_f1": 0.8192604613055003,
+    "test_f1": 0.8179822487256884,
+    "auroc": 0.71054832,
+    "concept_acc": 0.9669866666666667
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 1.0,
+    "seed": 0,
+    "source": "trained",
+    "val_f1": 0.8180676166779866,
+    "test_f1": 0.8173750133194402,
+    "auroc": 0.6752135,
+    "concept_acc": 0.96492
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 1.0,
+    "seed": 1,
+    "source": "trained",
+    "val_f1": 0.8188352694603503,
+    "test_f1": 0.8193148838713515,
+    "auroc": 0.7310871800000001,
+    "concept_acc": 0.9710666666666667
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 1.0,
+    "seed": 2,
+    "source": "trained",
+    "val_f1": 0.819634838359264,
+    "test_f1": 0.8195150744997676,
+    "auroc": 0.6978251,
+    "concept_acc": 0.96556
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 1.0,
+    "seed": 3,
+    "source": "trained",
+    "val_f1": 0.8181410773985628,
+    "test_f1": 0.8179426124738405,
+    "auroc": 0.71857444,
+    "concept_acc": 0.9558199999999999
+  },
+  {
+    "lambda": 0.1,
+    "gamma": 1.0,
+    "seed": 4,
+    "source": "trained",
+    "val_f1": 0.8189147798516547,
+    "test_f1": 0.8194485770011072,
+    "auroc": 0.69200418,
+    "concept_acc": 0.9685533333333334
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.0,
+    "seed": 0,
+    "source": "table_iii",
+    "val_f1": 0.8182797619915231,
+    "test_f1": 0.818067238504471,
+    "auroc": 0.73783094,
+    "concept_acc": 0.96543
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.0,
+    "seed": 1,
+    "source": "table_iii",
+    "val_f1": 0.8189757288969025,
+    "test_f1": 0.8185501058080301,
+    "auroc": 0.7267033599999999,
+    "concept_acc": 0.9659366666666667
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.0,
+    "seed": 2,
+    "source": "table_iii",
+    "val_f1": 0.8194693747511136,
+    "test_f1": 0.8187069335696657,
+    "auroc": 0.7009889600000001,
+    "concept_acc": 0.96533
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.0,
+    "seed": 3,
+    "source": "table_iii",
+    "val_f1": 0.816934393582541,
+    "test_f1": 0.8162672660272396,
+    "auroc": 0.7244109200000001,
+    "concept_acc": 0.9558333333333333
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.0,
+    "seed": 4,
+    "source": "table_iii",
+    "val_f1": 0.8187525686791394,
+    "test_f1": 0.8196733011441573,
+    "auroc": 0.6930411399999999,
+    "concept_acc": 0.9600166666666666
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.5,
+    "seed": 0,
+    "source": "table_iii",
+    "val_f1": 0.8176808686751623,
+    "test_f1": 0.8192766963415328,
+    "auroc": 0.70853612,
+    "concept_acc": 0.9742833333333333
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.5,
+    "seed": 1,
+    "source": "table_iii",
+    "val_f1": 0.8188171612406419,
+    "test_f1": 0.8188568662218846,
+    "auroc": 0.70351612,
+    "concept_acc": 0.9671966666666667
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.5,
+    "seed": 2,
+    "source": "table_iii",
+    "val_f1": 0.8181471102015027,
+    "test_f1": 0.8189366745412473,
+    "auroc": 0.6897765600000001,
+    "concept_acc": 0.96869
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.5,
+    "seed": 3,
+    "source": "table_iii",
+    "val_f1": 0.8173369574550322,
+    "test_f1": 0.8170353330087006,
+    "auroc": 0.7021455,
+    "concept_acc": 0.9618633333333333
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 0.5,
+    "seed": 4,
+    "source": "table_iii",
+    "val_f1": 0.8178700479749033,
+    "test_f1": 0.8179654270912345,
+    "auroc": 0.7069166600000001,
+    "concept_acc": 0.9673566666666666
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 1.0,
+    "seed": 0,
+    "source": "table_iii",
+    "val_f1": 0.8176755400889602,
+    "test_f1": 0.8177306033162123,
+    "auroc": 0.6929792,
+    "concept_acc": 0.98167
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 1.0,
+    "seed": 1,
+    "source": "table_iii",
+    "val_f1": 0.8176205109829109,
+    "test_f1": 0.8176162063470892,
+    "auroc": 0.71493698,
+    "concept_acc": 0.96702
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 1.0,
+    "seed": 2,
+    "source": "table_iii",
+    "val_f1": 0.8182837736974171,
+    "test_f1": 0.8211157217319467,
+    "auroc": 0.67987612,
+    "concept_acc": 0.9681866666666666
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 1.0,
+    "seed": 3,
+    "source": "table_iii",
+    "val_f1": 0.8185773981753979,
+    "test_f1": 0.8175432702395302,
+    "auroc": 0.6945676599999999,
+    "concept_acc": 0.9782266666666666
+  },
+  {
+    "lambda": 0.5,
+    "gamma": 1.0,
+    "seed": 4,
+    "source": "table_iii",
+    "val_f1": 0.816571117017895,
+    "test_f1": 0.8170585550498429,
+    "auroc": 0.71218828,
+    "concept_acc": 0.9650166666666666
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.0,
+    "seed": 0,
+    "source": "trained",
+    "val_f1": 0.8173310361485517,
+    "test_f1": 0.8191774539916267,
+    "auroc": 0.70366208,
+    "concept_acc": 0.9826133333333333
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.0,
+    "seed": 1,
+    "source": "trained",
+    "val_f1": 0.817624902973463,
+    "test_f1": 0.8183536326663109,
+    "auroc": 0.7232625400000001,
+    "concept_acc": 0.9769533333333333
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.0,
+    "seed": 2,
+    "source": "trained",
+    "val_f1": 0.8181843961221135,
+    "test_f1": 0.8191693204868346,
+    "auroc": 0.68925696,
+    "concept_acc": 0.96542
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.0,
+    "seed": 3,
+    "source": "trained",
+    "val_f1": 0.8182283595312909,
+    "test_f1": 0.8179664758198106,
+    "auroc": 0.71152424,
+    "concept_acc": 0.9759066666666667
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.0,
+    "seed": 4,
+    "source": "trained",
+    "val_f1": 0.8172717476542356,
+    "test_f1": 0.8175528538012864,
+    "auroc": 0.6884686,
+    "concept_acc": 0.9747766666666666
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.5,
+    "seed": 0,
+    "source": "trained",
+    "val_f1": 0.8190217591463347,
+    "test_f1": 0.8186948785570443,
+    "auroc": 0.7042936799999999,
+    "concept_acc": 0.9717533333333334
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.5,
+    "seed": 1,
+    "source": "trained",
+    "val_f1": 0.8160744879910189,
+    "test_f1": 0.816211132262047,
+    "auroc": 0.7106218799999999,
+    "concept_acc": 0.9747666666666667
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.5,
+    "seed": 2,
+    "source": "trained",
+    "val_f1": 0.816482195453181,
+    "test_f1": 0.8165737399816555,
+    "auroc": 0.7049744199999999,
+    "concept_acc": 0.9693966666666667
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.5,
+    "seed": 3,
+    "source": "trained",
+    "val_f1": 0.8179152233972201,
+    "test_f1": 0.818840764087288,
+    "auroc": 0.6965438799999999,
+    "concept_acc": 0.9810733333333334
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 0.5,
+    "seed": 4,
+    "source": "trained",
+    "val_f1": 0.817280181993894,
+    "test_f1": 0.8185328721401068,
+    "auroc": 0.705746,
+    "concept_acc": 0.9774733333333334
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 1.0,
+    "seed": 0,
+    "source": "trained",
+    "val_f1": 0.818240926700985,
+    "test_f1": 0.8165334751977417,
+    "auroc": 0.6901085599999999,
+    "concept_acc": 0.97921
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 1.0,
+    "seed": 1,
+    "source": "trained",
+    "val_f1": 0.8166598740124007,
+    "test_f1": 0.8180836327716567,
+    "auroc": 0.69680624,
+    "concept_acc": 0.97663
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 1.0,
+    "seed": 2,
+    "source": "trained",
+    "val_f1": 0.8165774127541923,
+    "test_f1": 0.8158134623149171,
+    "auroc": 0.70704778,
+    "concept_acc": 0.9752833333333333
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 1.0,
+    "seed": 3,
+    "source": "trained",
+    "val_f1": 0.8165921551477804,
+    "test_f1": 0.8162509782462815,
+    "auroc": 0.69711142,
+    "concept_acc": 0.9794266666666667
+  },
+  {
+    "lambda": 1.0,
+    "gamma": 1.0,
+    "seed": 4,
+    "source": "trained",
+    "val_f1": 0.817301621046668,
+    "test_f1": 0.8184145000738505,
+    "auroc": 0.71012626,
+    "concept_acc": 0.9772000000000001
+  }
+]
