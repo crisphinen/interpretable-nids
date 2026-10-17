@@ -302,11 +302,18 @@ def device_followup():
             print(f"   {ds:10s} mean {v['mean_share']:.2f}  " + "  ".join(
                 f"{k} {c['share_with_same_class_train_duplicate']:.2f} ({c['distinct_test_vectors']}/{c['n_test']})"
                 for k, c in v["per_class"].items()))
-    head("open-set test with the held-out device's own unknown flows: AUROC / TPR@5%FPR")
+    head("CTU labels: retained flows and flows without a DPKT match")
+    f = CBM / "ctu_label_counts.json"
+    if f.exists():
+        for k, v in LOAD(f)["per_label"].items():
+            print(f"   {k:28s} {v['retained']:>12,}  no match {v['no_packet_match']:>10,}")
+    head("open-set test, held-out address's own unknown flows: AUROC / diagnostic TPR, tau: known rejected / recall")
     f = CBM / "device_openset.json"
     if f.exists():
         for ds, v in LOAD(f).items():
-            print(f"   {ds:12s} " + "  ".join(f"{m} {x['auroc'][0]:.3f}/{x['tpr5'][0]:.3f}" for m, x in v["summary"].items()))
+            print(f"   {ds:14s} n={v['n_unknown']} " + "  ".join(
+                f"{m} {x['auroc'][0]:.3f}/{x['tpr5'][0]:.3f} tau:{x['val_tau_known_reject'][0]:.3f}/{x['val_tau_recall'][0]:.3f}"
+                for m, x in v["summary"].items()))
     head("95% bootstrap confidence intervals (seeds x evaluation flows)")
     f = CBM / "bootstrap_ci.json"
     if f.exists():

@@ -61,7 +61,8 @@ next paragraph shows, it is not evidence that the decision moved onto the rules.
 \textbf{Does raising $\alpha$ actually move the decision onto the rules? No.} A larger
 gate weight need not mean more rule reliance, because the two heads can emit logits of
 different magnitudes and the learned weights can compensate. Testing reliance directly by
-branch agreement (Table~\ref{tab:headagree}), the deployed prediction stays with the
+branch agreement (Table~\ref{tab:headagree}), the deployed known-class prediction (before
+rejection) stays with the
 \emph{neural-only} head at every $\lambda_\alpha$, and its agreement with the
 \emph{rule-only} head rises only mildly as $\alpha$ increases (CTU $32\%$ to $51\%$),
 staying well below neural agreement.
@@ -73,8 +74,10 @@ individual hard flows to the neural branch.) Each point was trained from scratch
 \begin{table}[t]
 \centering\small
 \caption{Branch agreement across the $\lambda_\alpha$ sweep (NeSy-NIDS, mean over five
-seeds): learned $\alpha$ and the fraction of flows on which the deployed prediction equals
-the neural-only (dep$=$neural) or rule-only (dep$=$rule) prediction.}
+seeds): learned $\alpha$ and the fraction of flows on which the deployed known-class prediction
+(before rejection) equals the neural-only (dep$=$neural) or rule-only (dep$=$rule) prediction. The
+open-set rejection score is computed on the hard rule vector, so these figures do not measure the
+rules' influence on rejection.}
 \label{tab:headagree}
 \setlength{\tabcolsep}{4pt}
 \resizebox{\columnwidth}{!}{%
@@ -353,18 +356,29 @@ $0.77$ on TON\_IoT addresses .30 and .31.
 
 \subsection{Open-Set Test with Unknown Flows from the Held-Out Address}
 Table~\ref{tab:device} scores against the main split's unknown pool, most of which comes from
-addresses seen in training. \texttt{cbm/run\_device\_openset.py} instead scores each held-out address's
-known test flows against that address's own unknown-family flows, for the MLP, CBMs and NeSy-NIDS: address .198 ($3{,}516$: C\&C
-$3{,}499$, C\&C-FileDownload $14$, Okiru-Attack $3$), TON\_IoT address .30 with .195 (DoS, $2$
-MITM) and address .31 with .190 (DoS, $510$ MITM); TON\_IoT unknowns are sampled as in the main
-split ($2{,}000$ per family). As a seen-address reference, the main-split models are scored the same
-way against the main split's own C\&C (CTU) or DoS (TON\_IoT) flows. Address .111 has 4 unknown-family
+addresses seen in training. \texttt{cbm/run\_device\_openset.py} instead scores each held-out
+address's known test flows against that address's own unknown-family flows, for the MLP, CBMs and
+NeSy-NIDS: address .198 ($3{,}516$: C\&C $3{,}499$, C\&C-FileDownload $14$, Okiru-Attack $3$) and the
+DoS flows of TON\_IoT address .30 (with normal address .195) and address .31 (with .190), $2{,}000$
+each, sampled as in the main split. The MITM flows of the two TON\_IoT addresses ($2$ and $510$) are
+scored separately and are not part of Tables~\ref{tab:devopen}--\ref{tab:devtau}. As a seen-address
+reference, the main-split models are scored the same way against the main split's own C\&C (CTU,
+$10{,}000$ of $21{,}995$ flows) or DoS (TON\_IoT, $2{,}000$) flows. Address .111 has 4 unknown-family
 flows and address .108 none, so neither is tested.
+
+Two operating points are reported. TPR@5\%FPR (Table~\ref{tab:devopen}), as in main
+Table~\ref{M-tab:main}, thresholds at the 95th percentile of the held-out address's own known test
+scores: it is a point on the test ROC curve, a diagnostic that is not available before deployment.
+Table~\ref{tab:devtau} uses the deployable threshold $\tau$ of main Section~\ref{M-sec:openset}, the
+95th percentile of the known validation scores, whose flows come from the training addresses, and
+reports the share of the held-out address's known test flows it rejects and the recall of the
+address's unknown flows.
 
 \begin{table}[h]
 \centering\footnotesize
-\caption{OOD AUROC / TPR@5\%FPR (five-seed mean) with known and unknown test flows from the same
-source address. ``Seen'': main-split models against the same family's flows from addresses seen in training.}
+\caption{OOD AUROC / diagnostic TPR@5\%FPR (five-seed mean) with known and unknown test flows from
+the same source address. ``Seen'': main-split models against the same family's flows from
+addresses seen in training. TON\_IoT columns use DoS flows only.}
 \label{tab:devopen}
 \setlength{\tabcolsep}{2.5pt}
 \resizebox{\columnwidth}{!}{%
@@ -374,13 +388,13 @@ source address. ``Seen'': main-split models against the same family's flows from
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}
 Model & Seen & Address .198 & Address .198, 31f & Seen & Address .30 & Address .31 \\
 \midrule
-MLP baseline               & $0.853$ / $0.337$ & $0.396$ / $0.007$ & $0.396$ / $0.007$ & $0.444$ / $0.009$ & $0.412$ / $0.004$ & $0.824$ / $0.025$ \\
-JointCBM $\gamma{=}0$      & $0.829$ / $0.339$ & $0.609$ / $0.052$ & $0.713$ / $0.162$ & $0.754$ / $0.016$ & $0.691$ / $0.007$ & $0.743$ / $0.035$ \\
-JointCBM $\gamma{=}0.1$    & $0.832$ / $0.331$ & $0.663$ / $0.071$ & $0.688$ / $0.066$ & $0.735$ / $0.011$ & $0.705$ / $0.003$ & $0.752$ / $0.039$ \\
-JointCBM $\gamma{=}0.5$    & $0.843$ / $0.439$ & $0.637$ / $0.020$ & $0.712$ / $0.100$ & $0.725$ / $0.014$ & $0.750$ / $0.002$ & $0.787$ / $0.049$ \\
-JointCBM $\gamma{=}1.0$    & $0.854$ / $0.507$ & $0.690$ / $0.073$ & $0.665$ / $0.030$ & $0.735$ / $0.011$ & $0.703$ / $0.003$ & $0.764$ / $0.012$ \\
-SequentialCBM              & $0.878$ / $0.497$ & $0.635$ / $0.039$ & $0.638$ / $0.041$ & $0.719$ / $0.022$ & $0.693$ / $0.000$ & $0.683$ / $0.007$ \\
-HybridCBM                  & $0.876$ / $0.554$ & $0.636$ / $0.033$ & $0.637$ / $0.032$ & $0.722$ / $0.021$ & $0.690$ / $0.001$ & $0.643$ / $0.016$ \\
+MLP baseline               & $0.853$ / $0.337$ & $0.396$ / $0.007$ & $0.396$ / $0.007$ & $0.444$ / $0.009$ & $0.411$ / $0.004$ & $0.818$ / $0.016$ \\
+JointCBM $\gamma{=}0$      & $0.829$ / $0.339$ & $0.609$ / $0.052$ & $0.713$ / $0.162$ & $0.754$ / $0.016$ & $0.691$ / $0.007$ & $0.749$ / $0.016$ \\
+JointCBM $\gamma{=}0.1$    & $0.832$ / $0.331$ & $0.663$ / $0.071$ & $0.688$ / $0.066$ & $0.735$ / $0.011$ & $0.705$ / $0.003$ & $0.757$ / $0.024$ \\
+JointCBM $\gamma{=}0.5$    & $0.843$ / $0.439$ & $0.637$ / $0.020$ & $0.712$ / $0.100$ & $0.725$ / $0.014$ & $0.750$ / $0.002$ & $0.792$ / $0.026$ \\
+JointCBM $\gamma{=}1.0$    & $0.854$ / $0.507$ & $0.690$ / $0.073$ & $0.665$ / $0.030$ & $0.735$ / $0.011$ & $0.703$ / $0.003$ & $0.772$ / $0.001$ \\
+SequentialCBM              & $0.878$ / $0.497$ & $0.635$ / $0.039$ & $0.638$ / $0.041$ & $0.719$ / $0.022$ & $0.693$ / $0.000$ & $0.691$ / $0.002$ \\
+HybridCBM                  & $0.876$ / $0.554$ & $0.636$ / $0.033$ & $0.637$ / $0.032$ & $0.722$ / $0.021$ & $0.690$ / $0.001$ & $0.645$ / $0.011$ \\
 NeSy-NIDS                  & $0.865$ / $0.260$ & $0.651$ / $0.060$ & $0.651$ / $0.060$ & -- & -- & -- \\
 NeSy-NIDS ($\alpha$)       & $0.872$ / $0.247$ & $0.651$ / $0.066$ & $0.650$ / $0.057$ & -- & -- & -- \\
 Rule-only                  & $0.820$ / $0.183$ & $0.639$ / $0.031$ & $0.639$ / $0.031$ & -- & -- & -- \\
@@ -388,11 +402,42 @@ Rule-only                  & $0.820$ / $0.183$ & $0.639$ / $0.031$ & $0.639$ / $
 \end{tabular}}
 \end{table}
 
-On CTU the held-out address lowers C\&C AUROC from $0.82$--$0.88$ to $0.40$--$0.71$ and TPR from
-$0.18$--$0.55$ to at most $0.162$. On TON\_IoT address .30 the change is small (AUROC $0.41$--$0.75$
-vs.\ $0.44$--$0.75$), and TPR is low for every model on seen addresses too ($\le0.022$). The ordering
-of the models is not stable across addresses: the concept models are above the MLP on address .198
-and address .30, and below it on address .31.
+\begin{table}[h]
+\centering\footnotesize
+\caption{Deployable threshold $\tau$ (95th percentile of known validation scores): share of known
+test flows rejected / recall of unknown flows (five-seed mean). The target rejection rate is 5\%.}
+\label{tab:devtau}
+\setlength{\tabcolsep}{2.5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{3}{c}{CTU, C\&C} & \multicolumn{3}{c}{TON\_IoT, DoS} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Model & Seen & Address .198 & Address .198, 31f & Seen & Address .30 & Address .31 \\
+\midrule
+MLP baseline               & $0.049$ / $0.337$ & $0.501$ / $0.049$ & $0.501$ / $0.049$ & $0.050$ / $0.009$ & $0.070$ / $0.004$ & $0.131$ / $0.070$ \\
+JointCBM $\gamma{=}0$      & $0.048$ / $0.276$ & $0.250$ / $0.028$ & $0.051$ / $0.038$ & $0.052$ / $0.016$ & $0.062$ / $0.008$ & $0.060$ / $0.016$ \\
+JointCBM $\gamma{=}0.1$    & $0.051$ / $0.335$ & $0.151$ / $0.027$ & $0.201$ / $0.033$ & $0.051$ / $0.016$ & $0.057$ / $0.003$ & $0.081$ / $0.037$ \\
+JointCBM $\gamma{=}0.5$    & $0.052$ / $0.439$ & $0.200$ / $0.035$ & $0.151$ / $0.037$ & $0.051$ / $0.014$ & $0.060$ / $0.005$ & $0.058$ / $0.047$ \\
+JointCBM $\gamma{=}1.0$    & $0.053$ / $0.513$ & $0.126$ / $0.131$ & $0.200$ / $0.033$ & $0.051$ / $0.017$ & $0.070$ / $0.006$ & $0.077$ / $0.003$ \\
+SequentialCBM              & $0.055$ / $0.549$ & $0.000$ / $0.031$ & $0.000$ / $0.032$ & $0.051$ / $0.021$ & $0.099$ / $0.003$ & $0.062$ / $0.002$ \\
+HybridCBM                  & $0.050$ / $0.552$ & $0.050$ / $0.026$ & $0.100$ / $0.027$ & $0.051$ / $0.021$ & $0.088$ / $0.004$ & $0.037$ / $0.002$ \\
+NeSy-NIDS                  & $0.047$ / $0.286$ & $0.030$ / $0.042$ & $0.022$ / $0.041$ & -- & -- & -- \\
+NeSy-NIDS ($\alpha$)       & $0.047$ / $0.268$ & $0.016$ / $0.040$ & $0.023$ / $0.040$ & -- & -- & -- \\
+Rule-only                  & $0.039$ / $0.183$ & $0.177$ / $0.045$ & $0.177$ / $0.045$ & -- & -- & -- \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+On CTU the held-out address lowers C\&C AUROC from $0.82$--$0.88$ to $0.40$--$0.71$ and diagnostic
+TPR from $0.18$--$0.55$ to at most $0.162$. On TON\_IoT address .30 the change is small (AUROC
+$0.41$--$0.75$ vs.\ $0.44$--$0.75$), and TPR is low for every model on seen addresses too
+($\le0.022$). With the deployable threshold the known rejection rate stays near its target on seen
+addresses ($3.9$--$5.5\%$) but not on held-out ones ($0$--$50\%$ on address .198, $3.7$--$13.1\%$ on
+the TON\_IoT addresses), and unknown recall is at most $13.1\%$ (.198) and $7.0\%$ (TON\_IoT). The
+ordering of the models is not stable across addresses: the concept models are above the MLP on
+address .198 and address .30, and below it on address .31 (MLP $0.818$). On the $510$ MITM flows of
+address .31, AUROC is $0.63$--$0.85$ and diagnostic TPR at most $0.139$.
 
 \section{Confidence Intervals}
 \label{sec:ci}
@@ -401,7 +446,9 @@ checkpoints (checked against the stored AUROC) and draws 2{,}000 hierarchical bo
 the five seeds are resampled with replacement for each model independently, and the $5{,}000$ known
 and $5{,}000$ unknown evaluation flows are resampled with replacement and shared by the two models
 of a comparison, since every model is scored on the same flows. The interval is the 2.5--97.5
-percentile of the difference of the two seed-mean AUROCs.
+percentile of the difference of the two seed-mean AUROCs. The intervals cover the variation from
+training seeds and from the sampled evaluation flows under the chosen splits; they do not measure
+uncertainty across new captures, source addresses or independently drawn splits.
 
 \begin{table}[h]
 \centering\footnotesize
@@ -428,8 +475,10 @@ TON & JointCBM $\gamma{=}0$ $-$ 8-unit bottleneck & $+0.106$ & $[+0.004, +0.214]
 \end{tabular}}
 \end{table}
 
-Every difference the main text describes as a gap excludes zero, and every comparison it describes
-as no difference or no consistent effect includes zero. The TON\_IoT difference between JointCBM and
+Every difference the main text describes as a gap excludes zero. An interval that includes zero
+shows that this analysis does not resolve the difference, not that the two models are equivalent;
+the main text describes those comparisons as similar observed AUROC or as no consistent
+improvement. The TON\_IoT difference between JointCBM and
 the 8-unit bottleneck barely excludes zero, because the bottleneck varies widely across seeds.
 
 \section{Rule Selectivity and Threshold Drift}
@@ -516,10 +565,46 @@ Unknown/known ratio   & $+0.78$ & $[+0.59,+0.74]$ & $+0.92$ & $[+0.43,+0.64]$ & 
 
 CTU-IoT-23 is distributed as packet captures with labelled Zeek \texttt{conn.log} files. For
 each capture we compute per-flow packet statistics with DPKT (field names follow the
-CIC-IoT-2023 feature set) and join each labelled Zeek record to the DPKT flow with the same
-source and destination IP and port whose start time lies in $[t_{\mathrm{zeek}},
-t_{\mathrm{zeek}}{+}\mathrm{duration}{+}1\,\mathrm{s}]$; Zeek records without a match are
-dropped. Four ratios are derived from Zeek fields: byte ratio
+CIC-IoT-2023 feature set) and join each labelled Zeek record to the DPKT flows with the same
+source and destination IP, ports and protocol whose start time lies in $[t_{\mathrm{zeek}}{-}\mathrm{duration}{-}60\,\mathrm{s},\,
+t_{\mathrm{zeek}}{+}60\,\mathrm{s}]$, keeping the one closest in start time
+(\texttt{preprocess/merge\_iot23\_outer2.py}), so each Zeek record yields at most one row; in the
+stored table only two pairs of rows share source address, timestamp, duration, byte counts, history and label. Zeek records without a DPKT match are
+kept, with their DPKT features set to 0: 1{,}896{,}696 of the 110{,}879{,}826 retained flows ($1.7\%$), mostly
+DDoS ($7.6\%$ of DDoS flows); no flow matched with protocol ICMP. In the main split they are
+$2.2\%$ of the training and $2.0\%$ of the known test flows (mostly DDoS) and $0.4\%$ of the
+unknown flows. Before sampling, a label filter excludes PartOfAHorizontalPortScan,
+PartOfAHorizontalPortScan-Attack and C\&C-PartOfAHorizontalPortScan, so horizontal port scanning
+is neither a known nor a held-out class; Table~\ref{tab:ctu_labels} lists the retained labels
+(\texttt{checks/ctu\_label\_counts.py}).
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{Retained CTU-IoT-23 flows per label and those without a matching DPKT flow (DPKT
+features set to 0).}
+\label{tab:ctu_labels}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Label & Retained & No DPKT match \\
+\midrule
+Okiru & 60{,}717{,}929 & 267{,}008 \\
+Benign & 30{,}830{,}238 & 158{,}334 \\
+DDoS & 19{,}265{,}778 & 1{,}471{,}222 \\
+C\&C-HeartBeat & 33{,}537 & 6 \\
+C\&C & 21{,}995 & 103 \\
+Attack & 9{,}398 & 1 \\
+C\&C-HeartBeat-Attack & 834 & 18 \\
+C\&C-FileDownload & 53 & 4 \\
+C\&C-Torii & 30 & 0 \\
+FileDownload & 18 & 0 \\
+C\&C-HeartBeat-FileDownload & 11 & 0 \\
+Okiru-Attack & 3 & 0 \\
+C\&C-Mirai & 2 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+ Four ratios are derived from Zeek fields: byte ratio
 $\mathrm{orig\_bytes}/(\mathrm{resp\_bytes}{+}1)$, originator packet and byte rates
 $\mathrm{orig\_pkts}/(\mathrm{duration}{+}1)$ and $\mathrm{orig\_ip\_bytes}/(\mathrm{duration}{+}1)$,
 and direction $\mathrm{orig\_bytes}{-}\mathrm{resp\_bytes}$. The model uses 34 numeric features
@@ -724,6 +809,40 @@ closed-set/open-set relationship.
   every model uses five seeds (DT's raw-feature score has no seed variance).}
   \label{fig:auroc_vs_f1}
 \end{figure}
+
+\section{Scorer Settings}
+\label{sec:scorers}
+Table~\ref{tab:scorers} lists how each OOD score is computed. Every setting was fixed in advance
+(the ODIN and $k$NN values are the published defaults) and none was chosen using the held-out
+families; scorers are fitted on training vectors, and the only test data used, by the combined
+score, are known-class test scores.
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{OOD scorer settings.}
+\label{tab:scorers}
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lp{0.72\columnwidth}@{}}
+\toprule
+Scorer & Computation \\
+\midrule
+Mahalanobis & Per-class means and a shared covariance of the within-class residuals ($+10^{-4}I$,
+pseudo-inverse), fitted on $20{,}000$ training vectors; score $=$ distance to the nearest class mean \\
+Hamming, Jaccard & Hard rule vectors; each class representative is the majority vote of its
+training vectors (rule mean $>0.5$, so it is binary); score $=$ Hamming or Jaccard distance to the
+nearest representative \\
+Energy & $-\log\sum_c e^{l_c}$ on the logits, $T{=}1$ \\
+Combined & Mahalanobis and energy scores each $z$-normalised with the mean and standard deviation
+of the known test scores, then summed \\
+MSP & $1-\max_c \mathrm{softmax}(l)_c$ \\
+ODIN & MSP at temperature $T{=}1000$ after an input perturbation of $\epsilon{=}0.0014$ along the
+sign of the gradient \\
+$k$NN & Euclidean distance to the 50th nearest $L_2$-normalised training embedding ($20{,}000$
+training vectors) \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
 \section{Leave-Family-Out Scorer Selection}
 \label{sec:lofo}
@@ -942,58 +1061,60 @@ uniform per-family detection rate.
 \begin{table}[t]
 \centering\small
 \caption{Per-family OOD AUROC and unknown recall at $\tau$ (5\% FPR) for JointCBM
-($\gamma{=}0$) and NeSy-NIDS, mean over five seeds. Detection varies enormously by
-family for both models, and the two disagree on which families they catch.}
+($\gamma{=}0$) and NeSy-NIDS, mean over five seeds. $n$: evaluated flows of the family, the same
+for every seed (sampled without replacement, at most $3{,}000$; each a distinct Zeek record), so
+the five seeds do not add test flows and rare CTU families rest on very few flows. Detection varies
+enormously by family for both models, and the two disagree on which families they catch.}
 \label{tab:openset_perfam}
 \setlength{\tabcolsep}{4pt}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{lcccc}
+\begin{tabular}{lrcccc}
 \toprule
-& \multicolumn{2}{c}{JointCBM} & \multicolumn{2}{c}{NeSy-NIDS} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}
-Held-out family & AUROC & Rec. & AUROC & Rec. \\
+& & \multicolumn{2}{c}{JointCBM} & \multicolumn{2}{c}{NeSy-NIDS} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+Held-out family & $n$ & AUROC & Rec. & AUROC & Rec. \\
 \midrule
-\multicolumn{5}{@{}l}{\textbf{CTU-IoT-23}} \\
-C\&C & 0.832 & 0.33 & 0.864 & 0.29 \\
-Attack & 0.812 & 0.45 & 0.995 & 0.99 \\
-C\&C-HeartBeat-Attack & 0.819 & 0.55 & 0.993 & 0.94 \\
-C\&C-FileDownload & 0.712 & 0.42 & 0.996 & 1.00 \\
-C\&C-Torii & 0.812 & 0.27 & 0.844 & 0.28 \\
-C\&C-Mirai & 0.994 & 1.00 & 0.994 & 1.00 \\
-C\&C-HeartBeat-FileDownload & 0.701 & 0.40 & 0.995 & 1.00 \\
-FileDownload & 0.715 & 0.40 & 0.995 & 1.00 \\
-Okiru-Attack & 0.964 & 0.80 & 0.979 & 0.93 \\
+\multicolumn{6}{@{}l}{\textbf{CTU-IoT-23}} \\
+C\&C & 3{,}000 & 0.832 & 0.33 & 0.864 & 0.29 \\
+Attack & 3{,}000 & 0.812 & 0.45 & 0.995 & 0.99 \\
+C\&C-HeartBeat-Attack & 834 & 0.819 & 0.55 & 0.993 & 0.94 \\
+C\&C-FileDownload & 53 & 0.712 & 0.42 & 0.996 & 1.00 \\
+C\&C-Torii & 30 & 0.812 & 0.27 & 0.844 & 0.28 \\
+C\&C-Mirai & 2 & 0.994 & 1.00 & 0.994 & 1.00 \\
+C\&C-HeartBeat-FileDownload & 11 & 0.701 & 0.40 & 0.995 & 1.00 \\
+FileDownload & 18 & 0.715 & 0.40 & 0.995 & 1.00 \\
+Okiru-Attack & 3 & 0.964 & 0.80 & 0.979 & 0.93 \\
 \midrule
-\multicolumn{5}{@{}l}{\textbf{CIC-IoT-2023}} \\
-DDoS-UDP\_Flood & 0.978 & 0.847 & 0.888 & 0.453 \\
-DDoS-TCP\_Flood & 0.902 & 0.390 & 0.830 & 0.107 \\
-DDoS-ICMP\_Flood & 0.949 & 0.638 & 0.900 & 0.481 \\
-DDoS-RSTFINFlood & 0.974 & 0.816 & 0.993 & 0.958 \\
-DDoS-PSHACK\_Flood & 0.993 & 0.993 & 0.848 & 0.178 \\
-DDoS-SynonymousIP\_Flood & 0.475 & 0.002 & 0.350 & 0.015 \\
-DDoS-ACK\_Fragmentation & 0.962 & 0.821 & 0.516 & 0.055 \\
-DDoS-UDP\_Fragmentation & 0.237 & 0.024 & 0.892 & 0.343 \\
-DDoS-HTTP\_Flood & 0.969 & 0.881 & 0.868 & 0.606 \\
-DDoS-SlowLoris & 0.977 & 0.898 & 0.705 & 0.284 \\
-DDoS-ICMP\_Fragmentation & 0.636 & 0.219 & 0.459 & 0.007 \\
-DoS-SYN\_Flood & 0.543 & 0.088 & 0.452 & 0.124 \\
-DoS-UDP\_Flood & 0.970 & 0.761 & 0.839 & 0.365 \\
-DoS-TCP\_Flood & 0.883 & 0.333 & 0.809 & 0.077 \\
-DoS-HTTP\_Flood & 0.975 & 0.907 & 0.897 & 0.697 \\
-Mirai-greip\_flood & 0.148 & 0.021 & 0.551 & 0.005 \\
-Mirai-udpplain & 0.632 & 0.029 & 0.937 & 0.628 \\
-Recon-HostDiscovery & 0.711 & 0.223 & 0.560 & 0.098 \\
-Recon-OSScan & 0.661 & 0.066 & 0.537 & 0.074 \\
-Recon-PingSweep & 0.635 & 0.091 & 0.454 & 0.014 \\
-MITM-ArpSpoofing & 0.742 & 0.245 & 0.585 & 0.072 \\
-DNS\_Spoofing & 0.721 & 0.291 & 0.547 & 0.060 \\
-DictionaryBruteForce & 0.582 & 0.065 & 0.441 & 0.007 \\
-BrowserHijacking & 0.663 & 0.117 & 0.496 & 0.026 \\
-CommandInjection & 0.647 & 0.156 & 0.487 & 0.008 \\
-XSS & 0.597 & 0.103 & 0.441 & 0.006 \\
-SqlInjection & 0.577 & 0.077 & 0.421 & 0.003 \\
-Backdoor\_Malware & 0.607 & 0.120 & 0.446 & 0.006 \\
-Uploading\_Attack & 0.596 & 0.128 & 0.431 & 0.004 \\
+\multicolumn{6}{@{}l}{\textbf{CIC-IoT-2023}} \\
+DDoS-UDP\_Flood & 3{,}000 & 0.978 & 0.847 & 0.888 & 0.453 \\
+DDoS-TCP\_Flood & 3{,}000 & 0.902 & 0.390 & 0.830 & 0.107 \\
+DDoS-ICMP\_Flood & 3{,}000 & 0.949 & 0.638 & 0.900 & 0.481 \\
+DDoS-RSTFINFlood & 3{,}000 & 0.974 & 0.816 & 0.993 & 0.958 \\
+DDoS-PSHACK\_Flood & 3{,}000 & 0.993 & 0.993 & 0.848 & 0.178 \\
+DDoS-SynonymousIP\_Flood & 3{,}000 & 0.475 & 0.002 & 0.350 & 0.015 \\
+DDoS-ACK\_Fragmentation & 3{,}000 & 0.962 & 0.821 & 0.516 & 0.055 \\
+DDoS-UDP\_Fragmentation & 3{,}000 & 0.237 & 0.024 & 0.892 & 0.343 \\
+DDoS-HTTP\_Flood & 3{,}000 & 0.969 & 0.881 & 0.868 & 0.606 \\
+DDoS-SlowLoris & 3{,}000 & 0.977 & 0.898 & 0.705 & 0.284 \\
+DDoS-ICMP\_Fragmentation & 3{,}000 & 0.636 & 0.219 & 0.459 & 0.007 \\
+DoS-SYN\_Flood & 3{,}000 & 0.543 & 0.088 & 0.452 & 0.124 \\
+DoS-UDP\_Flood & 3{,}000 & 0.970 & 0.761 & 0.839 & 0.365 \\
+DoS-TCP\_Flood & 3{,}000 & 0.883 & 0.333 & 0.809 & 0.077 \\
+DoS-HTTP\_Flood & 3{,}000 & 0.975 & 0.907 & 0.897 & 0.697 \\
+Mirai-greip\_flood & 3{,}000 & 0.148 & 0.021 & 0.551 & 0.005 \\
+Mirai-udpplain & 3{,}000 & 0.632 & 0.029 & 0.937 & 0.628 \\
+Recon-HostDiscovery & 3{,}000 & 0.711 & 0.223 & 0.560 & 0.098 \\
+Recon-OSScan & 3{,}000 & 0.661 & 0.066 & 0.537 & 0.074 \\
+Recon-PingSweep & 2{,}262 & 0.635 & 0.091 & 0.454 & 0.014 \\
+MITM-ArpSpoofing & 3{,}000 & 0.742 & 0.245 & 0.585 & 0.072 \\
+DNS\_Spoofing & 3{,}000 & 0.721 & 0.291 & 0.547 & 0.060 \\
+DictionaryBruteForce & 3{,}000 & 0.582 & 0.065 & 0.441 & 0.007 \\
+BrowserHijacking & 3{,}000 & 0.663 & 0.117 & 0.496 & 0.026 \\
+CommandInjection & 3{,}000 & 0.647 & 0.156 & 0.487 & 0.008 \\
+XSS & 3{,}000 & 0.597 & 0.103 & 0.441 & 0.006 \\
+SqlInjection & 3{,}000 & 0.577 & 0.077 & 0.421 & 0.003 \\
+Backdoor\_Malware & 3{,}000 & 0.607 & 0.120 & 0.446 & 0.006 \\
+Uploading\_Attack & 1{,}252 & 0.596 & 0.128 & 0.431 & 0.004 \\
 \bottomrule
 \end{tabular}}
 \end{table}

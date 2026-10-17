@@ -1,0 +1,110 @@
+{
+  "views": {
+    "cleaned": "CREATE VIEW cleaned AS SELECT src_ip, ts, duration, missed_bytes, orig_bytes, orig_ip_bytes, orig_pkts, resp_bytes, resp_ip_bytes, resp_pkts, conn_state, history, local_orig, local_resp, service, tunnel_parents, CASE  WHEN ((lower(\"label\") = 'benign')) THEN ('Benign') ELSE \"label\" END AS \"label\", CASE  WHEN ((lower(\"label\") = 'benign')) THEN ('Benign') ELSE detailed_label END AS detailed_label, byte_ratio, orig_pkt_rate, orig_byte_rate, direction, TRY_CAST(Header_Length AS DOUBLE) AS Header_Length, TRY_CAST(Protocol_Type AS DOUBLE) AS Protocol_Type, TRY_CAST(Rate AS DOUBLE) AS Rate, TRY_CAST(fin_flag_number AS DOUBLE) AS fin_flag_number, TRY_CAST(syn_flag_number AS DOUBLE) AS syn_flag_number, TRY_CAST(rst_flag_number AS DOUBLE) AS rst_flag_number, TRY_CAST(psh_flag_number AS DOUBLE) AS psh_flag_number, TRY_CAST(ack_flag_number AS DOUBLE) AS ack_flag_number, TRY_CAST(ece_flag_number AS DOUBLE) AS ece_flag_number, TRY_CAST(cwr_flag_number AS DOUBLE) AS cwr_flag_number, TRY_CAST(ack_count AS DOUBLE) AS ack_count, TRY_CAST(syn_count AS DOUBLE) AS syn_count, TRY_CAST(fin_count AS DOUBLE) AS fin_count, TRY_CAST(rst_count AS DOUBLE) AS rst_count, TRY_CAST(HTTP AS DOUBLE) AS HTTP, TRY_CAST(HTTPS AS DOUBLE) AS HTTPS, TRY_CAST(DNS AS DOUBLE) AS DNS, TRY_CAST(Telnet AS DOUBLE) AS Telnet, TRY_CAST(SMTP AS DOUBLE) AS SMTP, TRY_CAST(SSH AS DOUBLE) AS SSH, TRY_CAST(IRC AS DOUBLE) AS IRC, TRY_CAST(TCP AS DOUBLE) AS TCP, TRY_CAST(UDP AS DOUBLE) AS UDP, TRY_CAST(DHCP AS DOUBLE) AS DHCP, TRY_CAST(ARP AS DOUBLE) AS ARP, TRY_CAST(ICMP AS DOUBLE) AS ICMP, TRY_CAST(IGMP AS DOUBLE) AS IGMP, TRY_CAST(IPv AS DOUBLE) AS IPv, TRY_CAST(LLC AS DOUBLE) AS LLC, TRY_CAST(Tot_sum AS DOUBLE) AS Tot_sum, TRY_CAST(Tot_size AS DOUBLE) AS Tot_size, TRY_CAST(Min AS DOUBLE) AS Min, TRY_CAST(Max AS DOUBLE) AS Max, TRY_CAST(AVG AS DOUBLE) AS AVG, TRY_CAST(Std AS DOUBLE) AS Std, TRY_CAST(IAT AS DOUBLE) AS IAT, TRY_CAST(Number AS DOUBLE) AS Number, TRY_CAST(Variance AS DOUBLE) AS Variance, TRY_CAST(Srate AS DOUBLE) AS Srate, TRY_CAST(Drate AS DOUBLE) AS Drate, TRY_CAST(Magnitude AS DOUBLE) AS Magnitude, TRY_CAST(Radius AS DOUBLE) AS Radius, TRY_CAST(Weight AS DOUBLE) AS Weight, TRY_CAST(Covariance AS DOUBLE) AS Covariance, TRY_CAST(Time_To_Live AS DOUBLE) AS Time_To_Live FROM read_csv_auto('data/opt/Malware-Project/BigDataset/IoTScenarios/CTU-*/*_merged_outer.csv', (\"header\" = CAST('t' AS BOOLEAN)), (union_by_name = CAST('t' AS BOOLEAN))) WHERE ((lower(\"label\") = 'benign') OR ((detailed_label NOT IN ('PartOfAHorizontalPortScan', 'PartOfAHorizontalPortScan-Attack', 'C&C-PartOfAHorizontalPortScan', 'P')) AND (detailed_label IS NOT NULL)));",
+    "preprocessed": "CREATE VIEW preprocessed AS SELECT src_ip, ts, COALESCE(duration, -1) AS duration, COALESCE(orig_bytes, -1) AS orig_bytes, COALESCE(resp_bytes, -1) AS resp_bytes, COALESCE(byte_ratio, -1) AS byte_ratio, COALESCE(orig_pkt_rate, -1) AS orig_pkt_rate, COALESCE(orig_byte_rate, -1) AS orig_byte_rate, COALESCE(direction, -1) AS direction, COALESCE(missed_bytes, 0) AS missed_bytes, COALESCE(orig_ip_bytes, 0) AS orig_ip_bytes, COALESCE(orig_pkts, 0) AS orig_pkts, COALESCE(resp_ip_bytes, 0) AS resp_ip_bytes, COALESCE(resp_pkts, 0) AS resp_pkts, COALESCE(Header_Length, 0) AS Header_Length, COALESCE(Protocol_Type, 0) AS Protocol_Type, COALESCE(Rate, 0) AS Rate, COALESCE(fin_flag_number, 0) AS fin_flag_number, COALESCE(syn_flag_number, 0) AS syn_flag_number, COALESCE(rst_flag_number, 0) AS rst_flag_number, COALESCE(psh_flag_number, 0) AS psh_flag_number, COALESCE(ack_flag_number, 0) AS ack_flag_number, COALESCE(ece_flag_number, 0) AS ece_flag_number, COALESCE(cwr_flag_number, 0) AS cwr_flag_number, COALESCE(ack_count, 0) AS ack_count, COALESCE(syn_count, 0) AS syn_count, COALESCE(fin_count, 0) AS fin_count, COALESCE(rst_count, 0) AS rst_count, COALESCE(HTTP, 0) AS HTTP, COALESCE(HTTPS, 0) AS HTTPS, COALESCE(DNS, 0) AS DNS, COALESCE(Telnet, 0) AS Telnet, COALESCE(SMTP, 0) AS SMTP, COALESCE(SSH, 0) AS SSH, COALESCE(IRC, 0) AS IRC, COALESCE(TCP, 0) AS TCP, COALESCE(UDP, 0) AS UDP, COALESCE(DHCP, 0) AS DHCP, COALESCE(ARP, 0) AS ARP, COALESCE(ICMP, 0) AS ICMP, COALESCE(IGMP, 0) AS IGMP, COALESCE(IPv, 0) AS IPv, COALESCE(LLC, 0) AS LLC, COALESCE(Tot_sum, 0) AS Tot_sum, COALESCE(Min, 0) AS Min, COALESCE(Max, 0) AS Max, COALESCE(AVG, 0) AS AVG, COALESCE(Std, 0) AS Std, COALESCE(IAT, 0) AS IAT, COALESCE(Number, 0) AS Number, COALESCE(Variance, 0) AS Variance, COALESCE(Srate, 0) AS Srate, COALESCE(Drate, 0) AS Drate, COALESCE(Magnitude, 0) AS Magnitude, COALESCE(Radius, 0) AS Radius, COALESCE(Weight, 0) AS Weight, COALESCE(Covariance, 0) AS Covariance, COALESCE(Time_To_Live, 0) AS Time_To_Live, conn_state, history, service, CASE  WHEN ((tunnel_parents IS NULL)) THEN (0) WHEN ((tunnel_parents = '(empty)')) THEN (0) ELSE 1 END AS is_tunnel, detailed_label FROM cleaned;"
+  },
+  "per_label": {
+    "Okiru": {
+      "retained": 60717929,
+      "no_packet_match": 267008
+    },
+    "Benign": {
+      "retained": 30830238,
+      "no_packet_match": 158334
+    },
+    "DDoS": {
+      "retained": 19265778,
+      "no_packet_match": 1471222
+    },
+    "C&C-HeartBeat": {
+      "retained": 33537,
+      "no_packet_match": 6
+    },
+    "C&C": {
+      "retained": 21995,
+      "no_packet_match": 103
+    },
+    "Attack": {
+      "retained": 9398,
+      "no_packet_match": 1
+    },
+    "C&C-HeartBeat-Attack": {
+      "retained": 834,
+      "no_packet_match": 18
+    },
+    "C&C-FileDownload": {
+      "retained": 53,
+      "no_packet_match": 4
+    },
+    "C&C-Torii": {
+      "retained": 30,
+      "no_packet_match": 0
+    },
+    "FileDownload": {
+      "retained": 18,
+      "no_packet_match": 0
+    },
+    "C&C-HeartBeat-FileDownload": {
+      "retained": 11,
+      "no_packet_match": 0
+    },
+    "Okiru-Attack": {
+      "retained": 3,
+      "no_packet_match": 0
+    },
+    "C&C-Mirai": {
+      "retained": 2,
+      "no_packet_match": 0
+    }
+  },
+  "protocol_type_counts": {
+    "0.0": 1896696,
+    "17.0": 510277,
+    "6.0": 108472853
+  },
+  "duplicate_zeek_groups": {
+    "groups": 2,
+    "extra_rows": 2
+  },
+  "ctuk_splits": {
+    "train": {
+      "rows": 64400,
+      "no_packet_match": 1433,
+      "by_label": {
+        "DDoS": 1269,
+        "Benign": 95,
+        "Okiru": 67,
+        "C&C-HeartBeat": 2
+      }
+    },
+    "val": {
+      "rows": 13800,
+      "no_packet_match": 292,
+      "by_label": {
+        "DDoS": 268,
+        "Benign": 14,
+        "Okiru": 10
+      }
+    },
+    "test_known": {
+      "rows": 13800,
+      "no_packet_match": 276,
+      "by_label": {
+        "DDoS": 243,
+        "Benign": 18,
+        "Okiru": 13,
+        "C&C-HeartBeat": 2
+      }
+    },
+    "test_unknown": {
+      "rows": 32344,
+      "no_packet_match": 126,
+      "by_label": {
+        "C&C": 103,
+        "C&C-HeartBeat-Attack": 18,
+        "C&C-FileDownload": 4,
+        "Attack": 1
+      }
+    }
+  }
+}
