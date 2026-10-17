@@ -236,7 +236,7 @@ the collapse follows from the label's temporal structure rather than from featur
 (Section~\ref{sec:features}).
 
 Two effects separate. The \emph{absolute} deterioration is large but comes from one class:
-four-class weighted F1 falls from $0.933$ (random split) to $0.647$ for every model but SequentialCBM
+four-class weighted F1 falls from $0.933$ (random split) to $0.646$--$0.648$ for every model but SequentialCBM
 (F1$_4$, main Table~\ref{M-tab:temporal}) because DDoS is lost; C\&C-HeartBeat also falls, from
 $0.998$ to about $0.79$. This is a temporal-generalisation cost, not an interpretability one. The
 \emph{between-model} gap is negligible: on the three coherent families every JointCBM variant,
@@ -364,8 +364,8 @@ submitted 37-feature list on the \emph{same} rows (\texttt{ctuko}), so
 \texttt{ctuko}\,vs\,\texttt{ctuk} isolates the selection source from the sample. The
 NeSy-NIDS rule features are expert-defined rather than RF-selected, so the two rule counters the
 known-only forest drops are restored and the rule indices remapped; only the neural branch and
-the CBM/MLP/DT/RF inputs change. The script \texttt{06\_make\_kfs\_splits.py} and the \texttt{run\_kfs\_control.py}
-drivers in \texttt{cbm/} and \texttt{nesy/} reproduce the table.
+the CBM/MLP/DT/RF inputs change. The script \texttt{06\_make\_kfs\_splits.py} and the drivers \texttt{cbm/run\_kfs\_control.py}
+and \texttt{nesy/run\_kfs\_control.sh} reproduce the table.
 
 Table~\ref{tab:kfs} reports the outcome over five seeds. The accuracy and scorer findings
 hold. The JointCBM variants, HybridCBM and NeSy-NIDS still match the MLP on known-class F1
@@ -746,7 +746,7 @@ has a larger effect, but only on CTU-IoT-23 (down the $\gamma{=}0$ column, $+0.0
 CIC-IoT-2023 ($-0.033$); this is why the 1-D $\lambda$ sweep looked larger than the $\gamma$
 sweep. (iii) Known-class F1 is nearly constant across the grid ($0.816$--$0.821$ on CIC; $0.932$--$0.933$
 on CTU) with a single exception, CTU $\lambda{=}1.0,\gamma{=}0.5$, seed~0, where F1 fell to
-$0.748$ (the other two seeds of that cell are $0.932$/$0.933$); this run is \emph{included}
+$0.748$ (the other two seeds of that cell are $0.933$/$0.933$); this run is \emph{included}
 in the reported cell mean. It shows that heavy dual regularisation can destabilise
 training; in the other 53 runs of the grid known-class F1 stays within the ranges above. The
 $\lambda$--$\gamma$ interaction (a sign flip in $\gamma$'s effect across $\lambda$) is one more
