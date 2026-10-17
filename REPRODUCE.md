@@ -17,6 +17,7 @@ $PY 06_make_kfs_splits.py --split alt            # data/ctualt, data/ctualt_o
 $PY 06_make_kfs_splits.py --split temporal       # data/ctut, data/ctut_o
 $PY 06_make_kfs_splits.py --split device --holdout-host 192.168.1.198 --tag _h198     # data/ctud_h198, data/ctud_o_h198
 $PY 06_make_kfs_splits.py --split device --holdout-host 192.168.100.111 --tag _h111   # data/ctud_h111, data/ctud_o_h111
+$PY 06_make_kfs_splits.py --split device --holdout-host 192.168.100.108 --tag _h108   # data/ctud_h108, data/ctud_o_h108
 $PY 08_make_ctuk_n.py                            # data/ctuk_n: ctuk rows, MLP/CBM input = NeSy-NIDS's 33 columns
 ```
 
@@ -61,10 +62,13 @@ $PY -m nesy.run_shared_eval --datasets ctut
 ## Device-disjoint splits and controls
 
 ```bash
-for ds in ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111; do
+for ds in ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111 ctud_h108 ctud_o_h108 tond_a30 tond_a31; do
   $PY -m cbm.run_multiseed --dataset $ds --seeds 5 --device cuda; done
-bash nesy/run_kfs_control.sh ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111
-$PY -m nesy.run_shared_eval --datasets ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111
+bash nesy/run_kfs_control.sh ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111 ctud_h108 ctud_o_h108
+$PY -m nesy.run_shared_eval --datasets ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111 ctud_h108 ctud_o_h108
+$PY -m cbm.run_device_openset --device cuda      # known and unknown flows from the held-out device
+$PY -m cbm.run_device_openset --reference        # seen-device baselines (CTU C&C, TON_IoT DoS)
+$PY -m cbm.run_split_overlap                     # same-class train/test duplicate shares
 $PY -m cbm.run_bottleneck_control --datasets ctuk cicr ton --device cuda   # 8-unit bottleneck, no concept labels
 $PY -m cbm.run_multiseed --dataset ctuk_n --seeds 5 --device cuda \
     --variants MLPBaseline JointCBM_g0 SequentialCBM HybridCBM              # restored-features control
@@ -78,6 +82,8 @@ to their `Network_dataset_*.csv` glob.
 
 ```bash
 $PY 07_make_splits_ton.py                        # data/ton, ~35 s
+$PY 07_make_splits_ton.py --holdout-attacker 192.168.1.30 --holdout-normal 192.168.1.195 --tag _a30   # data/tond_a30
+$PY 07_make_splits_ton.py --holdout-attacker 192.168.1.31 --holdout-normal 192.168.1.190 --tag _a31   # data/tond_a31
 $PY -m cbm.run_multiseed --dataset ton --seeds 5 --device cuda
 ```
 
@@ -133,6 +139,7 @@ main results table exactly.
 ## Manuscript tables and figures
 
 ```bash
+$PY -m cbm.run_bootstrap_ci --device cuda                     # 95% CIs of the AUROC comparisons
 $PY checks/paper_values.py                                    # every table value, mean and seed std
 $PY -m nesy.aggregate_alpha_sweep --datasets ctuk:ctu cicr:cic --out results/nesy/alpha_sweep_main.json
 $PY -m cbm.make_alpha_figure --input results/nesy/alpha_sweep_main.json   # paper/figures/alpha_sweep

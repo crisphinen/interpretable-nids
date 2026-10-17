@@ -302,6 +302,131 @@ $3{,}516$ unknown flows come from the held-out host itself). On host .198 Sequen
 the MLP lowest, but with every model losing two of the four known classes these values do not
 measure open-set detection on a new device.
 
+\subsection{A Third CTU Host and TON\_IoT}
+Host 192.168.100.108 has $3{,}450$ flows in each CTU attack class but only $3{,}051$ Benign
+flows, all of which form its Benign test set; it has no unknown-family flows. On TON\_IoT the attack
+flows come from attacker machines; \texttt{07\_make\_splits\_ton.py --holdout-attacker} takes
+$7{,}500$ test flows per attack class from attacker machine 192.168.1.30 or 192.168.1.31 and
+$7{,}500$ normal flows from host 192.168.1.195 or 192.168.1.190, and draws training and validation
+flows from all other hosts (\texttt{tond\_a30}, \texttt{tond\_a31}; the fixed TON\_IoT feature list,
+scaler and vocabularies refit on the training rows). NeSy-NIDS has no TON\_IoT rule bank.
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{Host .108 (CTU) and the two TON\_IoT device splits: known-class weighted F1 (five-seed
+mean) and OOD AUROC against the main split's unknown pool (mean$\pm$std, five seeds). 31f: the
+main 31-feature CTU list. TON\_IoT main split: F1 $0.704$--$0.898$, AUROC $0.552$--$0.654$.}
+\label{tab:device2}
+\setlength{\tabcolsep}{2.5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+ & \multicolumn{3}{c}{CTU host .108} & \multicolumn{2}{c}{TON\_IoT machine .30} & \multicolumn{2}{c}{TON\_IoT machine .31} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Model & F1 & AUROC & AUROC 31f & F1 & AUROC & F1 & AUROC \\
+\midrule
+MLP baseline               & $0.544$ & $0.548{\pm}.003$ & $0.542{\pm}.008$ & $0.761$ & $0.552{\pm}.024$ & $0.886$ & $0.493{\pm}.033$ \\
+JointCBM $\gamma{=}0$      & $0.541$ & $0.600{\pm}.030$ & $0.590{\pm}.122$ & $0.754$ & $0.635{\pm}.007$ & $0.885$ & $0.585{\pm}.012$ \\
+JointCBM $\gamma{=}0.1$    & $0.539$ & $0.577{\pm}.056$ & $0.554{\pm}.071$ & $0.766$ & $0.659{\pm}.027$ & $0.853$ & $0.597{\pm}.026$ \\
+JointCBM $\gamma{=}0.5$    & $0.547$ & $0.595{\pm}.068$ & $0.625{\pm}.037$ & $0.746$ & $0.664{\pm}.023$ & $0.858$ & $0.613{\pm}.033$ \\
+JointCBM $\gamma{=}1.0$    & $0.546$ & $0.632{\pm}.059$ & $0.635{\pm}.050$ & $0.753$ & $0.660{\pm}.017$ & $0.888$ & $0.617{\pm}.011$ \\
+SequentialCBM              & $0.343$ & $0.753{\pm}.049$ & $0.729{\pm}.031$ & $0.677$ & $0.596{\pm}.009$ & $0.731$ & $0.601{\pm}.016$ \\
+HybridCBM                  & $0.544$ & $0.620{\pm}.049$ & $0.689{\pm}.077$ & $0.767$ & $0.610{\pm}.016$ & $0.892$ & $0.598{\pm}.020$ \\
+NeSy-NIDS                  & $0.552$ & $0.907{\pm}.011$ & $0.899{\pm}.010$ & -- & -- & -- & -- \\
+NeSy-NIDS ($\alpha$)       & $0.541$ & $0.906{\pm}.014$ & $0.898{\pm}.010$ & -- & -- & -- & -- \\
+Rule-only                  & $0.475$ & $0.887{\pm}.011$ & $0.887{\pm}.011$ & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+On TON\_IoT the largest per-class losses are on the held-out normal host and on password
+(machine .30, MLP: normal $0.68$ vs.\ $0.91$, password $0.59$ vs.\ $0.79$ on the main split);
+machine .31 matches the main split. The share of known test flows with an exact duplicate (features
+rounded to four decimals) among the training flows of their class is $0.84$ on the CTU main split
+and $0.88$ on TON\_IoT, $0.42$, $0.00$ and $0.41$ on CTU hosts .198, .111 and .108, and $0.74$ and
+$0.77$ on TON\_IoT machines .30 and .31.
+
+\subsection{Open-Set Test with Unknown Flows from the Held-Out Device}
+Table~\ref{tab:device} scores against the main split's unknown pool, most of which comes from
+devices seen in training. \texttt{cbm/run\_device\_openset.py} instead scores each held-out device's
+known test flows against that device's own unknown-family flows: host .198 ($3{,}516$: C\&C
+$3{,}499$, C\&C-FileDownload $14$, Okiru-Attack $3$), TON\_IoT machine .30 with host .195 (DoS, $2$
+MITM) and machine .31 with host .190 (DoS, $510$ MITM); TON\_IoT unknowns are sampled as in the main
+split ($2{,}000$ per family). As a seen-device reference, the main-split models are scored the same
+way against the main split's own C\&C (CTU) or DoS (TON\_IoT) flows. Host .111 has 4 unknown-family
+flows and host .108 none, so neither is tested.
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{OOD AUROC / TPR@5\%FPR (five-seed mean) with known and unknown test flows from the same
+device. ``Seen'': main-split models against the same family's flows from devices seen in training.}
+\label{tab:devopen}
+\setlength{\tabcolsep}{2.5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{3}{c}{CTU, C\&C} & \multicolumn{3}{c}{TON\_IoT, DoS} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Model & Seen & Host .198 & Host .198, 31f & Seen & Machine .30 & Machine .31 \\
+\midrule
+MLP baseline               & $0.853$ / $0.337$ & $0.396$ / $0.007$ & $0.396$ / $0.007$ & $0.444$ / $0.009$ & $0.412$ / $0.004$ & $0.824$ / $0.025$ \\
+JointCBM $\gamma{=}0$      & $0.829$ / $0.339$ & $0.609$ / $0.052$ & $0.713$ / $0.162$ & $0.754$ / $0.016$ & $0.691$ / $0.007$ & $0.743$ / $0.035$ \\
+JointCBM $\gamma{=}0.1$    & $0.832$ / $0.331$ & $0.663$ / $0.071$ & $0.688$ / $0.066$ & $0.735$ / $0.011$ & $0.705$ / $0.003$ & $0.752$ / $0.039$ \\
+JointCBM $\gamma{=}0.5$    & $0.843$ / $0.439$ & $0.637$ / $0.020$ & $0.712$ / $0.100$ & $0.725$ / $0.014$ & $0.750$ / $0.002$ & $0.787$ / $0.049$ \\
+JointCBM $\gamma{=}1.0$    & $0.854$ / $0.507$ & $0.690$ / $0.073$ & $0.665$ / $0.030$ & $0.735$ / $0.011$ & $0.703$ / $0.003$ & $0.764$ / $0.012$ \\
+SequentialCBM              & $0.878$ / $0.497$ & $0.635$ / $0.039$ & $0.638$ / $0.041$ & $0.719$ / $0.022$ & $0.693$ / $0.000$ & $0.683$ / $0.007$ \\
+HybridCBM                  & $0.876$ / $0.554$ & $0.636$ / $0.033$ & $0.637$ / $0.032$ & $0.722$ / $0.021$ & $0.690$ / $0.001$ & $0.643$ / $0.016$ \\
+NeSy-NIDS                  & $0.865$ / $0.260$ & $0.651$ / $0.060$ & $0.651$ / $0.060$ & -- & -- & -- \\
+NeSy-NIDS ($\alpha$)       & $0.872$ / $0.247$ & $0.651$ / $0.066$ & $0.650$ / $0.057$ & -- & -- & -- \\
+Rule-only                  & $0.820$ / $0.183$ & $0.639$ / $0.031$ & $0.639$ / $0.031$ & -- & -- & -- \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+On CTU the held-out device lowers C\&C AUROC from $0.82$--$0.88$ to $0.40$--$0.71$ and TPR from
+$0.18$--$0.55$ to at most $0.162$. On TON\_IoT machine .30 the change is small (AUROC $0.41$--$0.75$
+vs.\ $0.44$--$0.75$), and TPR is low for every model on seen devices too ($\le0.022$). The ordering
+of the models is not stable across devices: the concept models are above the MLP on host .198 and
+machine .30, and below it on machine .31.
+
+\section{Confidence Intervals}
+\label{sec:ci}
+\texttt{cbm/run\_bootstrap\_ci.py} recomputes the per-flow OOD scores of every model from its saved
+checkpoints (checked against the stored AUROC) and draws 2{,}000 hierarchical bootstrap replicates:
+the five seeds are resampled with replacement for each model independently, and the $5{,}000$ known
+and $5{,}000$ unknown evaluation flows are resampled with replacement and shared by the two models
+of a comparison, since every model is scored on the same flows. The interval is the 2.5--97.5
+percentile of the difference of the two seed-mean AUROCs.
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{Differences in mean OOD AUROC with 95\% bootstrap confidence intervals.}
+\label{tab:ci}
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Data & Comparison & Difference & 95\% CI \\
+\midrule
+CTU & NeSy-NIDS $-$ MLP & $+0.030$ & $[+0.016, +0.043]$ \\
+CTU & NeSy-NIDS ($\alpha$) $-$ MLP & $+0.035$ & $[+0.020, +0.047]$ \\
+CTU & SequentialCBM $-$ MLP & $-0.002$ & $[-0.027, +0.018]$ \\
+CTU & JointCBM $\gamma{=}1.0$ $-$ JointCBM $\gamma{=}0$ & $+0.011$ & $[-0.052, +0.065]$ \\
+CTU & JointCBM $\gamma{=}0$ $-$ 8-unit bottleneck & $+0.263$ & $[+0.102, +0.380]$ \\
+CIC & MLP $-$ JointCBM $\gamma{=}0$ & $+0.090$ & $[+0.073, +0.108]$ \\
+CIC & JointCBM $\gamma{=}1.0$ $-$ JointCBM $\gamma{=}0$ & $-0.018$ & $[-0.037, +0.002]$ \\
+CIC & 8-unit bottleneck $-$ JointCBM $\gamma{=}0$ & $+0.003$ & $[-0.024, +0.027]$ \\
+CIC & NeSy-NIDS, energy score $-$ NeSy-NIDS, Mahalanobis & $+0.073$ & $[+0.035, +0.112]$ \\
+TON & JointCBM $\gamma{=}0$ $-$ MLP & $+0.098$ & $[+0.051, +0.145]$ \\
+TON & JointCBM $\gamma{=}0$ $-$ 8-unit bottleneck & $+0.106$ & $[+0.004, +0.214]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Every difference the main text describes as a gap excludes zero, and every comparison it describes
+as no difference or no consistent effect includes zero. The TON\_IoT difference between JointCBM and
+the 8-unit bottleneck barely excludes zero, because the bottleneck varies widely across seeds.
+
 \section{Rule Selectivity and Threshold Drift}
 \label{sec:selectivity}
 

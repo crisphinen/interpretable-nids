@@ -1,0 +1,145 @@
+[
+  {
+    "comparison": "CTU: NeSy-NIDS - MLP",
+    "dataset": "ctuk",
+    "a": "NeSy",
+    "b": "MLPBaseline",
+    "diff": 0.02972776399999988,
+    "ci95": [
+      0.015603172199999998,
+      0.04296726289999988
+    ],
+    "excludes_zero": true,
+    "B": 2000
+  },
+  {
+    "comparison": "CTU: NeSy-NIDS (alpha) - MLP",
+    "dataset": "ctuk",
+    "a": "NeSy_a0.1",
+    "b": "MLPBaseline",
+    "diff": 0.03465629999999997,
+    "ci95": [
+      0.02011498760000014,
+      0.046717529299999824
+    ],
+    "excludes_zero": true,
+    "B": 2000
+  },
+  {
+    "comparison": "CTU: SequentialCBM - MLP",
+    "dataset": "ctuk",
+    "a": "SequentialCBM",
+    "b": "MLPBaseline",
+    "diff": -0.0024564559999999958,
+    "ci95": [
+      -0.027060059499999876,
+      0.018303658500000212
+    ],
+    "excludes_zero": false,
+    "B": 2000
+  },
+  {
+    "comparison": "CTU: JointCBM gamma=1.0 - gamma=0",
+    "dataset": "ctuk",
+    "a": "JointCBM_g1.0",
+    "b": "JointCBM_g0",
+    "diff": 0.010642108000000094,
+    "ci95": [
+      -0.05208797170000014,
+      0.06500882720000012
+    ],
+    "excludes_zero": false,
+    "B": 2000
+  },
+  {
+    "comparison": "CTU: JointCBM gamma=0 - 8-unit bottleneck",
+    "dataset": "ctuk",
+    "a": "JointCBM_g0",
+    "b": "Bottleneck8",
+    "diff": 0.26253654400000004,
+    "ci95": [
+      0.10166656099999995,
+      0.37978266530000004
+    ],
+    "excludes_zero": true,
+    "B": 2000
+  },
+  {
+    "comparison": "CIC: MLP - JointCBM gamma=0",
+    "dataset": "cicr",
+    "a": "MLPBaseline",
+    "b": "JointCBM_g0",
+    "diff": 0.0899718599999999,
+    "ci95": [
+      0.07281256040000003,
+      0.10815181440000013
+    ],
+    "excludes_zero": true,
+    "B": 2000
+  },
+  {
+    "comparison": "CIC: JointCBM gamma=1.0 - gamma=0",
+    "dataset": "cicr",
+    "a": "JointCBM_g1.0",
+    "b": "JointCBM_g0",
+    "diff": -0.017685416000000065,
+    "ci95": [
+      -0.036937387399999924,
+      0.0016444208000000573
+    ],
+    "excludes_zero": false,
+    "B": 2000
+  },
+  {
+    "comparison": "CIC: 8-unit bottleneck - JointCBM gamma=0",
+    "dataset": "cicr",
+    "a": "Bottleneck8",
+    "b": "JointCBM_g0",
+    "diff": 0.002670203999999954,
+    "ci95": [
+      -0.0236433866000001,
+      0.02653834330000002
+    ],
+    "excludes_zero": false,
+    "B": 2000
+  },
+  {
+    "comparison": "CIC: NeSy-NIDS energy - Mahalanobis",
+    "dataset": "cicr",
+    "a": "NeSy_energy",
+    "b": "NeSy",
+    "diff": 0.0732247399999999,
+    "ci95": [
+      0.03467855359999993,
+      0.1124399659999999
+    ],
+    "excludes_zero": true,
+    "B": 2000
+  },
+  {
+    "comparison": "TON: JointCBM gamma=0 - MLP",
+    "dataset": "ton",
+    "a": "JointCBM_g0",
+    "b": "MLPBaseline",
+    "diff": 0.09839321199999995,
+    "ci95": [
+      0.050596694300000196,
+      0.14461707799999987
+    ],
+    "excludes_zero": true,
+    "B": 2000
+  },
+  {
+    "comparison": "TON: JointCBM gamma=0 - 8-unit bottleneck",
+    "dataset": "ton",
+    "a": "JointCBM_g0",
+    "b": "Bottleneck8",
+    "diff": 0.10560234400000013,
+    "ci95": [
+      0.0037187490000000776,
+      0.21409300679999987
+    ],
+    "excludes_zero": true,
+    "B": 2000
+  }
+]
