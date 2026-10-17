@@ -28,7 +28,8 @@ from sklearn.metrics import f1_score, roc_auc_score
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from nesy.model import NeSyNIDS, RuleOnlyNIDS, CTU_RULES, CIC_RULES
+from nesy.model import NeSyNIDS, RuleOnlyNIDS, CTU_RULES, CIC_RULES, rules_for
+from dsets import DATASETS, is_ctu, is_cic, data_dir as dataset_dir, nesy_feature_cols
 
 RESULTS_DIR = PROJECT_ROOT / "results" / "nesy"
 K_EVAL = 10.0   # hard k for evaluation and rule analysis
@@ -38,10 +39,10 @@ K_EVAL = 10.0   # hard k for evaluation and rule analysis
 
 def load_known_split(dataset: str, device: torch.device, split: str = "val"):
     """Known-class samples from one split parquet (train / val / test_known)."""
-    if dataset == "ctu":
-        data_dir = PROJECT_ROOT / "data"
+    if is_ctu(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
-        feature_cols = vocab["feature_cols"]
+        feature_cols = nesy_feature_cols(dataset)
         known_ids = vocab["known_ids"]
         df = pd.read_parquet(data_dir / f"{split}.parquet")
         mask = df["label_id"].isin(known_ids)
@@ -50,8 +51,8 @@ def load_known_split(dataset: str, device: torch.device, split: str = "val"):
         id_map = {orig: i for i, orig in enumerate(sorted(known_ids))}
         y = np.array([id_map[lid] for lid in df["label_id"].values], dtype=np.int64)
         id_to_label = {i: vocab["id_to_label"][str(orig)] for i, orig in enumerate(sorted(known_ids))}
-    elif dataset == "cic":
-        data_dir = PROJECT_ROOT / "data" / "cic"
+    elif is_cic(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
         feature_cols = vocab["feature_cols"]
         l2i = vocab["label_to_id"]
@@ -80,10 +81,10 @@ def load_known_val(dataset: str, device: torch.device):
 
 # load unknown (ood) test samples. subsample to n_sample.
 def load_unknown_test(dataset: str, device: torch.device, n_sample: int = 10000):
-    if dataset == "ctu":
-        data_dir = PROJECT_ROOT / "data"
+    if is_ctu(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
-        feature_cols = vocab["feature_cols"]
+        feature_cols = nesy_feature_cols(dataset)
         known_ids = set(vocab["known_ids"])
         df = pd.read_parquet(data_dir / "test_unknown.parquet")
         mask = ~df["label_id"].isin(known_ids)
@@ -92,8 +93,8 @@ def load_unknown_test(dataset: str, device: torch.device, n_sample: int = 10000)
             df = df.sample(n=n_sample, random_state=42).reset_index(drop=True)
         X = df[feature_cols].values.astype(np.float32)
 
-    elif dataset == "cic":
-        data_dir = PROJECT_ROOT / "data" / "cic"
+    elif is_cic(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
         feature_cols = vocab["feature_cols"]
         l2i = vocab["label_to_id"]
@@ -124,7 +125,7 @@ def load_model(ckpt_path: Path, device: torch.device):
     n_features = ckpt["n_features"]
     n_classes = ckpt["n_classes"]
     model_type = ckpt.get("model_type", "nesy")
-    rule_templates = CTU_RULES if dataset == "ctu" else CIC_RULES
+    rule_templates = rules_for(dataset)
 
     if model_type == "nesy":
         model = NeSyNIDS(n_features, n_classes, rule_templates)
@@ -144,6 +145,14 @@ def compute_known_f1(model, X_known, y_known):
     logits, _ = model(X_known, k=K_EVAL)
     preds = logits.argmax(dim=1).cpu().numpy()
     return f1_score(y_known.cpu().numpy(), preds, average="weighted", zero_division=0)
+
+
+@torch.no_grad()
+def per_class_f1(model, X_known, y_known):
+    """Test F1 per known class, indexed by the remapped class id (sorted original label id)."""
+    preds = model(X_known, k=K_EVAL)[0].argmax(dim=1).cpu().numpy()
+    y = y_known.cpu().numpy()
+    return [float(v) for v in f1_score(y, preds, labels=sorted(set(y)), average=None, zero_division=0)]
 
 
 # per-class Mahalanobis scorer (Lee et al. 2018).
@@ -602,7 +611,7 @@ def multi_seed_eval(dataset: str, n_seeds: int, device: torch.device):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", choices=["ctu", "cic"], required=True)
+    parser.add_argument("--dataset", choices=DATASETS, required=True)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--multi_seed", type=int, default=0,
@@ -610,6 +619,7 @@ def main():
     parser.add_argument("--model", choices=["nesy", "rule_only"], default="nesy")
     parser.add_argument("--lambda_alpha", type=float, default=0.0,
                         help="Load alpha-regularised checkpoint (e.g. 0.1 loads _a0.1 suffix)")
+    parser.add_argument("--k_final", type=float, default=10.0, help="k_T of the checkpoint to evaluate (tag _k{k_T})")
     args = parser.parse_args()
 
     device = torch.device(
@@ -625,7 +635,7 @@ def main():
         return
 
     # single seed evaluation
-    alpha_tag = f"_a{args.lambda_alpha}" if args.lambda_alpha > 0 else ""
+    alpha_tag = (f"_a{args.lambda_alpha}" if args.lambda_alpha > 0 else "") + (f"_k{args.k_final:g}" if args.k_final != 10.0 else "")
     ckpt_path = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}{alpha_tag}.pt"
     if not ckpt_path.exists():
         print(f"ERROR: Checkpoint not found: {ckpt_path}")
@@ -721,6 +731,7 @@ def main():
         "seed": args.seed,
         "known_f1": f1,
         "test_f1": f1_te,
+        "test_f1_per_class": per_class_f1(model, X_test_known, y_test_known),
         "protocol": "per-class Mahalanobis fit on train; AUROC/TPR on test_known vs unknown; F1/tau on val",
         "ood_auroc_mahal": auroc,
         "ood_auroc_energy": comb["energy_auroc"],

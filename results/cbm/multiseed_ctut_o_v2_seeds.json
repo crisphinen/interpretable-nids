@@ -1,0 +1,947 @@
+[
+  {
+    "variant": "MLPBaseline",
+    "seed": 0,
+    "gamma": 0.0,
+    "val_f1": 0.6838212299069603,
+    "test_f1": 0.6462392449835895,
+    "test_f1_per_class": [
+      0.9938067117960536,
+      0.7864855451062348,
+      0.0,
+      0.8046647230320699
+    ],
+    "auroc": 0.7294045200000001,
+    "tpr5": 0.0
+  },
+  {
+    "variant": "MLPBaseline",
+    "seed": 1,
+    "gamma": 0.0,
+    "val_f1": 0.6978165827158246,
+    "test_f1": 0.6487567229952008,
+    "test_f1_per_class": [
+      0.8039147151345684,
+      0.7912570833815196,
+      0.0,
+      0.9998550934647152
+    ],
+    "auroc": 0.7367117799999999,
+    "tpr5": 0.0026
+  },
+  {
+    "variant": "MLPBaseline",
+    "seed": 2,
+    "gamma": 0.0,
+    "val_f1": 0.6959720738433437,
+    "test_f1": 0.6464130384855088,
+    "test_f1_per_class": [
+      0.9938067117960536,
+      0.7870413376683697,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.72997958,
+    "tpr5": 0.0054
+  },
+  {
+    "variant": "MLPBaseline",
+    "seed": 3,
+    "gamma": 0.0,
+    "val_f1": 0.6953556562447303,
+    "test_f1": 0.6461899251737346,
+    "test_f1_per_class": [
+      0.9939498703543648,
+      0.7868014406878122,
+      0.0,
+      0.8040083896527616
+    ],
+    "auroc": 0.72596122,
+    "tpr5": 0.0
+  },
+  {
+    "variant": "MLPBaseline",
+    "seed": 4,
+    "gamma": 0.0,
+    "val_f1": 0.6957462991397779,
+    "test_f1": 0.6458062320050199,
+    "test_f1_per_class": [
+      0.9922235023041475,
+      0.786336702683862,
+      0.0,
+      0.8046647230320699
+    ],
+    "auroc": 0.74339886,
+    "tpr5": 0.1331
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 0,
+    "gamma": 0.0,
+    "val_f1": 0.6745776506697966,
+    "test_f1": 0.6468695397730149,
+    "test_f1_per_class": [
+      0.7917383820998278,
+      0.9909356725146199,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.66052282,
+    "tpr5": 0.1975,
+    "concept_acc": 0.8507226166328601,
+    "concept_acc_per": {
+      "is_beaconing": 0.9411764705882353,
+      "is_high_rate": 0.9997826716893654,
+      "is_syn_heavy": 0.7469574036511156,
+      "is_short_connection": 0.8762677484787018,
+      "is_persistent": 0.6257606490872211,
+      "is_asymmetric": 0.995508548246885,
+      "is_single_packet_probe": 0.6230078238191828,
+      "is_incomplete_handshake": 0.9973196175021732
+    },
+    "probe_soft": 0.7453636627064619,
+    "probe_bin": 0.7453636627064619,
+    "leakage": 0.0
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 1,
+    "gamma": 0.0,
+    "val_f1": 0.6924143442732535,
+    "test_f1": 0.6467564414496167,
+    "test_f1_per_class": [
+      0.7915567282321899,
+      0.9910831749744189,
+      0.0,
+      0.8043858625918582
+    ],
+    "auroc": 0.88643976,
+    "tpr5": 0.38,
+    "concept_acc": 0.8862648507678934,
+    "concept_acc_per": {
+      "is_beaconing": 0.9549405969284266,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8792379020573746,
+      "is_short_connection": 0.7527528252680382,
+      "is_persistent": 0.8753984352361635,
+      "is_asymmetric": 0.9954361054766734,
+      "is_single_packet_probe": 0.6350333236742973,
+      "is_incomplete_handshake": 0.9973196175021732
+    },
+    "probe_soft": 0.7451463343958273,
+    "probe_bin": 0.4958707620979426,
+    "leakage": 0.24927557229788472
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 2,
+    "gamma": 0.0,
+    "val_f1": 0.6733502472200448,
+    "test_f1": 0.6438972737989325,
+    "test_f1_per_class": [
+      0.9651699538396978,
+      0.8056150368784202,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.81499218,
+    "tpr5": 0.0668,
+    "concept_acc": 0.8009906548826426,
+    "concept_acc_per": {
+      "is_beaconing": 0.9434946392350043,
+      "is_high_rate": 0.7547812228339612,
+      "is_syn_heavy": 0.741161982034193,
+      "is_short_connection": 0.9981164879745001,
+      "is_persistent": 0.7473196175021732,
+      "is_asymmetric": 0.6264126340191248,
+      "is_single_packet_probe": 0.7284844972471747,
+      "is_incomplete_handshake": 0.8681541582150102
+    },
+    "probe_soft": 0.7452187771660388,
+    "probe_bin": 0.7450738916256158,
+    "leakage": 0.00014488554042302315
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 3,
+    "gamma": 0.0,
+    "val_f1": 0.6804825271613055,
+    "test_f1": 0.6466469598475326,
+    "test_f1_per_class": [
+      0.7978723404255319,
+      0.7888604054998835,
+      0.0,
+      0.9998550934647152
+    ],
+    "auroc": 0.57689868,
+    "tpr5": 0.0546,
+    "concept_acc": 0.8662797015357867,
+    "concept_acc_per": {
+      "is_beaconing": 0.5698348304839177,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8707620979426254,
+      "is_short_connection": 0.9977542741234425,
+      "is_persistent": 0.8755433207765865,
+      "is_asymmetric": 0.8740944653723558,
+      "is_single_packet_probe": 0.8705447696319907,
+      "is_incomplete_handshake": 0.8717038539553753
+    },
+    "probe_soft": 0.7450738916256158,
+    "probe_bin": 0.7450738916256158,
+    "leakage": 0.0
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 4,
+    "gamma": 0.0,
+    "val_f1": 0.6773431797004857,
+    "test_f1": 0.6461527072778893,
+    "test_f1_per_class": [
+      0.9902411021814007,
+      0.7895656224525446,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.7306544600000001,
+    "tpr5": 0.0858,
+    "concept_acc": 0.7790223848159954,
+    "concept_acc_per": {
+      "is_beaconing": 0.9440741813966966,
+      "is_high_rate": 0.6801651695160823,
+      "is_syn_heavy": 0.6190959142277601,
+      "is_short_connection": 0.747826716893654,
+      "is_persistent": 0.6230078238191828,
+      "is_asymmetric": 0.9981164879745001,
+      "is_single_packet_probe": 0.7465227470298464,
+      "is_incomplete_handshake": 0.8733700376702405
+    },
+    "probe_soft": 0.7453636627064619,
+    "probe_bin": 0.7453636627064619,
+    "leakage": 0.0
+  },
+  {
+    "variant": "JointCBM_g0.1",
+    "seed": 0,
+    "gamma": 0.1,
+    "val_f1": 0.6760697320627482,
+    "test_f1": 0.6471157843466788,
+    "test_f1_per_class": [
+      0.78400181797523,
+      0.8044613194114856,
+      0.0,
+      1.0
+    ],
+    "auroc": 0.7492694400000001,
+    "tpr5": 0.1449,
+    "concept_acc": 0.826526731382208,
+    "concept_acc_per": {
+      "is_beaconing": 0.5701970443349754,
+      "is_high_rate": 0.9997826716893654,
+      "is_syn_heavy": 0.8527962909301652,
+      "is_short_connection": 0.9977542741234425,
+      "is_persistent": 0.8728629382787598,
+      "is_asymmetric": 0.995508548246885,
+      "is_single_packet_probe": 0.7043610547667343,
+      "is_incomplete_handshake": 0.618951028687337
+    },
+    "probe_soft": 0.745508548246885,
+    "probe_bin": 0.745508548246885,
+    "leakage": 0.0
+  },
+  {
+    "variant": "JointCBM_g0.1",
+    "seed": 1,
+    "gamma": 0.1,
+    "val_f1": 0.6980516883835114,
+    "test_f1": 0.6468695397730149,
+    "test_f1_per_class": [
+      0.7917383820998278,
+      0.9909356725146199,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.93217972,
+    "tpr5": 0.7557,
+    "concept_acc": 0.8977923065778035,
+    "concept_acc_per": {
+      "is_beaconing": 0.941538684439293,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8716314111851637,
+      "is_short_connection": 0.6264850767893364,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.9954361054766734,
+      "is_single_packet_probe": 0.7499275572297884,
+      "is_incomplete_handshake": 0.9999275572297884
+    },
+    "probe_soft": 0.7454361054766734,
+    "probe_bin": 0.7454361054766734,
+    "leakage": 0.0
+  },
+  {
+    "variant": "JointCBM_g0.1",
+    "seed": 2,
+    "gamma": 0.1,
+    "val_f1": 0.6920571407641967,
+    "test_f1": 0.6457285720670292,
+    "test_f1_per_class": [
+      0.9893891597361629,
+      0.7888604054998835,
+      0.0,
+      0.8046647230320699
+    ],
+    "auroc": 0.8049372199999999,
+    "tpr5": 0.0467,
+    "concept_acc": 0.8042686902347145,
+    "concept_acc_per": {
+      "is_beaconing": 0.941538684439293,
+      "is_high_rate": 0.9997102289191538,
+      "is_syn_heavy": 0.7529701535786728,
+      "is_short_connection": 0.9980440452042886,
+      "is_persistent": 0.7473196175021732,
+      "is_asymmetric": 0.5057229788467111,
+      "is_single_packet_probe": 0.8702549985511446,
+      "is_incomplete_handshake": 0.6185888148362794
+    },
+    "probe_soft": 0.7450738916256158,
+    "probe_bin": 0.7450014488554042,
+    "leakage": 7.244277021156709e-05
+  },
+  {
+    "variant": "JointCBM_g0.1",
+    "seed": 3,
+    "gamma": 0.1,
+    "val_f1": 0.6947330543618738,
+    "test_f1": 0.6468474278969092,
+    "test_f1_per_class": [
+      0.800742717883254,
+      0.9909356725146199,
+      0.0,
+      0.7957113211897625
+    ],
+    "auroc": 0.6512701599999999,
+    "tpr5": 0.0625,
+    "concept_acc": 0.836388003477253,
+    "concept_acc_per": {
+      "is_beaconing": 0.5703419298753984,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.7472471747319618,
+      "is_short_connection": 0.8768472906403941,
+      "is_persistent": 0.8751811069255289,
+      "is_asymmetric": 0.8742393509127789,
+      "is_single_packet_probe": 0.7473196175021732,
+      "is_incomplete_handshake": 0.9999275572297884
+    },
+    "probe_soft": 0.7454361054766734,
+    "probe_bin": 0.7452912199362504,
+    "leakage": 0.00014488554042302315
+  },
+  {
+    "variant": "JointCBM_g0.1",
+    "seed": 4,
+    "gamma": 0.1,
+    "val_f1": 0.6760925967442297,
+    "test_f1": 0.6460819397872897,
+    "test_f1_per_class": [
+      0.9900990099009901,
+      0.7894246447705567,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.70580274,
+    "tpr5": 0.0052,
+    "concept_acc": 0.7575340481019994,
+    "concept_acc_per": {
+      "is_beaconing": 0.9440741813966966,
+      "is_high_rate": 0.6490872210953347,
+      "is_syn_heavy": 0.6190959142277601,
+      "is_short_connection": 0.626557519559548,
+      "is_persistent": 0.604534917415242,
+      "is_asymmetric": 0.8768472906403941,
+      "is_single_packet_probe": 0.8683714865256448,
+      "is_incomplete_handshake": 0.8717038539553753
+    },
+    "probe_soft": 0.7453636627064619,
+    "probe_bin": 0.8665604172703564,
+    "leakage": -0.12119675456389445
+  },
+  {
+    "variant": "JointCBM_g0.5",
+    "seed": 0,
+    "gamma": 0.5,
+    "val_f1": 0.3674838741662676,
+    "test_f1": 0.3419965615625021,
+    "test_f1_per_class": [
+      0.0,
+      0.7940630797773655,
+      0.0,
+      0.5739231664726426
+    ],
+    "auroc": 0.79529808,
+    "tpr5": 0.1054,
+    "concept_acc": 0.961080121703854,
+    "concept_acc_per": {
+      "is_beaconing": 0.9574760938858302,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.9953636627064619,
+      "is_short_connection": 0.997826716893654,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.9954361054766734,
+      "is_single_packet_probe": 0.8764850767893364,
+      "is_incomplete_handshake": 0.8686612576064908
+    },
+    "probe_soft": 0.497826716893654,
+    "probe_bin": 0.3710518690234715,
+    "leakage": 0.1267748478701825
+  },
+  {
+    "variant": "JointCBM_g0.5",
+    "seed": 1,
+    "gamma": 0.5,
+    "val_f1": 0.6910859099851357,
+    "test_f1": 0.6490107712658003,
+    "test_f1_per_class": [
+      0.7951140815856188,
+      0.9962187318208261,
+      0.0,
+      0.8047102716567565
+    ],
+    "auroc": 0.70030826,
+    "tpr5": 0.0054,
+    "concept_acc": 0.8507135612865835,
+    "concept_acc_per": {
+      "is_beaconing": 0.9412489133584468,
+      "is_high_rate": 0.9997826716893654,
+      "is_syn_heavy": 0.7469574036511156,
+      "is_short_connection": 0.8762677484787018,
+      "is_persistent": 0.6230802665893944,
+      "is_asymmetric": 0.995508548246885,
+      "is_single_packet_probe": 0.6255433207765865,
+      "is_incomplete_handshake": 0.9973196175021732
+    },
+    "probe_soft": 0.7480440452042886,
+    "probe_bin": 0.7480440452042886,
+    "leakage": 0.0
+  },
+  {
+    "variant": "JointCBM_g0.5",
+    "seed": 2,
+    "gamma": 0.5,
+    "val_f1": 0.6980516883835114,
+    "test_f1": 0.646929129938748,
+    "test_f1_per_class": [
+      0.7918292403029608,
+      0.9910831749744189,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.7811118799999999,
+    "tpr5": 0.2106,
+    "concept_acc": 0.8672848449724717,
+    "concept_acc_per": {
+      "is_beaconing": 0.9437844103158505,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.6263401912489134,
+      "is_short_connection": 0.9981164879745001,
+      "is_persistent": 0.8682990437554332,
+      "is_asymmetric": 0.8762677484787018,
+      "is_single_packet_probe": 0.625615763546798,
+      "is_incomplete_handshake": 0.999855114459577
+    },
+    "probe_soft": 0.745508548246885,
+    "probe_bin": 0.49572587655751954,
+    "leakage": 0.2497826716893654
+  },
+  {
+    "variant": "JointCBM_g0.5",
+    "seed": 3,
+    "gamma": 0.5,
+    "val_f1": 0.6794639201516757,
+    "test_f1": 0.8582208236795662,
+    "test_f1_per_class": [
+      0.7918292403029608,
+      0.9910831749744189,
+      0.6499708794408853,
+      1.0
+    ],
+    "auroc": 0.7695713000000001,
+    "tpr5": 0.0675,
+    "concept_acc": 0.8213289626195306,
+    "concept_acc_per": {
+      "is_beaconing": 0.9437844103158505,
+      "is_high_rate": 0.8785134743552594,
+      "is_syn_heavy": 0.7471022891915386,
+      "is_short_connection": 0.8763401912489134,
+      "is_persistent": 0.6256882063170096,
+      "is_asymmetric": 0.8768472906403941,
+      "is_single_packet_probe": 0.6225007244277021,
+      "is_incomplete_handshake": 0.999855114459577
+    },
+    "probe_soft": 0.745508548246885,
+    "probe_bin": 0.7454361054766734,
+    "leakage": 7.244277021156709e-05
+  },
+  {
+    "variant": "JointCBM_g0.5",
+    "seed": 4,
+    "gamma": 0.5,
+    "val_f1": 0.6756371394532289,
+    "test_f1": 0.8569430689309808,
+    "test_f1_per_class": [
+      0.9938067117960536,
+      0.7924704781947854,
+      0.6499708794408853,
+      0.9915242062921994
+    ],
+    "auroc": 0.72639574,
+    "tpr5": 0.0398,
+    "concept_acc": 0.7942806432917995,
+    "concept_acc_per": {
+      "is_beaconing": 0.9731237322515213,
+      "is_high_rate": 0.6489423355549117,
+      "is_syn_heavy": 0.6187337003767024,
+      "is_short_connection": 0.626557519559548,
+      "is_persistent": 0.7474645030425964,
+      "is_asymmetric": 0.8742393509127789,
+      "is_single_packet_probe": 0.9920312952767314,
+      "is_incomplete_handshake": 0.8731527093596059
+    },
+    "probe_soft": 0.8666328600405679,
+    "probe_bin": 0.8666328600405679,
+    "leakage": 0.0
+  },
+  {
+    "variant": "JointCBM_g1.0",
+    "seed": 0,
+    "gamma": 1.0,
+    "val_f1": 0.36524585998946046,
+    "test_f1": 0.34157130907731714,
+    "test_f1_per_class": [
+      0.0,
+      0.7925052047189451,
+      0.0,
+      0.5737800315903234
+    ],
+    "auroc": 0.7790897399999999,
+    "tpr5": 0.0665,
+    "concept_acc": 0.9384417560127499,
+    "concept_acc_per": {
+      "is_beaconing": 0.9313242538394668,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.9992755722978847,
+      "is_short_connection": 0.8704723268617792,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.9952187771660388,
+      "is_single_packet_probe": 0.8453346855983773,
+      "is_incomplete_handshake": 0.8685163720660678
+    },
+    "probe_soft": 0.3709069834830484,
+    "probe_bin": 0.49550854824688495,
+    "leakage": -0.12460156476383655
+  },
+  {
+    "variant": "JointCBM_g1.0",
+    "seed": 1,
+    "gamma": 1.0,
+    "val_f1": 0.41509624578789056,
+    "test_f1": 0.3894439246162002,
+    "test_f1_per_class": [
+      0.001973164956590371,
+      0.9910831749744189,
+      0.0,
+      0.5647193585337915
+    ],
+    "auroc": 0.93388726,
+    "tpr5": 0.7504,
+    "concept_acc": 0.8972942625325993,
+    "concept_acc_per": {
+      "is_beaconing": 0.9412489133584468,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.6261953057084902,
+      "is_short_connection": 0.9978991596638656,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.995508548246885,
+      "is_single_packet_probe": 0.6227904955085483,
+      "is_incomplete_handshake": 0.9973196175021732
+    },
+    "probe_soft": 0.49594320486815413,
+    "probe_bin": 0.4958707620979426,
+    "leakage": 7.244277021151158e-05
+  },
+  {
+    "variant": "JointCBM_g1.0",
+    "seed": 2,
+    "gamma": 1.0,
+    "val_f1": 0.6950219016166981,
+    "test_f1": 0.6468695397730149,
+    "test_f1_per_class": [
+      0.7917383820998278,
+      0.9909356725146199,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.7760373999999999,
+    "tpr5": 0.2804,
+    "concept_acc": 0.8514289336424224,
+    "concept_acc_per": {
+      "is_beaconing": 0.9441466241669081,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.626557519559548,
+      "is_short_connection": 0.9981164879745001,
+      "is_persistent": 0.6185888148362794,
+      "is_asymmetric": 0.8768472906403941,
+      "is_single_packet_probe": 0.7471747319617502,
+      "is_incomplete_handshake": 1.0
+    },
+    "probe_soft": 0.7454361054766734,
+    "probe_bin": 0.7454361054766734,
+    "leakage": 0.0
+  },
+  {
+    "variant": "JointCBM_g1.0",
+    "seed": 3,
+    "gamma": 1.0,
+    "val_f1": 0.6823089966416193,
+    "test_f1": 0.6440443932376972,
+    "test_f1_per_class": [
+      0.8011145942180425,
+      0.955737242740344,
+      0.0,
+      0.8193257359924027
+    ],
+    "auroc": 0.6630849000000001,
+    "tpr5": 0.1112,
+    "concept_acc": 0.8533577223993045,
+    "concept_acc_per": {
+      "is_beaconing": 0.5730223123732252,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.7491306867574616,
+      "is_short_connection": 0.8764850767893364,
+      "is_persistent": 1.0,
+      "is_asymmetric": 0.8768472906403941,
+      "is_single_packet_probe": 0.7515937409446537,
+      "is_incomplete_handshake": 0.9997826716893654
+    },
+    "probe_soft": 0.745508548246885,
+    "probe_bin": 0.7454361054766734,
+    "leakage": 7.244277021156709e-05
+  },
+  {
+    "variant": "JointCBM_g1.0",
+    "seed": 4,
+    "gamma": 1.0,
+    "val_f1": 0.6819836425835224,
+    "test_f1": 0.6466197544231785,
+    "test_f1_per_class": [
+      0.8008356545961003,
+      0.7868014406878122,
+      0.0,
+      0.9988419224088014
+    ],
+    "auroc": 0.7753176,
+    "tpr5": 0.3103,
+    "concept_acc": 0.734479136482179,
+    "concept_acc_per": {
+      "is_beaconing": 0.5728774268328021,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.25057954216169226,
+      "is_short_connection": 0.7477542741234425,
+      "is_persistent": 0.6854534917415241,
+      "is_asymmetric": 0.9954361054766734,
+      "is_single_packet_probe": 0.7522457258765575,
+      "is_incomplete_handshake": 0.8714865256447406
+    },
+    "probe_soft": 0.7451463343958273,
+    "probe_bin": 0.747826716893654,
+    "leakage": -0.00268038249782665
+  },
+  {
+    "variant": "SequentialCBM",
+    "seed": 0,
+    "gamma": 0.0,
+    "val_f1": 0.3802801295057846,
+    "test_f1": 0.3724169449932473,
+    "test_f1_per_class": [
+      0.0,
+      0.9907881269191402,
+      0.0,
+      0.49887965305384896
+    ],
+    "auroc": 0.84612502,
+    "tpr5": 0.2939,
+    "concept_acc": 0.9515991741524196,
+    "concept_acc_per": {
+      "is_beaconing": 0.9442190669371197,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8716314111851637,
+      "is_short_connection": 0.9981164879745001,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.9981164879745001,
+      "is_single_packet_probe": 0.8453346855983773,
+      "is_incomplete_handshake": 0.957983193277311
+    },
+    "probe_soft": 0.49543610547667344,
+    "probe_bin": 0.49543610547667344,
+    "leakage": 0.0
+  },
+  {
+    "variant": "SequentialCBM",
+    "seed": 1,
+    "gamma": 0.0,
+    "val_f1": 0.38045108565825947,
+    "test_f1": 0.3918221212372002,
+    "test_f1_per_class": [
+      0.0,
+      0.9960727272727272,
+      0.0,
+      0.5712157576760738
+    ],
+    "auroc": 0.80646438,
+    "tpr5": 0.3897,
+    "concept_acc": 0.9387677484787018,
+    "concept_acc_per": {
+      "is_beaconing": 0.9442190669371197,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8716314111851637,
+      "is_short_connection": 0.8768472906403941,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.9981164879745001,
+      "is_single_packet_probe": 0.8245436105476673,
+      "is_incomplete_handshake": 0.9973920602723848
+    },
+    "probe_soft": 0.49804404520428863,
+    "probe_bin": 0.49804404520428863,
+    "leakage": 0.0
+  },
+  {
+    "variant": "SequentialCBM",
+    "seed": 2,
+    "gamma": 0.0,
+    "val_f1": 0.4010383948353386,
+    "test_f1": 0.3830973457015276,
+    "test_f1_per_class": [
+      0.0,
+      0.9907881269191402,
+      0.0,
+      0.5416012558869702
+    ],
+    "auroc": 0.85466404,
+    "tpr5": 0.3088,
+    "concept_acc": 0.9591241669081426,
+    "concept_acc_per": {
+      "is_beaconing": 0.9442190669371197,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8716314111851637,
+      "is_short_connection": 0.9981164879745001,
+      "is_persistent": 0.9972471747319618,
+      "is_asymmetric": 0.9981164879745001,
+      "is_single_packet_probe": 0.8636627064618951,
+      "is_incomplete_handshake": 1.0
+    },
+    "probe_soft": 0.49804404520428863,
+    "probe_bin": 0.49543610547667344,
+    "leakage": 0.002607939727615194
+  },
+  {
+    "variant": "SequentialCBM",
+    "seed": 3,
+    "gamma": 0.0,
+    "val_f1": 0.3846326970791763,
+    "test_f1": 0.39112821311450857,
+    "test_f1_per_class": [
+      0.0,
+      0.9960727272727272,
+      0.0,
+      0.5684401251853072
+    ],
+    "auroc": 0.6987007,
+    "tpr5": 0.0527,
+    "concept_acc": 0.937273616343089,
+    "concept_acc_per": {
+      "is_beaconing": 0.9442190669371197,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8716314111851637,
+      "is_short_connection": 0.8768472906403941,
+      "is_persistent": 0.9515357867284845,
+      "is_asymmetric": 0.9981164879745001,
+      "is_single_packet_probe": 0.8558388872790496,
+      "is_incomplete_handshake": 1.0
+    },
+    "probe_soft": 0.49797160243407707,
+    "probe_bin": 0.49543610547667344,
+    "leakage": 0.002535496957403627
+  },
+  {
+    "variant": "SequentialCBM",
+    "seed": 4,
+    "gamma": 0.0,
+    "val_f1": 0.4215985131488136,
+    "test_f1": 0.3887960586330478,
+    "test_f1_per_class": [
+      0.0,
+      0.9907881269191402,
+      0.0,
+      0.5643961076130509
+    ],
+    "auroc": 0.9124258599999999,
+    "tpr5": 0.6988,
+    "concept_acc": 0.9447804984062591,
+    "concept_acc_per": {
+      "is_beaconing": 0.9442190669371197,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8716314111851637,
+      "is_short_connection": 0.9981164879745001,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.995508548246885,
+      "is_single_packet_probe": 0.7513764126340191,
+      "is_incomplete_handshake": 1.0
+    },
+    "probe_soft": 0.49543610547667344,
+    "probe_bin": 0.49543610547667344,
+    "leakage": 0.0
+  },
+  {
+    "variant": "HybridCBM",
+    "seed": 0,
+    "gamma": 0.0,
+    "val_f1": 0.6842025755436605,
+    "test_f1": 0.6460972335853694,
+    "test_f1_per_class": [
+      0.9935205183585313,
+      0.7862036929508768,
+      0.0,
+      0.8046647230320699
+    ],
+    "auroc": 0.82069582,
+    "tpr5": 0.2389,
+    "concept_acc": 0.9437300782381919,
+    "concept_acc_per": {
+      "is_beaconing": 0.9260359316140249,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.9955809910170965,
+      "is_short_connection": 0.9597942625325993,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.9464647928136772,
+      "is_single_packet_probe": 0.8558388872790496,
+      "is_incomplete_handshake": 0.8687337003767024
+    },
+    "probe_soft": 0.49797160243407707,
+    "probe_bin": 0.49818893074471166,
+    "leakage": -0.00021732831063459024
+  },
+  {
+    "variant": "HybridCBM",
+    "seed": 1,
+    "gamma": 0.0,
+    "val_f1": 0.6985156324209348,
+    "test_f1": 0.6637749230376934,
+    "test_f1_per_class": [
+      0.6641640196361536,
+      0.9909356725146199,
+      0.0,
+      1.0
+    ],
+    "auroc": 0.75181858,
+    "tpr5": 0.5319,
+    "concept_acc": 0.9204306722689075,
+    "concept_acc_per": {
+      "is_beaconing": 0.8490292668791655,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8716314111851637,
+      "is_short_connection": 0.997826716893654,
+      "is_persistent": 0.9971747319617502,
+      "is_asymmetric": 0.9954361054766734,
+      "is_single_packet_probe": 0.75,
+      "is_incomplete_handshake": 0.9023471457548536
+    },
+    "probe_soft": 0.49804404520428863,
+    "probe_bin": 0.4955809910170965,
+    "leakage": 0.0024630541871921152
+  },
+  {
+    "variant": "HybridCBM",
+    "seed": 2,
+    "gamma": 0.0,
+    "val_f1": 0.6870047248585595,
+    "test_f1": 0.6637749230376934,
+    "test_f1_per_class": [
+      0.6641640196361536,
+      0.9909356725146199,
+      0.0,
+      1.0
+    ],
+    "auroc": 0.7915640200000001,
+    "tpr5": 0.5197,
+    "concept_acc": 0.9307266009852218,
+    "concept_acc_per": {
+      "is_beaconing": 0.9605911330049262,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8715589684149522,
+      "is_short_connection": 0.997826716893654,
+      "is_persistent": 0.9973920602723848,
+      "is_asymmetric": 0.9952912199362504,
+      "is_single_packet_probe": 0.75,
+      "is_incomplete_handshake": 0.8731527093596059
+    },
+    "probe_soft": 0.49507389162561577,
+    "probe_bin": 0.49818893074471166,
+    "leakage": -0.003115039119095886
+  },
+  {
+    "variant": "HybridCBM",
+    "seed": 3,
+    "gamma": 0.0,
+    "val_f1": 0.6848594292320309,
+    "test_f1": 0.6637749230376934,
+    "test_f1_per_class": [
+      0.6641640196361536,
+      0.9909356725146199,
+      0.0,
+      1.0
+    ],
+    "auroc": 0.9237477999999999,
+    "tpr5": 0.7198,
+    "concept_acc": 0.9438115763546797,
+    "concept_acc_per": {
+      "is_beaconing": 0.9440741813966966,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8715589684149522,
+      "is_short_connection": 0.9980440452042886,
+      "is_persistent": 1.0,
+      "is_asymmetric": 0.9980440452042886,
+      "is_single_packet_probe": 0.7473920602723848,
+      "is_incomplete_handshake": 0.9913793103448276
+    },
+    "probe_soft": 0.4955809910170965,
+    "probe_bin": 0.4955809910170965,
+    "leakage": 0.0
+  },
+  {
+    "variant": "HybridCBM",
+    "seed": 4,
+    "gamma": 0.0,
+    "val_f1": 0.687317401785578,
+    "test_f1": 0.6468695397730149,
+    "test_f1_per_class": [
+      0.7917383820998278,
+      0.9909356725146199,
+      0.0,
+      0.804804104477612
+    ],
+    "auroc": 0.93075698,
+    "tpr5": 0.7396,
+    "concept_acc": 0.9438749637786149,
+    "concept_acc_per": {
+      "is_beaconing": 0.941538684439293,
+      "is_high_rate": 1.0,
+      "is_syn_heavy": 0.8716314111851637,
+      "is_short_connection": 0.9978991596638656,
+      "is_persistent": 0.9973196175021732,
+      "is_asymmetric": 0.9953636627064619,
+      "is_single_packet_probe": 0.75,
+      "is_incomplete_handshake": 0.9972471747319618
+    },
+    "probe_soft": 0.4955809910170965,
+    "probe_bin": 0.4982613735149232,
+    "leakage": -0.0026803824978267055
+  }
+]

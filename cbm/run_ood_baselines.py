@@ -80,10 +80,12 @@ def run(ds, device, seed=0):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--device", default="cuda")
+    ap.add_argument("--datasets", nargs="+", default=["ctu", "cic"])
     args = ap.parse_args()
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
-    res = {ds: run(ds, device) for ds in ["ctu", "cic"]}
-    (RES / "r2_ood_baselines.json").write_text(json.dumps(res, indent=2)); print("wrote r2_ood_baselines.json")
+    res = {ds: run(ds, device) for ds in args.datasets}
+    out = "r2_ood_baselines.json" if args.datasets == ["ctu", "cic"] else f"ood_baselines_{'_'.join(args.datasets)}.json"
+    (RES / out).write_text(json.dumps(res, indent=2)); print(f"wrote {out}")
 
 
 if __name__ == "__main__":

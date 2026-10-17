@@ -1,0 +1,58 @@
+{
+  "syn_flood_ddos": {
+    "Benign_Final": 0.0,
+    "DDoS-SYN_Flood": 0.998533308506012,
+    "Mirai-greeth_flood": 0.0,
+    "Recon-PortScan": 0.0,
+    "VulnerabilityScan": 0.0
+  },
+  "udp_mirai_flood": {
+    "Benign_Final": 0.03253333270549774,
+    "DDoS-SYN_Flood": 0.0,
+    "Mirai-greeth_flood": 0.996399998664856,
+    "Recon-PortScan": 0.04053333401679993,
+    "VulnerabilityScan": 0.08720000088214874
+  },
+  "recon_port_scan": {
+    "Benign_Final": 0.0,
+    "DDoS-SYN_Flood": 0.03386666625738144,
+    "Mirai-greeth_flood": 0.0010666666785255075,
+    "Recon-PortScan": 0.18733333051204681,
+    "VulnerabilityScan": 0.02293333411216736
+  },
+  "vuln_scan": {
+    "Benign_Final": 0.0,
+    "DDoS-SYN_Flood": 0.0006666666595265269,
+    "Mirai-greeth_flood": 0.00013333333481568843,
+    "Recon-PortScan": 0.0049333334900438786,
+    "VulnerabilityScan": 0.0
+  },
+  "benign_low_rate": {
+    "Benign_Final": 0.9474666714668274,
+    "DDoS-SYN_Flood": 0.0010666666785255075,
+    "Mirai-greeth_flood": 0.5564000010490417,
+    "Recon-PortScan": 0.8125333189964294,
+    "VulnerabilityScan": 0.9404000043869019
+  },
+  "large_payload_flood": {
+    "Benign_Final": 0.3402666747570038,
+    "DDoS-SYN_Flood": 0.0,
+    "Mirai-greeth_flood": 0.001466666697524488,
+    "Recon-PortScan": 0.08293333649635315,
+    "VulnerabilityScan": 0.0862666666507721
+  },
+  "high_entropy_scan": {
+    "Benign_Final": 0.002266666619107127,
+    "DDoS-SYN_Flood": 0.00013333333481568843,
+    "Mirai-greeth_flood": 0.0006666666595265269,
+    "Recon-PortScan": 0.00573333352804184,
+    "VulnerabilityScan": 0.006399999838322401
+  },
+  "short_connection_flood": {
+    "Benign_Final": 0.058800000697374344,
+    "DDoS-SYN_Flood": 0.9745333194732666,
+    "Mirai-greeth_flood": 0.5738666653633118,
+    "Recon-PortScan": 0.1990666687488556,
+    "VulnerabilityScan": 0.06253333389759064
+  }
+}

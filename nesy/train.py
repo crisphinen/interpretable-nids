@@ -24,8 +24,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from nesy.model import (
     NeSyNIDS, RuleOnlyNIDS,
-    CTU_RULES, CIC_RULES,
+    CTU_RULES, CIC_RULES, rules_for,
 )
+from dsets import DATASETS, is_ctu, is_cic, data_dir as dataset_dir, nesy_feature_cols
 
 # config
 
@@ -52,10 +53,10 @@ def get_k(epoch: int) -> float:
 # data loading (reuse cbm's preprocessing)
 
 def load_dataset(dataset: str):
-    if dataset == "ctu":
-        data_dir = PROJECT_ROOT / "data"
+    if is_ctu(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
-        feature_cols = vocab["feature_cols"]
+        feature_cols = nesy_feature_cols(dataset)
         known_ids = vocab["known_ids"]
 
         import pandas as pd
@@ -71,10 +72,10 @@ def load_dataset(dataset: str):
         X_tr, y_tr = _load("train")
         X_val, y_val = _load("val")
         n_classes = len(np.unique(y_tr))
-        rule_templates = CTU_RULES
+        rule_templates = rules_for(dataset)
 
-    elif dataset == "cic":
-        data_dir = PROJECT_ROOT / "data" / "cic"
+    elif is_cic(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
         feature_cols = vocab["feature_cols"]
         l2i = vocab["label_to_id"]
@@ -197,14 +198,18 @@ def train_nesy(model, loader_tr, loader_val, device, label,
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", choices=["ctu", "cic"], required=True)
+    parser.add_argument("--dataset", choices=DATASETS, required=True)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--lambda_sparse", type=float, default=0.0)
     parser.add_argument("--lambda_alpha", type=float, default=0.0,
                         help="Penalty on (1-alpha)^2 to push model toward higher rule weight.")
     parser.add_argument("--model", choices=["nesy", "rule_only"], default="nesy")
+    parser.add_argument("--k_final", type=float, default=10.0,
+                        help="final annealing steepness k_T (geometry k_T sweep); non-default adds _k{k_T}")
     args = parser.parse_args()
+    global K_FINAL
+    K_FINAL = args.k_final
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -248,7 +253,8 @@ def main():
     # save checkpoint - tags encode non-default hyperparams
     sparse_tag = f"_sp{args.lambda_sparse}" if args.lambda_sparse > 0 else ""
     alpha_tag  = f"_a{args.lambda_alpha}"   if args.lambda_alpha  > 0 else ""
-    ckpt_path = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}{sparse_tag}{alpha_tag}.pt"
+    k_tag      = f"_k{args.k_final:g}"      if args.k_final != 10.0 else ""
+    ckpt_path = RESULTS_DIR / f"{args.dataset}_{args.model}_s{args.seed}{sparse_tag}{alpha_tag}{k_tag}.pt"
     torch.save({
         "model_state_dict": model.state_dict(),
         "model_type": args.model,

@@ -1,3 +1,10 @@
+% ── BibTeX control: >6 authors → first author + "et al." (IEEE style) ─────────
+@IEEEtranBSTCTL{BSTcontrol,
+  CTLuse_forced_etal       = "yes",
+  CTLmax_names_forced_etal = "6",
+  CTLnames_show_etal       = "1",
+}
+
 % ── Base papers ───────────────────────────────────────────────────────────────
 
 @inproceedings{wei2023xnids,
@@ -93,13 +100,14 @@
 }
 
 @article{neto2023ciciot,
-  author    = {Neto, Edmar C. B. and Dadkhah, Sajjad and Ferreira, Raphael and Ghorbani, Ali A.},
+  author    = {Neto, Euclides Carlos Pinto and Dadkhah, Sajjad and Ferreira, Raphael and Zohourian, Alireza and Lu, Rongxing and Ghorbani, Ali A.},
   title     = {{CICIoT2023}: A Real-Time Dataset and Benchmark for Large-Scale Attacks in {IoT} Environment},
   journal   = {Sensors},
   volume    = {23},
   number    = {13},
   pages     = {5941},
   year      = {2023},
+  doi       = {10.3390/s23135941},
 }
 
 @article{parmisano2020ctu,
@@ -226,10 +234,37 @@
   booktitle={International Conference on Learning Representations (ICLR)}, year={2022}
 }
 
-@article{manhaeve2021deepproblog,
-  title={Neural probabilistic logic programming in {DeepProbLog}},
-  author={Manhaeve, Robin and Duman{\v{c}}i{\'c}, Sebastijan and Kimmig, Angelika and Demeester, Thomas and De Raedt, Luc},
-  journal={Artificial Intelligence}, volume={298}, pages={103504}, year={2021}
+
+
+@article{apruzzese2022ml,
+  title={The Role of Machine Learning in Cybersecurity},
+  author={Apruzzese, Giovanni and Laskov, Pavel and Montes de Oca, Edgardo and Mallouli, Wissam and B{\'u}rdalo Rapa, Luis and Grammatopoulos, Athanasios Vasileios and Di Franco, Fabio},
+  journal={Digital Threats: Research and Practice}, volume={4}, number={1}, articleno={8}, numpages={38}, year={2023}
+}
+
+@article{shoukat2026concept,
+  title={From Evidence to Decision: Concept--Prototype Reasoning for Intrusion Detection in {SDN}-Based Industrial Networks},
+  author={Shoukat, Shifa and Gao, Tianhan and Javeed, Danish and Adil, Muhammad},
+  journal={Computer Networks},
+  year={2026},
+  note={in press}
+}
+
+@article{mahinpei2021promises,
+  title={Promises and Pitfalls of Black-Box Concept Learning Models},
+  author={Mahinpei, Anita and Clark, Justin and Lage, Isaac and Doshi-Velez, Finale and Pan, Weiwei},
+  journal={arXiv preprint arXiv:2106.13314},
+  year={2021}
+}
+
+% Cited only in the original submission; kept so the latexdiff build resolves them.
+@inproceedings{liu2023reinmax,
+  author    = {Liu, Liyuan and Dong, Chengyu and Liu, Xiaodong and Yu, Bin and Gao, Jianfeng},
+  title     = {{ReinMax}: Bridging Discrete and Backpropagation: Straight-Through and Beyond},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023},
+  volume    = {36},
+  note      = {Oral presentation},
 }
 
 @article{badreddine2022ltn,
@@ -238,8 +273,8 @@
   journal={Artificial Intelligence}, volume={303}, pages={103649}, year={2022}
 }
 
-@article{apruzzese2022ml,
-  title={The Role of Machine Learning in Cybersecurity},
-  author={Apruzzese, Giovanni and Laskov, Pavel and Montes de Oca, Edgardo and Mallouli, Wissam and B{\'u}rdalo Rapa, Luis and Grammatopoulos, Athanasios Vasileios and Di Franco, Fabio},
-  journal={Digital Threats: Research and Practice}, volume={4}, number={1}, articleno={8}, numpages={38}, year={2023}
+@article{manhaeve2021deepproblog,
+  title={Neural probabilistic logic programming in {DeepProbLog}},
+  author={Manhaeve, Robin and Duman{\v{c}}i{\'c}, Sebastijan and Kimmig, Angelika and Demeester, Thomas and De Raedt, Luc},
+  journal={Artificial Intelligence}, volume={298}, pages={103504}, year={2021}
 }

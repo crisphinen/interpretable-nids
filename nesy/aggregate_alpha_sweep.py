@@ -4,6 +4,8 @@
 # lambda_alpha=0 evals carry no _a suffix (they are the main-run models).
 #
 # usage: python -m nesy.aggregate_alpha_sweep [--require N]   (N = min seeds per cell)
+#        python -m nesy.aggregate_alpha_sweep --datasets ctuk:ctu cicr:cic --out results/nesy/alpha_sweep_main.json
+#        (DATA:KEY reads DATA's evals and stores them under KEY, the panel name the figure expects)
 
 import argparse, json
 from pathlib import Path
@@ -34,17 +36,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--require", type=int, default=5)
     ap.add_argument("--out", default=str(RES / "r2_alpha_sweep.json"))
+    ap.add_argument("--datasets", nargs="+", default=["ctu", "cic"])
     args = ap.parse_args()
     out, incomplete = {}, []
-    for ds in ["ctu", "cic"]:
-        out[ds] = {}
+    for spec in args.datasets:
+        ds, key = spec.split(":") if ":" in spec else (spec, spec)
+        out[key] = {}
         for la in LAMBDAS:
             c = cell(ds, la)
             n = c["n_seeds"] if c else 0
             if n < args.require:
                 incomplete.append(f"{ds} la={la} ({n}/{args.require})")
             if c:
-                out[ds][la] = c
+                out[key][la] = c
                 print(f"{ds:3s} la={la:<4s} n={n}  alpha={c['alpha']:.3f}±{c['alpha_std']:.3f}  "
                       f"F1={c['f1']:.4f}±{c['f1_std']:.4f}  AUROC={c['auroc']:.3f}±{c['auroc_std']:.3f}")
     if incomplete:

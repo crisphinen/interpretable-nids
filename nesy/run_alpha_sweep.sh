@@ -1,36 +1,27 @@
 #!/bin/bash
-# Alpha-sweep driver.
-# Trains + evaluates NeSy-NIDS across lambda_alpha and seeds, one dataset per GPU.
-# Covers lambda_alpha in {0,0.05,0.1,0.2,0.5,1.0} at seeds 0-4 (lambda_alpha=0 is
-# the main-table model and carries no _a suffix). Existing checkpoints are skipped,
-# so delete or move a checkpoint to retrain it.
+# NeSy-NIDS alpha-gate sweep (tab:alpha, tab:headagree, tab:fidelity NeSy rows): lambda_alpha in
+# {0, 0.05, 0.1, 0.2, 0.5, 1.0} x seeds 0-4, train + evaluate. lambda_alpha 0 and 0.1 come from
+# nesy/run_kfs_control.sh; existing checkpoints are skipped, evaluation always reruns.
 #
-# usage: bash nesy/run_alpha_sweep.sh
-set -u
+# usage: [PYTHON=...] [DEVICE=cuda] bash nesy/run_alpha_sweep.sh dataset [lambdas...]
+set -eu
+cd "$(dirname "$0")/.." || exit 1
 PY="${PYTHON:-python3}"
-cd "$(dirname "$0")/.."
+DEVICE="${DEVICE:-cuda}"
 RES=results/nesy
+ds="$1"; shift
+LAMBDAS="${*:-0 0.05 0.1 0.2 0.5 1.0}"
 
-LAMBDAS="0 0.05 0.1 0.2 0.5 1.0"
-SEEDS="0 1 2 3 4"
-
-run_dataset () {  # $1=dataset  $2=gpu
-  local ds=$1 gpu=$2
-  for la in $LAMBDAS; do
-    for s in $SEEDS; do
-      local tag="_a${la}"; [ "$la" = "0" ] && tag=""
-      local ck="$RES/${ds}_nesy_s${s}${tag}.pt" ev="$RES/${ds}_nesy_s${s}${tag}_eval.json"
-      if [ -f "$ck" ]; then echo "[skip] $ck"; continue; fi
-      echo "[$ds gpu$gpu] train la=$la seed=$s"
-      CUDA_VISIBLE_DEVICES=$gpu $PY -m nesy.train    --dataset $ds --seed $s --lambda_alpha $la --device cuda >/dev/null 2>&1
-      CUDA_VISIBLE_DEVICES=$gpu $PY -m nesy.evaluate --dataset $ds --seed $s --lambda_alpha $la --device cuda >/dev/null 2>&1
-      echo "[$ds gpu$gpu] done   la=$la seed=$s -> $ev"
-    done
+for la in $LAMBDAS; do
+  for s in 0 1 2 3 4; do
+    tag=""; [ "$la" != "0" ] && tag="_a${la}"
+    ck="$RES/${ds}_nesy_s${s}${tag}.pt"
+    if [ -f "$ck" ]; then echo "[skip] $ck"; else
+      echo "[$ds] train nesy la=$la seed=$s"
+      "$PY" -m nesy.train --dataset "$ds" --seed "$s" --model nesy --lambda_alpha "$la" --device "$DEVICE" > "$RES/${ds}_nesy_s${s}${tag}_train.log" 2>&1
+    fi
+    "$PY" -m nesy.evaluate --dataset "$ds" --seed "$s" --model nesy --lambda_alpha "$la" --device "$DEVICE" > "$RES/${ds}_nesy_s${s}${tag}_eval.log" 2>&1
+    echo "[$ds] done  nesy la=$la seed=$s"
   done
-  echo "[$ds] ALL DONE"
-}
-
-run_dataset ctu 0 &
-run_dataset cic 1 &
-wait
-echo "ALPHA SWEEP COMPLETE"
+done
+echo "ALPHA SWEEP ($ds) COMPLETE"

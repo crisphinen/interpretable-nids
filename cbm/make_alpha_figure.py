@@ -4,7 +4,7 @@
 # Renders from results/nesy/r2_alpha_sweep.json (mean over five seeds; built by
 # nesy/aggregate_alpha_sweep.py from the nesy/run_alpha_sweep.sh per-seed evals).
 #
-# usage: python -m cbm.make_alpha_figure
+# usage: python -m cbm.make_alpha_figure [--input results/nesy/alpha_sweep_main.json]
 
 import json
 import os
@@ -82,7 +82,10 @@ def _panel(ax, d, title):
 
 
 def main():
-    d = json.load(open(NESY_RES / "r2_alpha_sweep.json"))
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--input", default=str(NESY_RES / "r2_alpha_sweep.json"))
+    d = json.load(open(ap.parse_args().input))
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.0), sharey=True)
     _panel(axes[0], d["ctu"], "(a) CTU-IoT-23")
     _panel(axes[1], d["cic"], "(b) CIC-IoT-2023")

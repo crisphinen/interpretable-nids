@@ -53,8 +53,13 @@ def cap(a, n=5000):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--datasets", nargs="+", default=["ctu", "cic"])
+    dsets = ap.parse_args().datasets
+    out = "scorer_factorial.json" if dsets == ["ctu", "cic"] else f"scorer_factorial_{'_'.join(dsets)}.json"
     rows = []
-    for ds in ["ctu", "cic"]:
+    for ds in dsets:
         (Xk, yk, _), (Xtr, ytr, _), Xun, _, _ = load_test_data(ds)
         if len(Xtr) > 20000:
             i = RNG.choice(len(Xtr), 20000, replace=False); Xtr, ytr = Xtr[i], ytr[i]
@@ -82,12 +87,12 @@ def main():
                         sc[kind] = auroc(centroid_scores(etr, ytr, ekn, kind), centroid_scores(etr, ytr, eun, kind))
                 rows.append(dict(dataset=ds, variant=v, seed=s, interp=interp, **{f"auroc_{k}": val for k, val in sc.items()}))
         print(f"  {ds} done", flush=True)
-    (ROOT / "results" / "cbm" / "scorer_factorial.json").write_text(json.dumps(rows, indent=2))
+    (ROOT / "results" / "cbm" / out).write_text(json.dumps(rows, indent=2))
 
     SC = ["mahal", "hamming", "jaccard", "energy", "comb"]
     print("\n=== OOD AUROC by scorer x architecture (mean over 5 seeds); [best] per row ===")
     print(f"{'dataset':>7} {'architecture':>14} " + " ".join(f"{s:>8}" for s in SC) + "   best")
-    for ds in ["ctu", "cic"]:
+    for ds in dsets:
         for v in VARIANTS:
             rs = [r for r in rows if r["dataset"] == ds and r["variant"] == v]
             vals = {s: (mean(r[f"auroc_{s}"] for r in rs) if all(f"auroc_{s}" in r for r in rs) else None) for s in SC}
@@ -98,7 +103,7 @@ def main():
     print("\n=== best scorer per (dataset, architecture): consistency check ===")
     from collections import Counter
     best_by = {}
-    for ds in ["ctu", "cic"]:
+    for ds in dsets:
         for v in VARIANTS:
             rs = [r for r in rows if r["dataset"] == ds and r["variant"] == v]
             vals = {s: (mean(r[f"auroc_{s}"] for r in rs) if all(f"auroc_{s}" in r for r in rs) else -1) for s in SC}

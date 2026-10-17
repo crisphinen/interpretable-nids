@@ -27,9 +27,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from cbm.concepts import (
     CTU_CONCEPTS, CIC_CONCEPTS,
-    ctu_concept_labels, cic_concept_labels,
+    ctu_concept_labels, cic_concept_labels, ton_concept_labels, TON_CONCEPTS,
 )
 from cbm.model import MLPBaseline, JointCBM, SequentialCBM, HybridCBM
+from dsets import DATASETS, is_ctu, is_cic, is_ton, data_dir as dataset_dir
 
 RESULTS_DIR = PROJECT_ROOT / "results" / "cbm"
 EMBED_DIM = 64
@@ -39,8 +40,8 @@ EMBED_DIM = 64
 
 # load test_known and test_unknown splits with concept labels.
 def load_test_data(dataset: str):
-    if dataset == "ctu":
-        data_dir = PROJECT_ROOT / "data"
+    if is_ctu(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
         feature_cols = vocab["feature_cols"]
         known_ids = vocab["known_ids"]
@@ -70,8 +71,8 @@ def load_test_data(dataset: str):
         X_unknown = _load_unknown()
         concept_names = CTU_CONCEPTS
 
-    elif dataset == "cic":
-        data_dir = PROJECT_ROOT / "data" / "cic"
+    elif is_cic(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
         feature_cols = vocab["feature_cols"]
         l2i = vocab["label_to_id"]
@@ -85,7 +86,7 @@ def load_test_data(dataset: str):
             df = df[mask].reset_index(drop=True)
             X = df[feature_cols].values.astype(np.float32)
             y = np.array([id_map[lid] for lid in df["label_id"].values], dtype=np.int64)
-            C = cic_concept_labels(df)
+            C = (ton_concept_labels if is_ton(dataset) else cic_concept_labels)(df)
             return X, y, C
 
         def _load_unknown(max_per_class=2000):
@@ -110,7 +111,7 @@ def load_test_data(dataset: str):
         X_train, y_train, C_train = _load_known("train")
         X_val_known, _, _ = _load_known("val")
         X_unknown = _load_unknown()
-        concept_names = CIC_CONCEPTS
+        concept_names = TON_CONCEPTS if is_ton(dataset) else CIC_CONCEPTS
 
     else:
         raise ValueError(f"Unknown dataset: {dataset}")
@@ -120,16 +121,16 @@ def load_test_data(dataset: str):
 
 def _load_val_known(dataset: str) -> np.ndarray:
     """Return raw feature array for val_known split (used for OOD calibration)."""
-    if dataset == "ctu":
-        data_dir = PROJECT_ROOT / "data"
+    if is_ctu(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
         feature_cols = vocab["feature_cols"]
         known_ids = set(vocab["known_ids"])
         df = pd.read_parquet(data_dir / "val.parquet")
         df = df[df["label_id"].isin(known_ids)].reset_index(drop=True)
         return df[feature_cols].values.astype(np.float32)
-    elif dataset == "cic":
-        data_dir = PROJECT_ROOT / "data" / "cic"
+    elif is_cic(dataset):
+        data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
         feature_cols = vocab["feature_cols"]
         l2i = vocab["label_to_id"]
@@ -425,7 +426,7 @@ def intervention_experiment(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", choices=["ctu", "cic"], required=True)
+    parser.add_argument("--dataset", choices=DATASETS, required=True)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--models", nargs="+",
                         choices=["MLPBaseline", "JointCBM", "SequentialCBM", "HybridCBM"],

@@ -4,7 +4,7 @@
 # standard split for each lambda x seed and reports known-class F1, mean concept
 # accuracy and per-class-Mahalanobis OOD AUROC, using the same loaders and
 # scoring as cbm.train / cbm.evaluate. Writes per-seed rows to
-# results/cbm/lambda_sensitivity_{ds}_seeds.json; --aggregate rebuilds
+# results/cbm/lambda_sensitivity_{ds}_seeds.json; --aggregate writes
 # results/cbm/lambda_sensitivity.json (input of Table tab:lambda) from them.
 #
 # usage: python -m cbm.run_lambda_sweep --dataset ctu --seeds 5 --device cuda

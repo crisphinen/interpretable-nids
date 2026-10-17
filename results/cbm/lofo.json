@@ -1,0 +1,289 @@
+{
+  "ctuk_lofo_cchb": {
+    "base": "ctuk",
+    "held_out": "C&C-HeartBeat",
+    "n_held_out": 3450,
+    "rows": [
+      {
+        "seed": 0,
+        "mahal": 0.908394463768116,
+        "energy": 0.7365944057971013,
+        "winner": "M"
+      },
+      {
+        "seed": 1,
+        "mahal": 0.8865953043478261,
+        "energy": 0.29834089855072465,
+        "winner": "M"
+      },
+      {
+        "seed": 2,
+        "mahal": 0.9358619710144928,
+        "energy": 0.5064926376811595,
+        "winner": "M"
+      },
+      {
+        "seed": 3,
+        "mahal": 0.8671579710144927,
+        "energy": 0.6030072173913044,
+        "winner": "M"
+      },
+      {
+        "seed": 4,
+        "mahal": 0.9199490434782609,
+        "energy": 0.3310213913043478,
+        "winner": "M"
+      }
+    ],
+    "mahal": 0.9035917507246378,
+    "energy": 0.4950913101449276,
+    "winner_M": 5,
+    "winner_E": 0
+  },
+  "ctuk_lofo_ddos": {
+    "base": "ctuk",
+    "held_out": "DDoS",
+    "n_held_out": 3450,
+    "rows": [
+      {
+        "seed": 0,
+        "mahal": 0.8275866086956521,
+        "energy": 0.6824038260869565,
+        "winner": "M"
+      },
+      {
+        "seed": 1,
+        "mahal": 0.8481137391304349,
+        "energy": 0.8633585217391302,
+        "winner": "E"
+      },
+      {
+        "seed": 2,
+        "mahal": 0.8669413043478261,
+        "energy": 0.7300049855072464,
+        "winner": "M"
+      },
+      {
+        "seed": 3,
+        "mahal": 0.8753875942028986,
+        "energy": 0.16106724637681158,
+        "winner": "M"
+      },
+      {
+        "seed": 4,
+        "mahal": 0.8726310724637681,
+        "energy": 0.3025242608695652,
+        "winner": "M"
+      }
+    ],
+    "mahal": 0.8581320637681161,
+    "energy": 0.547871768115942,
+    "winner_M": 4,
+    "winner_E": 1
+  },
+  "ctuk_lofo_okiru": {
+    "base": "ctuk",
+    "held_out": "Okiru",
+    "n_held_out": 3450,
+    "rows": [
+      {
+        "seed": 0,
+        "mahal": 0.2650456231884058,
+        "energy": 0.6247188985507246,
+        "winner": "E"
+      },
+      {
+        "seed": 1,
+        "mahal": 0.2529725507246377,
+        "energy": 0.5210284057971014,
+        "winner": "E"
+      },
+      {
+        "seed": 2,
+        "mahal": 0.07974049275362319,
+        "energy": 0.15755985507246378,
+        "winner": "E"
+      },
+      {
+        "seed": 3,
+        "mahal": 0.254806231884058,
+        "energy": 0.4851071304347826,
+        "winner": "E"
+      },
+      {
+        "seed": 4,
+        "mahal": 0.2536337971014493,
+        "energy": 0.6751402028985507,
+        "winner": "E"
+      }
+    ],
+    "mahal": 0.22123973913043476,
+    "energy": 0.4927108985507246,
+    "winner_M": 0,
+    "winner_E": 5
+  },
+  "cicr_lofo_ddossyn": {
+    "base": "cicr",
+    "held_out": "DDoS-SYN_Flood",
+    "n_held_out": 5000,
+    "rows": [
+      {
+        "seed": 0,
+        "mahal": 0.9239399200000001,
+        "energy": 0.65670132,
+        "winner": "M"
+      },
+      {
+        "seed": 1,
+        "mahal": 0.77730672,
+        "energy": 0.17206426,
+        "winner": "M"
+      },
+      {
+        "seed": 2,
+        "mahal": 0.88899808,
+        "energy": 0.70242024,
+        "winner": "M"
+      },
+      {
+        "seed": 3,
+        "mahal": 0.90999448,
+        "energy": 0.78147974,
+        "winner": "M"
+      },
+      {
+        "seed": 4,
+        "mahal": 0.81353792,
+        "energy": 0.39012922,
+        "winner": "M"
+      }
+    ],
+    "mahal": 0.862755424,
+    "energy": 0.540558956,
+    "winner_M": 5,
+    "winner_E": 0
+  },
+  "cicr_lofo_mirai": {
+    "base": "cicr",
+    "held_out": "Mirai-greeth_flood",
+    "n_held_out": 5000,
+    "rows": [
+      {
+        "seed": 0,
+        "mahal": 0.98496172,
+        "energy": 0.9467817199999999,
+        "winner": "M"
+      },
+      {
+        "seed": 1,
+        "mahal": 0.97454732,
+        "energy": 0.6878152800000001,
+        "winner": "M"
+      },
+      {
+        "seed": 2,
+        "mahal": 0.9859728799999999,
+        "energy": 0.9803604000000001,
+        "winner": "M"
+      },
+      {
+        "seed": 3,
+        "mahal": 0.29272968,
+        "energy": 0.88794682,
+        "winner": "E"
+      },
+      {
+        "seed": 4,
+        "mahal": 0.98831004,
+        "energy": 0.97576608,
+        "winner": "M"
+      }
+    ],
+    "mahal": 0.8453043279999999,
+    "energy": 0.89573406,
+    "winner_M": 4,
+    "winner_E": 1
+  },
+  "cicr_lofo_recon": {
+    "base": "cicr",
+    "held_out": "Recon-PortScan",
+    "n_held_out": 5000,
+    "rows": [
+      {
+        "seed": 0,
+        "mahal": 0.7761086799999999,
+        "energy": 0.6575341,
+        "winner": "M"
+      },
+      {
+        "seed": 1,
+        "mahal": 0.7309711999999999,
+        "energy": 0.79045666,
+        "winner": "E"
+      },
+      {
+        "seed": 2,
+        "mahal": 0.74273924,
+        "energy": 0.71114164,
+        "winner": "M"
+      },
+      {
+        "seed": 3,
+        "mahal": 0.77344564,
+        "energy": 0.68323668,
+        "winner": "M"
+      },
+      {
+        "seed": 4,
+        "mahal": 0.7195383200000001,
+        "energy": 0.7341082800000001,
+        "winner": "E"
+      }
+    ],
+    "mahal": 0.748560616,
+    "energy": 0.715295472,
+    "winner_M": 3,
+    "winner_E": 2
+  },
+  "cicr_lofo_vuln": {
+    "base": "cicr",
+    "held_out": "VulnerabilityScan",
+    "n_held_out": 5000,
+    "rows": [
+      {
+        "seed": 0,
+        "mahal": 0.7169173199999999,
+        "energy": 0.58902326,
+        "winner": "M"
+      },
+      {
+        "seed": 1,
+        "mahal": 0.7068361999999999,
+        "energy": 0.7417316,
+        "winner": "E"
+      },
+      {
+        "seed": 2,
+        "mahal": 0.71711844,
+        "energy": 0.7303500599999999,
+        "winner": "E"
+      },
+      {
+        "seed": 3,
+        "mahal": 0.70487908,
+        "energy": 0.5606542600000001,
+        "winner": "M"
+      },
+      {
+        "seed": 4,
+        "mahal": 0.67548812,
+        "energy": 0.56933588,
+        "winner": "M"
+      }
+    ],
+    "mahal": 0.7042478319999999,
+    "energy": 0.6382190120000001,
+    "winner_M": 3,
+    "winner_E": 2
+  }
+}

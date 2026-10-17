@@ -1,0 +1,16 @@
+{
+  "MLPBaseline": {
+    "Benign_Final": 0.7596489181370955,
+    "DDoS-SYN_Flood": 0.9992533954177418,
+    "Mirai-greeth_flood": 0.9992532709732507,
+    "Recon-PortScan": 0.6358041403666065,
+    "VulnerabilityScan": 0.6990966740257676
+  },
+  "JointCBM_g0": {
+    "Benign_Final": 0.7585665575410968,
+    "DDoS-SYN_Flood": 0.9989735437397689,
+    "Mirai-greeth_flood": 0.9990664157061815,
+    "Recon-PortScan": 0.6380661045567964,
+    "VulnerabilityScan": 0.6965922235097203
+  }
+}

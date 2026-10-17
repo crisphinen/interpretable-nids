@@ -26,6 +26,7 @@ from cbm.model import MLPBaseline, JointCBM, SequentialCBM, HybridCBM
 from cbm.train import (load_dataset, train_joint, train_classifier_stage2,
                        make_tensors, make_loader, compute_val_f1, EMBED_DIM, LAMBDA_CONCEPT)
 from cbm.evaluate import load_test_data, ood_auroc, tpr_at_fpr, concept_accuracies
+from dsets import DATASETS
 
 RES = Path(__file__).parent.parent / "results" / "cbm"
 CK = RES / "ms"
@@ -52,14 +53,16 @@ def leakage_probe(model, Xtr, ytr, Xte, yte, device):
     return a_soft, a_bin
 
 
-def run(ds, seeds, device, variants=None):
+def run(ds, seeds, device, variants=None, suffix=""):
     (Xtr, ytr, Ctr), (Xva, yva, Cva), nf, nk, nc, names = load_dataset(ds)
     (Xte, yte, Cte), _, Xun, _, _ = load_test_data(ds)
     a, b, c = make_tensors(Xtr, ytr, Ctr, device); d, e, f = make_tensors(Xva, yva, Cva, device)
     ltr = make_loader(a, b, c, shuffle=True); lva = make_loader(d, e, f, shuffle=False)
     Xte_t = torch.tensor(Xte, dtype=torch.float32, device=device)
     CK.mkdir(exist_ok=True)
-    dest = RES / f"multiseed_{ds}_v2_seeds.json"
+    # a suffix lets two processes train disjoint variants of one dataset in parallel; merge
+    # the files with --merge before --aggregate
+    dest = RES / f"multiseed_{ds}_v2_seeds{suffix}.json"
     rows = json.loads(dest.read_text()) if dest.exists() else []
     done = {(r["variant"], r["seed"]) for r in rows}
     for vname, gamma in VARIANTS:
@@ -88,6 +91,8 @@ def run(ds, seeds, device, variants=None):
             r = {"variant": vname, "seed": s, "gamma": gamma,
                  "val_f1": float(compute_val_f1(model, lva, device)),
                  "test_f1": float(f1_score(yte, preds, average="weighted", zero_division=0)),
+                 "test_f1_per_class": [float(v) for v in f1_score(yte, preds, labels=sorted(set(yte)),
+                                                                  average=None, zero_division=0)],
                  "auroc": float(ood_auroc(model, Xtr, ytr, Xte, Xun, device)),
                  "tpr5": float(tpr_at_fpr(model, Xtr, ytr, Xte, Xun, device))}
             if base != "MLPBaseline":
@@ -103,7 +108,7 @@ def run(ds, seeds, device, variants=None):
 
 
 def aggregate(require):
-  for ds in ["ctu", "cic"]:
+  for ds in DATASETS:
     f = RES / f"multiseed_{ds}_v2_seeds.json"
     if not f.exists(): continue
     all_rows = json.loads(f.read_text())
@@ -130,16 +135,27 @@ def aggregate(require):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dataset", choices=["ctu", "cic"]); ap.add_argument("--seeds", type=int, default=5)
+    ap.add_argument("--dataset", choices=DATASETS); ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--seed_list", type=int, nargs="+", help="explicit seeds (overrides --seeds)")
     ap.add_argument("--variants", nargs="+", help="subset of variant names to run")
+    ap.add_argument("--seeds-suffix", default="", help="write per-seed rows to multiseed_{ds}_v2_seeds{suffix}.json")
+    ap.add_argument("--merge", nargs="+", metavar="SUFFIX", help="fold suffixed seed files of --dataset into the main one")
     ap.add_argument("--device", default="cuda"); ap.add_argument("--aggregate", action="store_true")
     ap.add_argument("--require", type=int, default=5)
     args = ap.parse_args()
     if args.aggregate: aggregate(args.require); return
+    if args.merge:
+        main_f = RES / f"multiseed_{args.dataset}_v2_seeds.json"
+        rows = json.loads(main_f.read_text()) if main_f.exists() else []
+        seen = {(r["variant"], r["seed"]) for r in rows}
+        for sfx in args.merge:
+            for r in json.loads((RES / f"multiseed_{args.dataset}_v2_seeds{sfx}.json").read_text()):
+                if (r["variant"], r["seed"]) not in seen:
+                    rows.append(r); seen.add((r["variant"], r["seed"]))
+        main_f.write_text(json.dumps(rows, indent=2)); print(f"merged -> {main_f} ({len(rows)} rows)"); return
     if not args.dataset: ap.error("--dataset required unless --aggregate")
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
-    run(args.dataset, args.seed_list or list(range(args.seeds)), device, args.variants)
+    run(args.dataset, args.seed_list or list(range(args.seeds)), device, args.variants, args.seeds_suffix)
 
 
 if __name__ == "__main__":

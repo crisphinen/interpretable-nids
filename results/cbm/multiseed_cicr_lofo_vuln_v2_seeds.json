@@ -1,0 +1,147 @@
+[
+  {
+    "variant": "JointCBM_g0",
+    "seed": 0,
+    "gamma": 0.0,
+    "val_f1": 0.9133473786791452,
+    "test_f1": 0.9129281099300093,
+    "test_f1_per_class": [
+      0.835134104487098,
+      0.9991998933191092,
+      0.9992667155522965,
+      0.8181117263615336
+    ],
+    "auroc": 0.7200400399999999,
+    "tpr5": 0.34912317473625376,
+    "concept_acc": 0.9733666666666667,
+    "concept_acc_per": {
+      "is_high_rate": 0.9956666666666667,
+      "is_syn_flood": 0.9957,
+      "is_udp_dominant": 0.9932333333333333,
+      "is_short_connection": 0.9309333333333333,
+      "is_large_payload": 0.9969333333333333,
+      "is_port_scan": 0.9307333333333333,
+      "is_high_variance": 0.9540333333333333,
+      "is_persistent": 0.9897
+    },
+    "probe_soft": 0.9122,
+    "probe_bin": 0.8813666666666666,
+    "leakage": 0.03083333333333338
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 1,
+    "gamma": 0.0,
+    "val_f1": 0.9137172217032081,
+    "test_f1": 0.9115908559585904,
+    "test_f1_per_class": [
+      0.8300502124372344,
+      0.9993997999333111,
+      0.999466808850973,
+      0.8174466026128431
+    ],
+    "auroc": 0.7743471399999999,
+    "tpr5": 0.41706839935722767,
+    "concept_acc": 0.9529666666666667,
+    "concept_acc_per": {
+      "is_high_rate": 0.8858666666666667,
+      "is_syn_flood": 0.9961,
+      "is_udp_dominant": 0.9810666666666666,
+      "is_short_connection": 0.9241333333333334,
+      "is_large_payload": 0.9379,
+      "is_port_scan": 0.9693,
+      "is_high_variance": 0.9355,
+      "is_persistent": 0.9938666666666667
+    },
+    "probe_soft": 0.9114333333333333,
+    "probe_bin": 0.8848,
+    "leakage": 0.026633333333333287
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 2,
+    "gamma": 0.0,
+    "val_f1": 0.9133201983015251,
+    "test_f1": 0.9118683620690438,
+    "test_f1_per_class": [
+      0.8317187399756207,
+      0.998866893288009,
+      0.9989330488130168,
+      0.8179547661995282
+    ],
+    "auroc": 0.7686913,
+    "tpr5": 0.44602808635506186,
+    "concept_acc": 0.9633416666666667,
+    "concept_acc_per": {
+      "is_high_rate": 0.9943666666666666,
+      "is_syn_flood": 0.9950333333333333,
+      "is_udp_dominant": 0.9865,
+      "is_short_connection": 0.8834333333333333,
+      "is_large_payload": 0.9457,
+      "is_port_scan": 0.9134333333333333,
+      "is_high_variance": 0.9945,
+      "is_persistent": 0.9937666666666667
+    },
+    "probe_soft": 0.9117,
+    "probe_bin": 0.8882,
+    "leakage": 0.023499999999999965
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 3,
+    "gamma": 0.0,
+    "val_f1": 0.9121464415781075,
+    "test_f1": 0.9107403666266224,
+    "test_f1_per_class": [
+      0.8292996083969956,
+      0.9990003332222592,
+      0.99913292870006,
+      0.815528596187175
+    ],
+    "auroc": 0.7123597399999999,
+    "tpr5": 0.32982253895060437,
+    "concept_acc": 0.9652041666666666,
+    "concept_acc_per": {
+      "is_high_rate": 0.9465,
+      "is_syn_flood": 0.9956333333333334,
+      "is_udp_dominant": 0.9909333333333333,
+      "is_short_connection": 0.8788666666666667,
+      "is_large_payload": 0.9826333333333334,
+      "is_port_scan": 0.9988,
+      "is_high_variance": 0.9972666666666666,
+      "is_persistent": 0.931
+    },
+    "probe_soft": 0.9109,
+    "probe_bin": 0.8926,
+    "leakage": 0.018300000000000094
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 4,
+    "gamma": 0.0,
+    "val_f1": 0.9124033706494045,
+    "test_f1": 0.9113277114013354,
+    "test_f1_per_class": [
+      0.8286584180864157,
+      0.9991333911072595,
+      0.9991998933191092,
+      0.818319143092557
+    ],
+    "auroc": 0.77573464,
+    "tpr5": 0.47086564661496544,
+    "concept_acc": 0.8996291666666667,
+    "concept_acc_per": {
+      "is_high_rate": 0.9945666666666667,
+      "is_syn_flood": 0.9958666666666667,
+      "is_udp_dominant": 0.6787,
+      "is_short_connection": 0.8771,
+      "is_large_payload": 0.9497,
+      "is_port_scan": 0.9991,
+      "is_high_variance": 0.8045666666666667,
+      "is_persistent": 0.8974333333333333
+    },
+    "probe_soft": 0.9112666666666667,
+    "probe_bin": 0.8977666666666667,
+    "leakage": 0.013499999999999956
+  }
+]
