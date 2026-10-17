@@ -67,7 +67,8 @@ for ds in ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111 ctud_h108 ctud_o_h108 tond
 bash nesy/run_kfs_control.sh ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111 ctud_h108 ctud_o_h108
 $PY -m nesy.run_shared_eval --datasets ctud_h198 ctud_o_h198 ctud_h111 ctud_o_h111 ctud_h108 ctud_o_h108
 $PY -m cbm.run_device_openset --device cuda      # known and unknown flows from the held-out device
-$PY -m cbm.run_device_openset --reference        # seen-device baselines (CTU C&C, TON_IoT DoS)
+$PY -m cbm.run_device_openset --reference        # seen-address baselines (CTU C&C, TON_IoT DoS)
+$PY -m cbm.run_device_openset --mitm             # TON_IoT MITM flows of the held-out addresses, separately
 $PY -m cbm.run_split_overlap                     # same-class train/test duplicate shares
 $PY -m cbm.run_bottleneck_control --datasets ctuk cicr ton --device cuda   # 8-unit bottleneck, no concept labels
 $PY -m cbm.run_multiseed --dataset ctuk_n --seeds 5 --device cuda \
@@ -140,6 +141,7 @@ main results table exactly.
 
 ```bash
 $PY -m cbm.run_bootstrap_ci --device cuda                     # 95% CIs of the AUROC comparisons
+$PY checks/ctu_label_counts.py                                # CTU retained labels, unmatched (zero-filled) flows
 $PY checks/paper_values.py                                    # every table value, mean and seed std
 $PY -m nesy.aggregate_alpha_sweep --datasets ctuk:ctu cicr:cic --out results/nesy/alpha_sweep_main.json
 $PY -m cbm.make_alpha_figure --input results/nesy/alpha_sweep_main.json   # paper/figures/alpha_sweep

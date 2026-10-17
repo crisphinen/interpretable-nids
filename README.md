@@ -118,7 +118,8 @@ prints every value in the manuscript and supplement tables from `results/`.
 | Open-set (C+1), per-family, confusion matrix | `ctuk`, `cicr` | `results/cbm/openset_{ctuk,cicr}.json` | `cbm/run_openset.py` |
 | Post-hoc detectors on the MLP | `ctuk`, `cicr` | `results/cbm/ood_baselines_{ds}_seeds.json` | `cbm/run_ood_baselines.py --seeds 5` |
 | Device-disjoint splits | CTU `ctud_h198`, `ctud_h111`, `ctud_h108` and the `ctud_o_*` controls; TON_IoT `tond_a30`, `tond_a31` | `results/cbm/multiseed_{ds}_v2.json`, `results/nesy/shared_eval_{ds}.json`, `results/nesy/{ds}_*_eval.json` | `06_make_kfs_splits.py --split device`, `07_make_splits_ton.py --holdout-attacker`, `cbm/run_multiseed.py`, `nesy/run_kfs_control.sh` |
-| Open-set test with the held-out device's own unknown flows; seen-device baselines | `ctud_h198`, `ctud_o_h198`, `tond_a30`, `tond_a31`; `ctuk`, `ton` | `results/cbm/device_openset.json` | `cbm/run_device_openset.py` |
+| Open-set test with the held-out address's own unknown flows (AUROC, diagnostic TPR, validation-threshold rejection and recall); seen-address baselines | `ctud_h198`, `ctud_o_h198`, `tond_a30`, `tond_a31`; `ctuk`, `ton` | `results/cbm/device_openset.json` | `cbm/run_device_openset.py` |
+| CTU retained labels and flows without a DPKT match | `iot23_3.duckdb` | `results/cbm/ctu_label_counts.json` | `checks/ctu_label_counts.py` |
 | Same-class train/test duplicate shares | `ctuk`, `ctud_*`, `ton`, `tond_*` | `results/cbm/split_overlap.json` | `cbm/run_split_overlap.py` |
 | 95% confidence intervals of AUROC comparisons | `ctuk`, `cicr`, `ton` | `results/cbm/bootstrap_ci.json` | `cbm/run_bootstrap_ci.py` |
 | 8-unit bottleneck control | `ctuk`, `cicr`, `ton` | `results/cbm/bottleneck8_{ds}.json` | `cbm/run_bottleneck_control.py` |
