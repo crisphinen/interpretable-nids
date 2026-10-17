@@ -215,8 +215,8 @@ CIC OOD AUROC     & 0.743$\pm$0.018 & 0.717$\pm$0.017 & 0.703$\pm$0.013 \\
 \label{sec:temporal}
 
 Random flow partitioning can leak device or session identity between train and test. The CTU
-attacks come from very few source hosts (Okiru: 4, DDoS: 7, C\&C-HeartBeat: 5 source IPs);
-Section~\ref{sec:device} holds out a device, and here we build the known-class splits in time: we take the same per-class sample as the main
+attacks come from very few source addresses (Okiru: 4, DDoS: 7, C\&C-HeartBeat: 5);
+Section~\ref{sec:device} holds out source IP addresses, and here we build the known-class splits in time: we take the same per-class sample as the main
 split, order the flows of each known class by capture timestamp (timestamps are compared
 only within a class), and assign that class's earliest 70\% to training, the next 15\% to
 validation and the latest 15\% to test (five seeds; within each class, test strictly
@@ -244,31 +244,34 @@ SequentialCBM is the exception, losing Benign (F1$_4$ $0.330$, Coh-3 $0.441$). N
 highest temporal-split AUROC ($0.888{\pm}0.025$; $0.901{\pm}0.030$ with the $\alpha$-gate penalty of
 Section~\ref{sec:alpha}), and the JointCBM $\gamma$ ordering shifts relative to the alternative split.
 
-\section{Device-Disjoint Splits on CTU-IoT-23}
+\section{Source-IP Holdout}
 \label{sec:device}
 
-Two CTU hosts, 192.168.1.198 and 192.168.100.111, have at least $3{,}450$ flows in each of the
-four known classes. For each, we take that host's flows as the known test set ($3{,}450$ per
-class) and draw the training and validation flows, in the usual numbers, from all other hosts; the unknown test flows are those of the main split. The feature list is
-re-selected on each split's training rows (36 features for host .198, 33 for host .111), and a
-control uses the main split's 31-feature list on the same rows. Every model of main
-Table~\ref{M-tab:main} is trained with five seeds and scored on the shared evaluation flows; for
-host .198 one class has only $14{,}699$ training flows instead of $16{,}100$, because C\&C-HeartBeat
-has fewer flows on the other hosts. \texttt{06\_make\_kfs\_splits.py --split device} builds the
+Flows are grouped by source IP address. Our merged flow tables keep the source IP but not the
+capture name, and an address can recur across captures, so a
+held-out address is not shown to be a single physical device; the experiment is a source-IP
+holdout, and its conclusions concern source addresses. Two CTU addresses, 192.168.1.198 and 192.168.100.111, have at least $3{,}450$ flows in each of the
+four known classes. For each, we take that address's flows as the known test set ($3{,}450$ per
+class) and draw the training and validation flows, in the usual numbers, from all other addresses; the unknown test flows are those of the main split. The feature list is
+re-selected on each split's training rows (36 features for address .198, 33 for address .111), and a
+control uses the main split's 31-feature list on the same rows. The MLP, the CBM variants (JointCBM, SequentialCBM, HybridCBM) and NeSy-NIDS (with the $\alpha$
+penalty and the rule-only head) are trained with five seeds and scored on the shared evaluation flows; for
+address .198 one class has only $14{,}699$ training flows instead of $16{,}100$, because C\&C-HeartBeat
+has fewer flows on the other addresses. \texttt{06\_make\_kfs\_splits.py --split device} builds the
 splits (\texttt{ctud\_h198}, \texttt{ctud\_h111} and the \texttt{\_o} controls).
 
 \begin{table}[h]
 \centering\footnotesize
-\caption{Device-disjoint CTU splits: known-class weighted F1 (five-seed mean) and OOD AUROC
+\caption{CTU source-IP holdout: known-class weighted F1 (five-seed mean) and OOD AUROC
 (mean$\pm$std, five seeds) with the re-selected features, and AUROC with the main 31-feature list
-(31f). With the 31-feature list, F1 is $0.417$ on host .198 ($0.517$ for NeSy-NIDS ($\alpha$)) and
-$0.149$--$0.227$ on host .111. Main split for reference: F1 $0.933$, AUROC $0.82$--$0.91$.}
+(31f). With the 31-feature list, F1 is $0.417$ on address .198 ($0.517$ for NeSy-NIDS ($\alpha$)) and
+$0.149$--$0.227$ on address .111. Main split for reference: F1 $0.566$--$0.933$, AUROC $0.805$--$0.909$.}
 \label{tab:device}
 \setlength{\tabcolsep}{3pt}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
- & \multicolumn{3}{c}{Host 192.168.1.198} & \multicolumn{3}{c}{Host 192.168.100.111} \\
+ & \multicolumn{3}{c}{Address 192.168.1.198} & \multicolumn{3}{c}{Address 192.168.100.111} \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}
 Model & F1 & AUROC & AUROC 31f & F1 & AUROC & AUROC 31f \\
 \midrule
@@ -286,34 +289,36 @@ Rule-only                  & $0.416$ & $0.770{\pm}.032$ & $0.770{\pm}.032$ & $0.
 \end{tabular}}
 \end{table}
 
-Known-class classification fails for every model. Each host's traffic in a class is a few
-repeated flow patterns: the $3{,}450$ Benign test flows of host .198 are three distinct feature
-vectors and its Okiru flows six, against $7{,}970$ and $166$ distinct vectors in the training
-rows of those classes. With the re-selected features, every model and seed on host .198 scores F1
+Known-class classification fails for every model. The held-out
+addresses' class traffic is unlike the other addresses': none of address .198's Benign or DDoS test
+flows, and none of address .111's test flows in any class, has an exact duplicate among the training
+flows of its class (Section~\ref{sec:device2}), and address .198's $3{,}450$ Benign test flows are
+three distinct feature vectors. With the re-selected features, every MLP, CBM and NeSy-NIDS run on address .198 scores F1
 $0.00$ on Benign and on one more class (DDoS, or C\&C-HeartBeat for SequentialCBM and rule-only),
 which fixes weighted F1 at $0.417$ (with the 31-feature list, two NeSy-NIDS ($\alpha$) seeds reach
 $0.67$ on Benign); the MLP (seed 0) classifies $3{,}448$ of the $3{,}450$ Benign flows as Okiru and all DDoS
-flows as Benign. On host .111 every model and seed with the re-selected features scores F1 below $0.03$ on DDoS
+flows as Benign. On address .111 every MLP, CBM and NeSy-NIDS run with the re-selected features scores F1 below $0.03$ on DDoS
 and Okiru (with the 31-feature list SequentialCBM reaches $0.54$ on DDoS); the MLP (seed 0) classifies $3{,}407$ of the DDoS and $3{,}409$ of the Okiru flows as C\&C-HeartBeat. Because the known test flows are themselves unlike the
-training data, AUROC no longer isolates novel attack types. On host .111 it is below $0.5$ for
-every model and seed (all 100 runs): the held-out host's known flows score as more novel than the unknown flows, over $99.9\%$
-of which come from other hosts that also produce known-class flows ($89\%$ for host .198, where
-$3{,}516$ unknown flows come from the held-out host itself). On host .198 SequentialCBM and NeSy-NIDS score highest and
-the MLP lowest, but with every model losing two of the four known classes these values do not
-measure open-set detection on a new device.
+training data, AUROC no longer isolates novel attack types. On address .111 it is below $0.5$ for
+every model and seed (all 100 runs): the held-out address's known flows score as more novel than the unknown flows, over $99.9\%$
+of which come from other addresses that also produce known-class flows ($89\%$ for address .198, where
+$3{,}516$ unknown flows come from the held-out address itself). On address .198 SequentialCBM and NeSy-NIDS score highest and
+the MLP lowest, but with every model losing two of the four known classes these
+values do not measure open-set detection on a new address.
 
-\subsection{A Third CTU Host and TON\_IoT}
-Host 192.168.100.108 has $3{,}450$ flows in each CTU attack class but only $3{,}051$ Benign
+\subsection{A Third CTU Address and TON\_IoT}
+\label{sec:device2}
+Address 192.168.100.108 has $3{,}450$ flows in each CTU attack class but only $3{,}051$ Benign
 flows, all of which form its Benign test set; it has no unknown-family flows. On TON\_IoT the attack
-flows come from attacker machines; \texttt{07\_make\_splits\_ton.py --holdout-attacker} takes
-$7{,}500$ test flows per attack class from attacker machine 192.168.1.30 or 192.168.1.31 and
-$7{,}500$ normal flows from host 192.168.1.195 or 192.168.1.190, and draws training and validation
-flows from all other hosts (\texttt{tond\_a30}, \texttt{tond\_a31}; the fixed TON\_IoT feature list,
+flows of each known class come from a few source addresses; \texttt{07\_make\_splits\_ton.py --holdout-attacker} takes
+$7{,}500$ test flows per attack class from address 192.168.1.30 or 192.168.1.31 and
+$7{,}500$ normal flows from address 192.168.1.195 or 192.168.1.190, and draws training and validation
+flows from all other addresses (\texttt{tond\_a30}, \texttt{tond\_a31}; the fixed TON\_IoT feature list,
 scaler and vocabularies refit on the training rows). NeSy-NIDS has no TON\_IoT rule bank.
 
 \begin{table}[h]
 \centering\footnotesize
-\caption{Host .108 (CTU) and the two TON\_IoT device splits: known-class weighted F1 (five-seed
+\caption{CTU address .108 and the two TON\_IoT source-IP holdouts: known-class weighted F1 (five-seed
 mean) and OOD AUROC against the main split's unknown pool (mean$\pm$std, five seeds). 31f: the
 main 31-feature CTU list. TON\_IoT main split: F1 $0.704$--$0.898$, AUROC $0.552$--$0.654$.}
 \label{tab:device2}
@@ -321,7 +326,7 @@ main 31-feature CTU list. TON\_IoT main split: F1 $0.704$--$0.898$, AUROC $0.552
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lccccccc@{}}
 \toprule
- & \multicolumn{3}{c}{CTU host .108} & \multicolumn{2}{c}{TON\_IoT machine .30} & \multicolumn{2}{c}{TON\_IoT machine .31} \\
+ & \multicolumn{3}{c}{CTU address .108} & \multicolumn{2}{c}{TON\_IoT address .30} & \multicolumn{2}{c}{TON\_IoT address .31} \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
 Model & F1 & AUROC & AUROC 31f & F1 & AUROC & F1 & AUROC \\
 \midrule
@@ -339,27 +344,27 @@ Rule-only                  & $0.475$ & $0.887{\pm}.011$ & $0.887{\pm}.011$ & -- 
 \end{tabular}}
 \end{table}
 
-On TON\_IoT the largest per-class losses are on the held-out normal host and on password
-(machine .30, MLP: normal $0.68$ vs.\ $0.91$, password $0.59$ vs.\ $0.79$ on the main split);
-machine .31 matches the main split. The share of known test flows with an exact duplicate (features
+On TON\_IoT the largest per-class losses are on the held-out normal address and on password
+(address .30, MLP: normal $0.68$ vs.\ $0.91$, password $0.59$ vs.\ $0.79$ on the main split);
+address .31 matches the main split. The share of known test flows with an exact duplicate (features
 rounded to four decimals) among the training flows of their class is $0.84$ on the CTU main split
-and $0.88$ on TON\_IoT, $0.42$, $0.00$ and $0.41$ on CTU hosts .198, .111 and .108, and $0.74$ and
-$0.77$ on TON\_IoT machines .30 and .31.
+and $0.88$ on TON\_IoT, $0.42$, $0.00$ and $0.41$ on CTU addresses .198, .111 and .108, and $0.74$ and
+$0.77$ on TON\_IoT addresses .30 and .31.
 
-\subsection{Open-Set Test with Unknown Flows from the Held-Out Device}
+\subsection{Open-Set Test with Unknown Flows from the Held-Out Address}
 Table~\ref{tab:device} scores against the main split's unknown pool, most of which comes from
-devices seen in training. \texttt{cbm/run\_device\_openset.py} instead scores each held-out device's
-known test flows against that device's own unknown-family flows: host .198 ($3{,}516$: C\&C
-$3{,}499$, C\&C-FileDownload $14$, Okiru-Attack $3$), TON\_IoT machine .30 with host .195 (DoS, $2$
-MITM) and machine .31 with host .190 (DoS, $510$ MITM); TON\_IoT unknowns are sampled as in the main
-split ($2{,}000$ per family). As a seen-device reference, the main-split models are scored the same
-way against the main split's own C\&C (CTU) or DoS (TON\_IoT) flows. Host .111 has 4 unknown-family
-flows and host .108 none, so neither is tested.
+addresses seen in training. \texttt{cbm/run\_device\_openset.py} instead scores each held-out address's
+known test flows against that address's own unknown-family flows, for the MLP, CBMs and NeSy-NIDS: address .198 ($3{,}516$: C\&C
+$3{,}499$, C\&C-FileDownload $14$, Okiru-Attack $3$), TON\_IoT address .30 with .195 (DoS, $2$
+MITM) and address .31 with .190 (DoS, $510$ MITM); TON\_IoT unknowns are sampled as in the main
+split ($2{,}000$ per family). As a seen-address reference, the main-split models are scored the same
+way against the main split's own C\&C (CTU) or DoS (TON\_IoT) flows. Address .111 has 4 unknown-family
+flows and address .108 none, so neither is tested.
 
 \begin{table}[h]
 \centering\footnotesize
 \caption{OOD AUROC / TPR@5\%FPR (five-seed mean) with known and unknown test flows from the same
-device. ``Seen'': main-split models against the same family's flows from devices seen in training.}
+source address. ``Seen'': main-split models against the same family's flows from addresses seen in training.}
 \label{tab:devopen}
 \setlength{\tabcolsep}{2.5pt}
 \resizebox{\columnwidth}{!}{%
@@ -367,7 +372,7 @@ device. ``Seen'': main-split models against the same family's flows from devices
 \toprule
  & \multicolumn{3}{c}{CTU, C\&C} & \multicolumn{3}{c}{TON\_IoT, DoS} \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}
-Model & Seen & Host .198 & Host .198, 31f & Seen & Machine .30 & Machine .31 \\
+Model & Seen & Address .198 & Address .198, 31f & Seen & Address .30 & Address .31 \\
 \midrule
 MLP baseline               & $0.853$ / $0.337$ & $0.396$ / $0.007$ & $0.396$ / $0.007$ & $0.444$ / $0.009$ & $0.412$ / $0.004$ & $0.824$ / $0.025$ \\
 JointCBM $\gamma{=}0$      & $0.829$ / $0.339$ & $0.609$ / $0.052$ & $0.713$ / $0.162$ & $0.754$ / $0.016$ & $0.691$ / $0.007$ & $0.743$ / $0.035$ \\
@@ -383,11 +388,11 @@ Rule-only                  & $0.820$ / $0.183$ & $0.639$ / $0.031$ & $0.639$ / $
 \end{tabular}}
 \end{table}
 
-On CTU the held-out device lowers C\&C AUROC from $0.82$--$0.88$ to $0.40$--$0.71$ and TPR from
-$0.18$--$0.55$ to at most $0.162$. On TON\_IoT machine .30 the change is small (AUROC $0.41$--$0.75$
-vs.\ $0.44$--$0.75$), and TPR is low for every model on seen devices too ($\le0.022$). The ordering
-of the models is not stable across devices: the concept models are above the MLP on host .198 and
-machine .30, and below it on machine .31.
+On CTU the held-out address lowers C\&C AUROC from $0.82$--$0.88$ to $0.40$--$0.71$ and TPR from
+$0.18$--$0.55$ to at most $0.162$. On TON\_IoT address .30 the change is small (AUROC $0.41$--$0.75$
+vs.\ $0.44$--$0.75$), and TPR is low for every model on seen addresses too ($\le0.022$). The ordering
+of the models is not stable across addresses: the concept models are above the MLP on address .198
+and address .30, and below it on address .31.
 
 \section{Confidence Intervals}
 \label{sec:ci}
@@ -568,8 +573,8 @@ The control also bears on the geometry reading. The CTU correlations of main
 Table~\ref{M-tab:signflip} are opposite in sign to CIC-IoT-2023 and TON\_IoT, and
 Section~\ref{sec:loco} traces the direction to SequentialCBM, the CBM configuration whose AUROC
 changes most with the feature list. Under the leak-free list no CTU association holds without that
-configuration, and Section~\ref{sec:transfer} shows that no statistic predicts detectability on a
-held-out corpus.
+configuration, and Section~\ref{sec:transfer} shows that no statistic predicts detectability consistently
+on a held-out corpus.
 
 \textbf{Per-split selection for the robustness experiments.} The known-only selection above is
 fitted on the primary random split's known-class training rows, which is not automatically
@@ -577,8 +582,10 @@ leak-free for the other CTU experiments. We therefore run the same random-forest
 separately on each: the alternative known set's training rows (excluding the now-held-out
 C\&C-HeartBeat), the earliest 70\% of the timestamp-ordered split, and each leave-one-family-out
 fold's reduced known set, so the family that experiment holds out, and any test-period flow, never
-informs its features. Each of these splits draws its own class-balanced sample; running the main split's
-31-feature list on the same sample separates re-selection from the sample, and the accuracy,
+informs its features. The alternative split draws its own class-balanced sample, the temporal
+split reorders the main split's sample by time, and the leave-one-family-out folds reuse the main
+split's rows. For the alternative and temporal splits, running the main split's 31-feature list on
+the same rows separates re-selection from the sample, and the accuracy,
 scorer and $\gamma$ conclusions hold under both. One consequence is visible in the temporal split
 (Section~\ref{sec:temporal}): the DDoS collapse occurs under both feature lists (bar two JointCBM
 seeds with the main-split list), so it is a property of the temporal split, not of feature
