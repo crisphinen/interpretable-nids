@@ -38,3 +38,5 @@ nb_run.py
 iot23-3.ipynb
 HyperIoT_*.md
 Unknown\ Attack\ Detection*.pdf
+data/cicr/*.parquet
+data/cicr_alt/*.parquet

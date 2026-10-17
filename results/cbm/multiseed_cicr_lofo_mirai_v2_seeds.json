@@ -1,0 +1,147 @@
+[
+  {
+    "variant": "JointCBM_g0",
+    "seed": 0,
+    "gamma": 0.0,
+    "val_f1": 0.7719869725504344,
+    "test_f1": 0.7737548513675522,
+    "test_f1_per_class": [
+      0.7580783717703033,
+      0.9998666488865182,
+      0.6349307435121796,
+      0.7021436413012077
+    ],
+    "auroc": 0.7240326800000001,
+    "tpr5": 0.45104101166771465,
+    "concept_acc": 0.9587791666666666,
+    "concept_acc_per": {
+      "is_high_rate": 0.9926666666666667,
+      "is_syn_flood": 0.9957,
+      "is_udp_dominant": 0.9997,
+      "is_short_connection": 0.8933,
+      "is_large_payload": 0.9291333333333334,
+      "is_port_scan": 0.9335666666666667,
+      "is_high_variance": 0.9264,
+      "is_persistent": 0.9997666666666667
+    },
+    "probe_soft": 0.7775,
+    "probe_bin": 0.7251333333333333,
+    "leakage": 0.05236666666666667
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 1,
+    "gamma": 0.0,
+    "val_f1": 0.7735605519263282,
+    "test_f1": 0.7772963714626206,
+    "test_f1_per_class": [
+      0.7626085829119668,
+      0.9998666488865182,
+      0.6433857539315448,
+      0.7033245001204529
+    ],
+    "auroc": 0.7183583800000001,
+    "tpr5": 0.34817997624537134,
+    "concept_acc": 0.9590208333333334,
+    "concept_acc_per": {
+      "is_high_rate": 0.9931666666666666,
+      "is_syn_flood": 0.9634,
+      "is_udp_dominant": 0.9988,
+      "is_short_connection": 0.8785,
+      "is_large_payload": 0.9481,
+      "is_port_scan": 0.9993,
+      "is_high_variance": 0.9975333333333334,
+      "is_persistent": 0.8933666666666666
+    },
+    "probe_soft": 0.7785333333333333,
+    "probe_bin": 0.7203666666666667,
+    "leakage": 0.05816666666666659
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 2,
+    "gamma": 0.0,
+    "val_f1": 0.7711736817567093,
+    "test_f1": 0.772365149311678,
+    "test_f1_per_class": [
+      0.7596558437480374,
+      0.9999333288885925,
+      0.6409742562047172,
+      0.6888971684053651
+    ],
+    "auroc": 0.76488084,
+    "tpr5": 0.5008558652972822,
+    "concept_acc": 0.9422958333333333,
+    "concept_acc_per": {
+      "is_high_rate": 0.9875666666666667,
+      "is_syn_flood": 0.9957,
+      "is_udp_dominant": 0.9715,
+      "is_short_connection": 0.9124,
+      "is_large_payload": 0.9571333333333333,
+      "is_port_scan": 0.9295333333333333,
+      "is_high_variance": 0.8453333333333334,
+      "is_persistent": 0.9392
+    },
+    "probe_soft": 0.7744333333333333,
+    "probe_bin": 0.7349,
+    "leakage": 0.03953333333333331
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 3,
+    "gamma": 0.0,
+    "val_f1": 0.7730500190415586,
+    "test_f1": 0.7748640969330722,
+    "test_f1_per_class": [
+      0.760033498679379,
+      0.9998666488865182,
+      0.6349231500554587,
+      0.7046330901109331
+    ],
+    "auroc": 0.6117361400000001,
+    "tpr5": 0.22346817578425207,
+    "concept_acc": 0.9679458333333333,
+    "concept_acc_per": {
+      "is_high_rate": 0.9823666666666667,
+      "is_syn_flood": 0.9956,
+      "is_udp_dominant": 0.9495,
+      "is_short_connection": 0.9329333333333333,
+      "is_large_payload": 0.9800666666666666,
+      "is_port_scan": 0.9945333333333334,
+      "is_high_variance": 0.9480333333333333,
+      "is_persistent": 0.9605333333333334
+    },
+    "probe_soft": 0.7762,
+    "probe_bin": 0.6820666666666667,
+    "leakage": 0.09413333333333329
+  },
+  {
+    "variant": "JointCBM_g0",
+    "seed": 4,
+    "gamma": 0.0,
+    "val_f1": 0.7724206150465092,
+    "test_f1": 0.7729515015509301,
+    "test_f1_per_class": [
+      0.7581961902293638,
+      0.9996665555185061,
+      0.6310383566040764,
+      0.702904903851774
+    ],
+    "auroc": 0.7502266400000001,
+    "tpr5": 0.4805246978271501,
+    "concept_acc": 0.96195,
+    "concept_acc_per": {
+      "is_high_rate": 0.9974333333333333,
+      "is_syn_flood": 0.9957,
+      "is_udp_dominant": 0.9997666666666667,
+      "is_short_connection": 0.9302666666666667,
+      "is_large_payload": 0.9175333333333333,
+      "is_port_scan": 0.9617333333333333,
+      "is_high_variance": 0.9591333333333333,
+      "is_persistent": 0.9340333333333334
+    },
+    "probe_soft": 0.776,
+    "probe_bin": 0.7220666666666666,
+    "leakage": 0.05393333333333339
+  }
+]

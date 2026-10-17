@@ -1,0 +1,50 @@
+{
+  "ddos_high_rate": {
+    "Benign": 0.0,
+    "C&C-HeartBeat": 0.0,
+    "DDoS": 0.038260869681835175,
+    "Okiru": 0.0
+  },
+  "cc_heartbeat_beaconing": {
+    "Benign": 0.0,
+    "C&C-HeartBeat": 1.0,
+    "DDoS": 0.9275362491607666,
+    "Okiru": 0.0
+  },
+  "benign_single_probe": {
+    "Benign": 1.0,
+    "C&C-HeartBeat": 0.5005797147750854,
+    "DDoS": 0.4492753744125366,
+    "Okiru": 1.0
+  },
+  "okiru_low_rate": {
+    "Benign": 1.0,
+    "C&C-HeartBeat": 0.9997101426124573,
+    "DDoS": 0.577101469039917,
+    "Okiru": 1.0
+  },
+  "asymmetric_flood": {
+    "Benign": 0.0,
+    "C&C-HeartBeat": 0.5005797147750854,
+    "DDoS": 0.7014492750167847,
+    "Okiru": 0.0
+  },
+  "persistent_connection": {
+    "Benign": 0.0,
+    "C&C-HeartBeat": 0.5005797147750854,
+    "DDoS": 0.5614492893218994,
+    "Okiru": 0.0
+  },
+  "incomplete_handshake": {
+    "Benign": 0.0,
+    "C&C-HeartBeat": 0.9997101426124573,
+    "DDoS": 0.005797101650387049,
+    "Okiru": 0.0
+  },
+  "ddos_short_burst": {
+    "Benign": 0.0,
+    "C&C-HeartBeat": 0.0,
+    "DDoS": 0.038260869681835175,
+    "Okiru": 0.0
+  }
+}

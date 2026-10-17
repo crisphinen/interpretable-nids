@@ -1,0 +1,96 @@
+{
+  "dataset": "cicr",
+  "model": "nesy",
+  "seed": 3,
+  "known_f1": 0.8193320605327309,
+  "test_f1": 0.8204597088818145,
+  "test_f1_per_class": [
+    0.7619232511486442,
+    0.9993998799759952,
+    0.9994667377682975,
+    0.638015484278717,
+    0.7034931912374186
+  ],
+  "protocol": "per-class Mahalanobis fit on train; AUROC/TPR on test_known vs unknown; F1/tau on val",
+  "ood_auroc_mahal": 0.6774082199999999,
+  "ood_auroc_energy": 0.74587346,
+  "ood_auroc_comb_avg": 0.76715832,
+  "ood_auroc_comb_max": 0.7552203399999998,
+  "ood_auroc_comb_ada": 0.76715832,
+  "tpr_at_5fpr_mahal": 0.2518,
+  "tpr_at_5fpr_comb_avg": 0.4188,
+  "tau": 0.5466318063238614,
+  "unk_rejection_rate": 0.4228,
+  "known_rejection_rate": 0.0512,
+  "mean_crispness": 1.0,
+  "soft_crispness_0.1": 0.7473800182342529,
+  "gate_alpha": 0.9036160707473755,
+  "crispness_per_rule": {
+    "syn_flood_ddos": 1.0,
+    "udp_mirai_flood": 1.0,
+    "recon_port_scan": 1.0,
+    "vuln_scan": 1.0,
+    "benign_low_rate": 1.0,
+    "large_payload_flood": 1.0,
+    "high_entropy_scan": 1.0,
+    "short_connection_flood": 1.0
+  },
+  "editing_results": {
+    "syn_flood_ddos": {
+      "base_acc": 0.8214133381843567,
+      "acc_forced_hi": 0.8144800066947937,
+      "acc_forced_lo": 0.8213066458702087,
+      "delta_hi": -0.006933331489562988,
+      "delta_lo": -0.00010669231414794922
+    },
+    "udp_mirai_flood": {
+      "base_acc": 0.8214133381843567,
+      "acc_forced_hi": 0.819920003414154,
+      "acc_forced_lo": 0.8212266564369202,
+      "delta_hi": -0.0014933347702026367,
+      "delta_lo": -0.00018668174743652344
+    },
+    "recon_port_scan": {
+      "base_acc": 0.8214133381843567,
+      "acc_forced_hi": 0.7748000025749207,
+      "acc_forced_lo": 0.8213333487510681,
+      "delta_hi": -0.046613335609436035,
+      "delta_lo": -7.998943328857422e-05
+    },
+    "vuln_scan": {
+      "base_acc": 0.8214133381843567,
+      "acc_forced_hi": 0.8042133450508118,
+      "acc_forced_lo": 0.8209866881370544,
+      "delta_hi": -0.017199993133544922,
+      "delta_lo": -0.0004266500473022461
+    },
+    "benign_low_rate": {
+      "base_acc": 0.8214133381843567,
+      "acc_forced_hi": 0.8222399950027466,
+      "acc_forced_lo": 0.8185333609580994,
+      "delta_hi": 0.0008266568183898926,
+      "delta_lo": -0.0028799772262573242
+    },
+    "large_payload_flood": {
+      "base_acc": 0.8214133381843567,
+      "acc_forced_hi": 0.8217066526412964,
+      "acc_forced_lo": 0.8214666843414307,
+      "delta_hi": 0.00029331445693969727,
+      "delta_lo": 5.334615707397461e-05
+    },
+    "high_entropy_scan": {
+      "base_acc": 0.8214133381843567,
+      "acc_forced_hi": 0.8174399733543396,
+      "acc_forced_lo": 0.8213866353034973,
+      "delta_hi": -0.00397336483001709,
+      "delta_lo": -2.6702880859375e-05
+    },
+    "short_connection_flood": {
+      "base_acc": 0.8214133381843567,
+      "acc_forced_hi": 0.8109866380691528,
+      "acc_forced_lo": 0.8203999996185303,
+      "delta_hi": -0.010426700115203857,
+      "delta_lo": -0.001013338565826416
+    }
+  }
+}

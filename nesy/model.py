@@ -11,7 +11,7 @@
 # ood scoring: max rule activation per sample (rule confidence).
 # low confidence = sample fits no known rule = potentially ood.
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import List, Literal
 
 import torch
@@ -153,6 +153,18 @@ CIC_RULES = [
 
 # one differentiable logical rule.
 # score in (0, 1) - how well the sample matches the rule's conditions.
+# CTU_RULES feature_indices refer to positions in the submitted 37-feature list
+# (config.ALL_FEATURES). For another CTU feature list, remap each index by feature name.
+def rules_for(dataset: str) -> List[RuleTemplate]:
+    from dsets import is_ctu, nesy_feature_cols
+    if not is_ctu(dataset):
+        return CIC_RULES
+    from config import ALL_FEATURES
+    pos = {c: i for i, c in enumerate(nesy_feature_cols(dataset))}
+    return [replace(t, feature_indices=[pos[ALL_FEATURES[i]] for i in t.feature_indices])
+            for t in CTU_RULES]
+
+
 class DiffRule(nn.Module):
     def __init__(self, template: RuleTemplate):
         super().__init__()

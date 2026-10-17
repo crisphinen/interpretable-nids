@@ -227,7 +227,7 @@ def make_architecture():
 
 # ── auroc_vs_f1 ───────────────────────────────────────────────────────────────
 
-def make_auroc_vs_f1():
+def make_auroc_vs_f1(datasets=("ctu", "cic")):
     """One point per model, using the same numbers as the main table:
     five-seed mean +/- std for MLP / CBM variants (results/cbm/multiseed_*_v2.json)
     and NeSy-NIDS (lambda_alpha=0 evals), single run for Post-hoc CBM, DT, RF
@@ -237,21 +237,29 @@ def make_auroc_vs_f1():
         ms = json.loads((CBM_RES / f"multiseed_{ds}_v2.json").read_text())["results"]
         for mname, v in ms.items():
             pts.append((mname, v["test_f1_mean"], v["auroc_mean"], v["test_f1_std"], v["auroc_std"]))
-        base = json.loads((CBM_RES / f"{ds}_cbm_baselines.json").read_text())
-        ph = base.get("PostHocCBM")
-        if ph:
-            pts.append(("PostHocCBM", ph["test_f1"], ph["ood_auroc"], 0.0, 0.0))
+        five_seed = (CBM_RES / f"baselines_{ds}.json").exists()   # five-seed baselines (REPRODUCE.md)
+        if five_seed:
+            names = {"PostHocCBM": "PostHocCBM", "DT": "DecisionTree", "RF": "RandomForest"}
+            for mname, v in json.loads((CBM_RES / f"baselines_{ds}.json").read_text())["summary"].items():
+                pts.append((names[mname], v["test_f1"][0], v["auroc"][0], v["test_f1"][1], v["auroc"][1]))
+        else:
+            base = json.loads((CBM_RES / f"{ds}_cbm_baselines.json").read_text())
+            ph = base.get("PostHocCBM")
+            if ph:
+                pts.append(("PostHocCBM", ph["test_f1"], ph["ood_auroc"], 0.0, 0.0))
         seeds = [json.loads((NESY_RES / f"{ds}_nesy_s{i}_eval.json").read_text())
                  for i in range(5) if (NESY_RES / f"{ds}_nesy_s{i}_eval.json").exists()]
         if seeds:
             f1 = np.array([d.get("test_f1", d["known_f1"]) for d in seeds])
             au = np.array([d["ood_auroc_mahal"] for d in seeds])
             pts.append(("NeSy", f1.mean(), au.mean(), f1.std(), au.std()))
-        ro = NESY_RES / f"{ds}_rule_only_s0_eval.json"
-        if ro.exists():
-            d = json.loads(ro.read_text())
-            pts.append(("RuleOnly", d.get("test_f1", d["known_f1"]),
-                        d.get("ood_auroc_mahal", d.get("ood_auroc")), 0.0, 0.0))
+        ro = [json.loads(f.read_text()) for f in sorted(NESY_RES.glob(f"{ds}_rule_only_s[0-9]_eval.json"))]
+        if ro:
+            f1 = np.array([d.get("test_f1", d["known_f1"]) for d in ro])
+            au = np.array([d.get("ood_auroc_mahal", d.get("ood_auroc")) for d in ro])
+            pts.append(("RuleOnly", f1.mean(), au.mean(), f1.std(), au.std()))
+        if five_seed:
+            return pts
         nb = json.loads((NESY_RES / f"{ds}_baselines.json").read_text())
         for mname, v in nb.items():
             f1 = v.get("f1"); auroc = v.get("auroc_maha") or v.get("auroc")
@@ -291,13 +299,17 @@ def make_auroc_vs_f1():
     # Per-dataset label offsets to avoid overlap (DT and MLP are near-colocated in CIC)
     OFFSETS = {
         "cic": {"DecisionTree": (-2, -13)},  # push DT label below the point
+        "ctuk": {"SequentialCBM": (-46, 7), "RuleOnly": (-44, -11), "PostHocCBM": (6, -3)},
+        "cicr": {"MLPBaseline": (6, 2), "DecisionTree": (-16, 7), "RandomForest": (-20, 2),
+                 "HybridCBM": (8, 1), "NeSy": (8, -7), "SequentialCBM": (-50, -9),
+                 "RuleOnly": (-40, 8), "PostHocCBM": (-24, -13)},
     }
 
     fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.2))
     fig.subplots_adjust(wspace=0.30, left=0.07, right=0.98,
                         top=0.88, bottom=0.18)
 
-    for ax, ds, title in zip(axes, ["ctu", "cic"],
+    for ax, ds, title in zip(axes, datasets,
                               ["(a) CTU-IoT-23", "(b) CIC-IoT-2023"]):
         for label, f1, auroc, f1s, aus in _gather(ds):
             if f1s or aus:
@@ -736,6 +748,9 @@ def make_concept_space_pca():
 # ── entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["--main"]:   # auroc_vs_f1 on the main splits ctuk / cicr (REPRODUCE.md)
+        make_auroc_vs_f1(("ctuk", "cicr"))
+        raise SystemExit
     print("Generating all paper figures ...\n")
     make_architecture()
     make_auroc_vs_f1()

@@ -167,6 +167,42 @@ def cic_concept_labels(df: pd.DataFrame) -> np.ndarray:
     return C
 
 
+# ton_iot concept rules (raw zeek conn-log units, from the raw_* columns of data/ton).
+# the logs carry no flag counts or inter-arrival times, so is_beaconing, is_syn_heavy and the
+# syn/fin handshake test are replaced by connection-state, responsiveness and web-service concepts.
+
+TON_CONCEPTS = [
+    "is_high_rate",
+    "is_short_connection",
+    "is_persistent",
+    "is_asymmetric",
+    "is_single_packet_probe",
+    "is_incomplete_handshake",
+    "is_responsive",
+    "is_web_service",
+]
+TON_INCOMPLETE_STATES = {"S0", "S1", "REJ", "RSTOS0", "RSTRH", "SH", "SHR"}
+
+
+def ton_concept_labels(df: pd.DataFrame) -> np.ndarray:
+    dur = df["raw_duration"].values.astype(np.float64)
+    sp = df["raw_src_pkts"].values.astype(np.float64)
+    dp = df["raw_dst_pkts"].values.astype(np.float64)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        rate = np.where(dur > 0, (sp + dp) / dur, 0.0)
+    C = np.stack([
+        rate > 1000,
+        (dur >= 0) & (dur < 0.01),
+        dur > 2.5,
+        (dp == 0) & (sp > 1),
+        sp == 1,
+        df["raw_conn_state"].isin(TON_INCOMPLETE_STATES).values,
+        dp > 0,
+        df["raw_service"].isin({"http", "ssl"}).values,
+    ], axis=1)
+    return C.astype(np.float32)
+
+
 # quality analysis
 
 # computes:

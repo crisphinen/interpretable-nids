@@ -82,13 +82,17 @@ def run(ds, device):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--device", default="cuda")
+    ap.add_argument("--datasets", nargs="+", default=["ctu", "cic"])
     args = ap.parse_args()
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
     res, pts = {}, []
-    for ds in ["ctu", "cic"]:
+    for ds in args.datasets:
         res[ds], wcv = run(ds, device)
         pts += [{"ds": ds, "seed": s, "wcv": wcv[s], "auroc": res[ds]["mahal"]["all"][s]} for s in range(5)]
         print(f"{ds}: " + "  ".join(f"{k}={v['mean']:.3f}±{v['std']:.3f}" for k, v in res[ds].items()))
+    if args.datasets != ["ctu", "cic"]:
+        out = f"scorer_ablation_{'_'.join(args.datasets)}.json"
+        (RESULTS_DIR / out).write_text(json.dumps(res, indent=2)); print(f"wrote {out}"); return
     (RESULTS_DIR / "scorer_ablation.json").write_text(json.dumps(res, indent=2))
     fq_path = RESULTS_DIR / "r2_fig_quant.json"
     fq = json.loads(fq_path.read_text()) if fq_path.exists() else {}

@@ -1,10 +1,15 @@
 # build cic-iot-2023 splits.
-# uses duckdb cli for the database query, then pandas for splitting.
+# queries duckdb through the python module, then pandas for splitting.
 # produces: train / val / test_known / test_unknown parquet files + vocab.json
 #
-# usage: python 04_make_splits_ciciot23.py
+# --order-by-rowid makes the draw deterministic; the paper's split is
+# python 04_make_splits_ciciot23.py --name cicr --order-by-rowid
+#
+# usage: python 04_make_splits_ciciot23.py [--name cic] [--order-by-rowid]
+#        python 04_make_splits_ciciot23.py --name cicr_alt --order-by-rowid --alt
 
-import os, json, subprocess, tempfile, sys
+import os, json, sys
+import duckdb
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -17,37 +22,34 @@ from cic_config import (
     NUMERIC_FEATURES, ALL_FEATURES,
     SAMPLES_PER_CLASS, VAL_FRAC, TEST_FRAC, RANDOM_SEED,
 )
-from config import DUCKDB_BIN
+import argparse
 
+ap = argparse.ArgumentParser()
+ap.add_argument("--name", default="cic", help="output dir under data/ (cicr = the paper's split)")
+ap.add_argument("--order-by-rowid", action="store_true",
+                help="draw from rows in explicit rowid order so the sample is reproducible")
+ap.add_argument("--alt", action="store_true",
+                help="alternative known set: DDoS-ICMP_Flood and Mirai-udpplain replace "
+                     "DDoS-SYN_Flood and Mirai-greeth_flood")
+args = ap.parse_args()
+if args.alt:
+    swap = {"DDoS-SYN_Flood": "DDoS-ICMP_Flood", "Mirai-greeth_flood": "Mirai-udpplain"}
+    KNOWN_CLASSES = [swap.get(c, c) for c in KNOWN_CLASSES]
+    UNKNOWN_PRIMARY = [{v: k for k, v in swap.items()}.get(c, c) for c in UNKNOWN_PRIMARY]
+DATA_DIR = os.path.join(os.path.dirname(DATA_DIR), args.name)
 os.makedirs(DATA_DIR, exist_ok=True)
 
 ALL_LABEL_CLASSES = KNOWN_CLASSES + UNKNOWN_PRIMARY + UNKNOWN_RARE
 in_clause  = ', '.join(f"'{c}'" for c in ALL_LABEL_CLASSES)
 feat_sql   = ', '.join(f'"{c}"' for c in ALL_FEATURES)
 
-# 1. export from duckdb to parquet via cli
-# write to DATA_DIR (on work disk), not /tmp (main disk may be full)
-raw_parquet = os.path.join(DATA_DIR, '_raw.parquet')
-sql = f"""
-COPY (
-    SELECT {feat_sql}, label
-    FROM flows
-    WHERE label IN ({in_clause})
-) TO '{raw_parquet}' (FORMAT PARQUET, ROW_GROUP_SIZE 100000);
-"""
-
-print(f"Querying {DB_PATH} via DuckDB CLI ...")
-result = subprocess.run(
-    [DUCKDB_BIN, DB_PATH],
-    input=sql, text=True, capture_output=True
-)
-if result.returncode != 0:
-    print("DuckDB stderr:", result.stderr)
-    sys.exit(1)
-print("Query done.")
-
-df = pd.read_parquet(raw_parquet)
-os.remove(raw_parquet)
+# 1. query duckdb; the per-class sample below depends on this row order, which duckdb keeps
+# as insertion order (preserve_insertion_order, on by default)
+print(f"Querying {DB_PATH} ...")
+con = duckdb.connect(DB_PATH, read_only=True)
+order = " ORDER BY rowid" if args.order_by_rowid else ""
+df = con.execute(f"SELECT {feat_sql}, label FROM flows WHERE label IN ({in_clause}){order}").df()
+con.close()
 print(f"Loaded {len(df):,} rows across {df['label'].nunique()} classes")
 print(df['label'].value_counts().to_string())
 
@@ -97,7 +99,16 @@ X_val   = X_val.copy()
 X_test_k = X_test_k.copy()
 unknown_df = unknown_df.copy()
 
-X_train[ALL_FEATURES]  = scaler.fit_transform(X_train[ALL_FEATURES].values)
+if args.alt:
+    # CIC concept thresholds are z-scores of the main split's scaler; reuse it so the concepts
+    # keep their raw-unit meaning (the old alternative split re-used main-scaled rows too)
+    main_vocab = json.load(open(os.path.join(os.path.dirname(DATA_DIR), "cicr", "vocab.json")))
+    scaler.fit(X_train[ALL_FEATURES].values[:2])
+    scaler.mean_ = np.array(main_vocab["scaler_mean"]); scaler.scale_ = np.array(main_vocab["scaler_scale"])
+    scaler.var_ = scaler.scale_ ** 2
+    X_train[ALL_FEATURES] = scaler.transform(X_train[ALL_FEATURES].values)
+else:
+    X_train[ALL_FEATURES] = scaler.fit_transform(X_train[ALL_FEATURES].values)
 X_val[ALL_FEATURES]    = scaler.transform(X_val[ALL_FEATURES].values)
 X_test_k[ALL_FEATURES] = scaler.transform(X_test_k[ALL_FEATURES].values)
 unknown_df[ALL_FEATURES] = scaler.transform(unknown_df[ALL_FEATURES].values)
