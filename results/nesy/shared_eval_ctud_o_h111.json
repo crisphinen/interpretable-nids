@@ -1,0 +1,167 @@
+[
+  {
+    "model": "nesy",
+    "variant": "main",
+    "seed": 0,
+    "auroc_mahal": 0.25811454,
+    "tpr5": 0.0,
+    "auroc_energy": 0.1984112,
+    "auroc_comb": 0.10563580000000003,
+    "auroc_hamming": 0.25901060000000004,
+    "auroc_jaccard": 0.32242
+  },
+  {
+    "model": "nesy",
+    "variant": "a0.1",
+    "seed": 0,
+    "auroc_mahal": 0.25887008,
+    "tpr5": 0.0001,
+    "auroc_energy": 0.17949308,
+    "auroc_comb": 0.13156396,
+    "auroc_hamming": 0.33534682,
+    "auroc_jaccard": 0.32201219999999997
+  },
+  {
+    "model": "nesy",
+    "variant": "main",
+    "seed": 1,
+    "auroc_mahal": 0.27506946,
+    "tpr5": 0.0,
+    "auroc_energy": 0.39518144,
+    "auroc_comb": 0.15148624,
+    "auroc_hamming": 0.21179339999999997,
+    "auroc_jaccard": 0.31962206
+  },
+  {
+    "model": "nesy",
+    "variant": "a0.1",
+    "seed": 1,
+    "auroc_mahal": 0.26832954000000003,
+    "tpr5": 0.0,
+    "auroc_energy": 0.18295448,
+    "auroc_comb": 0.06883484000000001,
+    "auroc_hamming": 0.21110142000000004,
+    "auroc_jaccard": 0.32010658000000003
+  },
+  {
+    "model": "nesy",
+    "variant": "main",
+    "seed": 2,
+    "auroc_mahal": 0.35857406000000003,
+    "tpr5": 0.0101,
+    "auroc_energy": 0.36124326000000007,
+    "auroc_comb": 0.18868714000000003,
+    "auroc_hamming": 0.34171982,
+    "auroc_jaccard": 0.43846594000000005
+  },
+  {
+    "model": "nesy",
+    "variant": "a0.1",
+    "seed": 2,
+    "auroc_mahal": 0.36010616,
+    "tpr5": 0.0146,
+    "auroc_energy": 0.44040938,
+    "auroc_comb": 0.11640641999999998,
+    "auroc_hamming": 0.34210710000000005,
+    "auroc_jaccard": 0.43919392
+  },
+  {
+    "model": "nesy",
+    "variant": "main",
+    "seed": 3,
+    "auroc_mahal": 0.28129888,
+    "tpr5": 0.0169,
+    "auroc_energy": 0.40380844,
+    "auroc_comb": 0.15826704,
+    "auroc_hamming": 0.22485733999999996,
+    "auroc_jaccard": 0.28381304
+  },
+  {
+    "model": "nesy",
+    "variant": "a0.1",
+    "seed": 3,
+    "auroc_mahal": 0.23450143999999998,
+    "tpr5": 0.0154,
+    "auroc_energy": 0.17752788,
+    "auroc_comb": 0.13820860000000001,
+    "auroc_hamming": 0.19632974000000003,
+    "auroc_jaccard": 0.27630816
+  },
+  {
+    "model": "nesy",
+    "variant": "main",
+    "seed": 4,
+    "auroc_mahal": 0.22374607999999999,
+    "tpr5": 0.0134,
+    "auroc_energy": 0.16391606000000003,
+    "auroc_comb": 0.10963968000000002,
+    "auroc_hamming": 0.37164400000000003,
+    "auroc_jaccard": 0.38535934
+  },
+  {
+    "model": "nesy",
+    "variant": "a0.1",
+    "seed": 4,
+    "auroc_mahal": 0.27924548,
+    "tpr5": 0.0134,
+    "auroc_energy": 0.28643942,
+    "auroc_comb": 0.15003326,
+    "auroc_hamming": 0.2095286,
+    "auroc_jaccard": 0.31864572
+  },
+  {
+    "model": "rule_only",
+    "variant": "main",
+    "seed": 0,
+    "auroc_mahal": 0.19231534,
+    "tpr5": 0.0003,
+    "auroc_energy": 0.24007857999999996,
+    "auroc_comb": 0.19632510000000003,
+    "auroc_hamming": 0.27753720000000004,
+    "auroc_jaccard": 0.31217232
+  },
+  {
+    "model": "rule_only",
+    "variant": "main",
+    "seed": 1,
+    "auroc_mahal": 0.21015739999999994,
+    "tpr5": 0.0003,
+    "auroc_energy": 0.55344762,
+    "auroc_comb": 0.31301202,
+    "auroc_hamming": 0.17222407999999995,
+    "auroc_jaccard": 0.19210091999999998
+  },
+  {
+    "model": "rule_only",
+    "variant": "main",
+    "seed": 2,
+    "auroc_mahal": 0.14469124,
+    "tpr5": 0.0083,
+    "auroc_energy": 0.39697946,
+    "auroc_comb": 0.16718661999999998,
+    "auroc_hamming": 0.2951914,
+    "auroc_jaccard": 0.33701706
+  },
+  {
+    "model": "rule_only",
+    "variant": "main",
+    "seed": 3,
+    "auroc_mahal": 0.16981762,
+    "tpr5": 0.0003,
+    "auroc_energy": 0.3551312,
+    "auroc_comb": 0.2457006,
+    "auroc_hamming": 0.29425547999999996,
+    "auroc_jaccard": 0.37959301999999995
+  },
+  {
+    "model": "rule_only",
+    "variant": "main",
+    "seed": 4,
+    "auroc_mahal": 0.24751808,
+    "tpr5": 0.0202,
+    "auroc_energy": 0.29967472,
+    "auroc_comb": 0.19476496000000001,
+    "auroc_hamming": 0.34107898000000003,
+    "auroc_jaccard": 0.39611626
+  }
+]

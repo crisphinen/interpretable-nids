@@ -1,0 +1,58 @@
+{
+  "ddos_high_rate": {
+    "coverage": 0.22702898550724637,
+    "dominant": "DDoS",
+    "precision": 0.7593360995850622,
+    "target": "DDoS",
+    "target_precision": 0.7593360995850622
+  },
+  "cc_heartbeat_beaconing": {
+    "coverage": 0.29188405797101447,
+    "dominant": "C&C-HeartBeat",
+    "precision": 0.6549155908639523,
+    "target": "C&C-HeartBeat",
+    "target_precision": 0.6549155908639523
+  },
+  "benign_single_probe": {
+    "coverage": 0.5752898550724638,
+    "dominant": "Benign",
+    "precision": 0.37662174077339716,
+    "target": "Benign",
+    "target_precision": 0.37662174077339716
+  },
+  "okiru_low_rate": {
+    "coverage": 0.6258695652173913,
+    "dominant": "Benign",
+    "precision": 0.34618501794604606,
+    "target": "Okiru",
+    "target_precision": 0.3136505731156652
+  },
+  "asymmetric_flood": {
+    "coverage": 0.41833333333333333,
+    "dominant": "DDoS",
+    "precision": 0.48276459379871817,
+    "target": "DDoS",
+    "target_precision": 0.48276459379871817
+  },
+  "persistent_connection": {
+    "coverage": 0.1471014492753623,
+    "dominant": "C&C-HeartBeat",
+    "precision": 0.6344827586206897,
+    "target": "C&C-HeartBeat",
+    "target_precision": 0.6344827586206897
+  },
+  "incomplete_handshake": {
+    "coverage": 0.28289855072463765,
+    "dominant": "C&C-HeartBeat",
+    "precision": 0.7617827868852459,
+    "target": "C&C-HeartBeat",
+    "target_precision": 0.7617827868852459
+  },
+  "ddos_short_burst": {
+    "coverage": 0.2268840579710145,
+    "dominant": "DDoS",
+    "precision": 0.759821143404663,
+    "target": "DDoS",
+    "target_precision": 0.759821143404663
+  }
+}

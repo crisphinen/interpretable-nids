@@ -11,6 +11,11 @@ CTU_DIRS = {"ctu": "data", "ctuk": "data/ctuk", "ctuko": "data/ctuko"}
 # robustness splits (06_make_kfs_splits.py --split alt|temporal): own re-selection, and _o = the
 # main split's 31-feature list (ctuk) on the same rows
 CTU_DIRS.update({n: f"data/{n}" for n in ("ctualt", "ctualt_o", "ctut", "ctut_o")})
+# device-disjoint splits (06_make_kfs_splits.py --split device): every known-class flow of the held-out
+# host is test-only; _o = the main split's 31-feature list on the same rows
+CTU_DIRS.update({n: f"data/{n}" for n in ("ctud_h198", "ctud_o_h198", "ctud_h111", "ctud_o_h111")})
+# restored-features control (08_make_ctuk_n.py): ctuk rows, MLP/CBM input = NeSy-NIDS's 33 columns
+CTU_DIRS.update({"ctuk_n": "data/ctuk_n"})
 # leave-family-out folds (cbm/run_lofo.py --make-folds): vocab variants over the base split's rows
 CTU_DIRS.update({f"ctuk_lofo_{s}": f"data/ctuk_lofo_{s}" for s in ("cchb", "ddos", "okiru")})
 # cic  - an earlier CIC split used by the lambda ablation (vocab.json and results only)

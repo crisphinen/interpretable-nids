@@ -26,13 +26,17 @@ def with_baselines(ds):
         for m, v in LOAD(agg)["results"].items():
             out[m] = (v["test_f1_mean"], v["auroc_mean"], v["auroc_std"],
                       v["tpr5_mean"], v["tpr5_std"], len(v["seeds"]))
-    for key, model, tag in (("NeSy", "nesy", ""), ("NeSy_a0.1", "nesy", "_a0.1"),
-                            ("RuleOnly", "rule_only", "")):
+    sh = NESY / f"shared_eval_{ds}.json"                 # main-table flows (nesy/run_shared_eval.py)
+    shared = LOAD(sh) if sh.exists() else []
+    for key, model, tag, var in (("NeSy", "nesy", "", "main"), ("NeSy_a0.1", "nesy", "_a0.1", "a0.1"),
+                                 ("RuleOnly", "rule_only", "", "main")):
         rows = [LOAD(f) for f in (NESY / f"{ds}_{model}_s{s}{tag}_eval.json" for s in range(5)) if f.exists()]
         if rows:
-            g = lambda k: np.array([r[k] for r in rows])
-            out[key] = (g("test_f1").mean(), g("ood_auroc_mahal").mean(), g("ood_auroc_mahal").std(),
-                        g("tpr_at_5fpr_mahal").mean(), g("tpr_at_5fpr_mahal").std(), len(rows))
+            f1 = np.array([r["test_f1"] for r in rows])
+            sr = [r for r in shared if r["model"] == model and r["variant"] == var]
+            au = np.array([r["auroc_mahal"] for r in sr]) if sr else np.array([r["ood_auroc_mahal"] for r in rows])
+            tp = np.array([r["tpr5"] for r in sr]) if sr else np.array([r["tpr_at_5fpr_mahal"] for r in rows])
+            out[key] = (f1.mean(), au.mean(), au.std(), tp.mean(), tp.std(), len(rows))
     f = CBM / f"baselines_{ds}.json"
     if f.exists():
         d = LOAD(f)
@@ -245,6 +249,51 @@ def transfer_and_selection():
                   ("true_mahal", "true_energy", "perm_mahal", "perm_energy")) + f" | {ok('perm')}/5 {ok('mix')}/5")
 
 
+def revision_controls():
+    head("NeSy scorer ablation on main-table flows: mean (std)")
+    for ds in ("ctuk", "cicr"):
+        rs = [r for r in LOAD(NESY / f"shared_eval_{ds}.json") if r["model"] == "nesy" and r["variant"] == "main"]
+        print(f"   {ds:5s} " + "  ".join(f"{k[6:]} {ms([r[k] for r in rs])}" for k in
+              ("auroc_mahal", "auroc_hamming", "auroc_jaccard", "auroc_energy", "auroc_comb")))
+    head("post-hoc detectors, five MLP seeds on main-table flows")
+    for ds in ("ctuk", "cicr"):
+        f = CBM / f"ood_baselines_{ds}_seeds.json"
+        if f.exists():
+            print(f"   {ds:5s} " + "  ".join(f"{k} {v['mean']:.3f}±{v['std']:.3f}" for k, v in LOAD(f)["summary"].items()))
+    head("lambda x gamma grid (main splits): AUROC mean (std); gamma=0 column is the lambda table")
+    for ds in ("ctuk", "cicr"):
+        f = CBM / f"lambdagrid_{ds}_seeds.json"
+        if not f.exists():
+            continue
+        rows = LOAD(f)
+        for la in (0.1, 0.5, 1.0):
+            z = [r for r in rows if r["lambda"] == la and r["gamma"] == 0.0]
+            print(f"   {ds:5s} lambda={la}: " + "  ".join(ms([r["auroc"] for r in rows if r["lambda"] == la and r["gamma"] == g])
+                  for g in (0.0, 0.5, 1.0)) + f" | F1 {np.mean([r['test_f1'] for r in z]):.4f} "
+                  f"concept {np.mean([r['concept_acc'] for r in z]):.3f}")
+    head("rule target precision at initial thresholds (vs learned in tab:rulequality)")
+    for ds in ("ctuk", "cicr"):
+        f = NESY / f"rule_init_{ds}.json"
+        if f.exists():
+            print(f"   {ds:5s} " + "  ".join(f"{k} {v['target_precision']:.2f}" for k, v in LOAD(f).items()))
+    head("8-unit bottleneck control (JointCBM architecture, no concept labels)")
+    for ds in ("ctuk", "cicr", "ton"):
+        f = CBM / f"bottleneck8_{ds}.json"
+        if f.exists():
+            rs = LOAD(f)
+            print(f"   {ds:5s} n={len(rs)} F1 {np.mean([r['test_f1'] for r in rs]):.4f} AUROC {ms([r['auroc'] for r in rs])} "
+                  f"TPR {ms([r['tpr5'] for r in rs])}")
+    head("restored-features control (ctuk rows, NeSy-NIDS's 33 columns): AUROC")
+    res = with_baselines("ctuk_n")
+    print("   ctuk_n " + "  ".join(f"{m} {v[1]:.3f}±{v[2]:.3f}" for m, v in res.items()))
+    head("device-disjoint CTU splits: F1 | AUROC per model")
+    for ds in ("ctud_h198", "ctud_o_h198", "ctud_h111", "ctud_o_h111"):
+        res = with_baselines(ds)
+        if res:
+            print(f"   {ds:12s} " + "  ".join(f"{m} {v[0]:.3f}/{v[1]:.3f}" for m, v in res.items()))
+
+
 if __name__ == "__main__":
-    for f in (protocol, table_main, splits, scorers, openset, fidelity, selectivity, geometry, transfer_and_selection):
+    for f in (protocol, table_main, splits, scorers, openset, fidelity, selectivity, geometry, transfer_and_selection,
+              revision_controls):
         f()
