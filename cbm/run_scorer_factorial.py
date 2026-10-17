@@ -1,7 +1,9 @@
 # B: scorer x architecture factorial. On the same per-seed checkpoints behind the
 # validated table (results/cbm/ms/), score OOD with every scorer used in Table V
 # (Mahalanobis, Hamming, Jaccard, energy, z-normalised Mahalanobis+energy) on each
-# CBM/MLP architecture x dataset x seed. The point: which scorer wins is not
+# CBM/MLP architecture x dataset x seed. The combined score z-normalises each score with the mean
+# and std of the known VALIDATION scores (frozen before testing; auroc_comb); auroc_comb_testnorm
+# keeps the earlier variant normalised on the known test scores, for reference. The point: which scorer wins is not
 # consistent across architectures or datasets, a second independent leg of the
 # "no reliable rule" result. Hamming/Jaccard are only defined on the binary-ish
 # concept space, not the MLP penultimate. Writes results/cbm/scorer_factorial.json.
@@ -60,7 +62,7 @@ def main():
     out = "scorer_factorial.json" if dsets == ["ctu", "cic"] else f"scorer_factorial_{'_'.join(dsets)}.json"
     rows = []
     for ds in dsets:
-        (Xk, yk, _), (Xtr, ytr, _), Xun, _, _ = load_test_data(ds)
+        (Xk, yk, _), (Xtr, ytr, _), Xun, Xval, _ = load_test_data(ds)
         if len(Xtr) > 20000:
             i = RNG.choice(len(Xtr), 20000, replace=False); Xtr, ytr = Xtr[i], ytr[i]
         Xk, Xun = cap(Xk), cap(Xun)
@@ -74,14 +76,16 @@ def main():
                 with torch.no_grad():
                     E = lambda X: m.get_embedding(torch.tensor(X, dtype=torch.float32, device=DEVICE)).cpu().numpy()
                     L = lambda X: m(torch.tensor(X, dtype=torch.float32, device=DEVICE))[0].cpu().numpy()
-                    etr, ekn, eun = E(Xtr), E(Xk), E(Xun)
-                    lkn, lun = L(Xk), L(Xun)
+                    etr, ekn, eun, eva = E(Xtr), E(Xk), E(Xun), E(Xval)
+                    lkn, lun, lva = L(Xk), L(Xun), L(Xval)
                 sc = {"mahal": auroc(mahalanobis_scores(etr, ekn, train_labels=ytr),
                                      mahalanobis_scores(etr, eun, train_labels=ytr)),
                       "energy": auroc(energy_score(lkn), energy_score(lun))}
                 mk = mahalanobis_scores(etr, ekn, train_labels=ytr); mu = mahalanobis_scores(etr, eun, train_labels=ytr)
                 ek = energy_score(lkn); eu = energy_score(lun)
-                sc["comb"] = auroc(znorm(mk, mk) + znorm(ek, ek), znorm(mu, mk) + znorm(eu, ek))
+                mv = mahalanobis_scores(etr, eva, train_labels=ytr); ev = energy_score(lva)
+                sc["comb"] = auroc(znorm(mk, mv) + znorm(ek, ev), znorm(mu, mv) + znorm(eu, ev))
+                sc["comb_testnorm"] = auroc(znorm(mk, mk) + znorm(ek, ek), znorm(mu, mk) + znorm(eu, ek))
                 if interp:
                     for kind in ("hamming", "jaccard"):
                         sc[kind] = auroc(centroid_scores(etr, ytr, ekn, kind), centroid_scores(etr, ytr, eun, kind))

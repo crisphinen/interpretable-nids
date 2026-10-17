@@ -441,7 +441,7 @@ address .31, AUROC is $0.63$--$0.85$ and diagnostic TPR at most $0.139$.
 
 \section{Confidence Intervals}
 \label{sec:ci}
-\texttt{cbm/run\_bootstrap\_ci.py} recomputes the per-flow OOD scores of every model from its saved
+\texttt{cbm/run\_bootstrap\_ci.py} recomputes the per-flow OOD scores of every model compared from its saved
 checkpoints (checked against the stored AUROC) and draws 2{,}000 hierarchical bootstrap replicates:
 the five seeds are resampled with replacement for each model independently, and the $5{,}000$ known
 and $5{,}000$ unknown evaluation flows are resampled with replacement and shared by the two models
@@ -575,7 +575,14 @@ DDoS ($7.6\%$ of DDoS flows); no flow matched with protocol ICMP. In the main sp
 $2.2\%$ of the training and $2.0\%$ of the known test flows (mostly DDoS) and $0.4\%$ of the
 unknown flows. Before sampling, a label filter excludes PartOfAHorizontalPortScan,
 PartOfAHorizontalPortScan-Attack and C\&C-PartOfAHorizontalPortScan, so horizontal port scanning
-is neither a known nor a held-out class; Table~\ref{tab:ctu_labels} lists the retained labels
+is neither a known nor a held-out class. We used the full IoT-23 archive
+(\texttt{iot\_23\_datasets\_full.tar.gz}), whose packet captures the DPKT features require, and keep
+the labels of its Zeek label files. For capture CTU-IoT-Malware-Capture-33-1 these files label
+$13{,}609{,}467$ flows Okiru, a count the provider's summary table lists under Okiru-Attack; our
+flows from that capture's source address (192.168.1.197) include exactly $13{,}609{,}467$ Okiru and
+no Okiru-Attack flows, and the label file for this capture currently served by the provider also
+uses Okiru. These flows therefore belong to the known Okiru class, and our three Okiru-Attack flows
+are those of capture 36-1; Table~\ref{tab:ctu_labels} lists the retained labels
 (\texttt{checks/ctu\_label\_counts.py}).
 
 \begin{table}[h]
@@ -711,7 +718,7 @@ Post-hoc CBM        & 0.576 & 0.576 & $0.805{\pm}.030$ & $0.871{\pm}.024$ \\
 \centering\footnotesize
 \caption{Scorer comparison under the known-only feature selection (\texttt{ctuk}): OOD AUROC
 (mean${\pm}$std, five seeds) for per-class Mahalanobis on the concept space, the logit-space
-energy score, and their $z$-normalised average (combined). Per-class Mahalanobis is best for every
+energy score, and their average after $z$-normalising each with known validation scores (combined). Per-class Mahalanobis is best for every
 architecture, and the logit-energy score reaches at most $0.61$ (main
 Table~\ref{M-tab:scorer_arch} gives the CIC comparison, where the ranking depends on architecture).}
 \label{tab:kfs_scorer}
@@ -720,13 +727,13 @@ Table~\ref{M-tab:scorer_arch} gives the CIC comparison, where the ranking depend
 \toprule
 Architecture & Mahalanobis & Energy & Combined \\
 \midrule
-MLP                 & $\mathbf{0.879{\pm}.001}$ & $0.386{\pm}.073$ & $0.703{\pm}.061$ \\
-JointCBM ($\gamma{=}0$)   & $\mathbf{0.830{\pm}.044}$ & $0.476{\pm}.111$ & $0.632{\pm}.068$ \\
-JointCBM ($\gamma{=}0.1$) & $\mathbf{0.812{\pm}.034}$ & $0.494{\pm}.136$ & $0.625{\pm}.097$ \\
-JointCBM ($\gamma{=}0.5$) & $\mathbf{0.851{\pm}.037}$ & $0.570{\pm}.138$ & $0.718{\pm}.105$ \\
+MLP                 & $\mathbf{0.879{\pm}.001}$ & $0.386{\pm}.073$ & $0.682{\pm}.046$ \\
+JointCBM ($\gamma{=}0$)   & $\mathbf{0.830{\pm}.044}$ & $0.476{\pm}.111$ & $0.631{\pm}.068$ \\
+JointCBM ($\gamma{=}0.1$) & $\mathbf{0.812{\pm}.034}$ & $0.494{\pm}.136$ & $0.624{\pm}.098$ \\
+JointCBM ($\gamma{=}0.5$) & $\mathbf{0.851{\pm}.037}$ & $0.570{\pm}.138$ & $0.714{\pm}.106$ \\
 JointCBM ($\gamma{=}1$)   & $\mathbf{0.842{\pm}.049}$ & $0.612{\pm}.124$ & $0.708{\pm}.100$ \\
 SequentialCBM       & $\mathbf{0.875{\pm}.026}$ & $0.604{\pm}.085$ & $0.757{\pm}.018$ \\
-HybridCBM           & $\mathbf{0.827{\pm}.055}$ & $0.365{\pm}.047$ & $0.613{\pm}.047$ \\
+HybridCBM           & $\mathbf{0.827{\pm}.055}$ & $0.365{\pm}.047$ & $0.610{\pm}.047$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -814,8 +821,8 @@ closed-set/open-set relationship.
 \label{sec:scorers}
 Table~\ref{tab:scorers} lists how each OOD score is computed. Every setting was fixed in advance
 (the ODIN and $k$NN values are the published defaults) and none was chosen using the held-out
-families; scorers are fitted on training vectors, and the only test data used, by the combined
-score, are known-class test scores.
+families; scorers are fitted on training vectors, and the combined score is normalised with
+known validation scores, so no test flow enters any scorer.
 
 \begin{table}[h]
 \centering\footnotesize
@@ -834,7 +841,7 @@ training vectors (rule mean $>0.5$, so it is binary); score $=$ Hamming or Jacca
 nearest representative \\
 Energy & $-\log\sum_c e^{l_c}$ on the logits, $T{=}1$ \\
 Combined & Mahalanobis and energy scores each $z$-normalised with the mean and standard deviation
-of the known test scores, then summed \\
+of the known validation scores (frozen before testing), then summed \\
 MSP & $1-\max_c \mathrm{softmax}(l)_c$ \\
 ODIN & MSP at temperature $T{=}1000$ after an input perturbation of $\epsilon{=}0.0014$ along the
 sign of the gradient \\
@@ -1062,7 +1069,7 @@ uniform per-family detection rate.
 \centering\small
 \caption{Per-family OOD AUROC and unknown recall at $\tau$ (5\% FPR) for JointCBM
 ($\gamma{=}0$) and NeSy-NIDS, mean over five seeds. $n$: evaluated flows of the family, the same
-for every seed (sampled without replacement, at most $3{,}000$; each a distinct Zeek record), so
+for every seed (sampled without replacement, at most $3{,}000$; each a distinct dataset record), so
 the five seeds do not add test flows and rare CTU families rest on very few flows. Detection varies
 enormously by family for both models, and the two disagree on which families they catch.}
 \label{tab:openset_perfam}
