@@ -9,7 +9,9 @@
 #   TPR     the next 20,000-flow fit subset, threshold at the 95th percentile of all known-test
 #           scores, TPR over all unknown flows (cbm.evaluate.tpr_at_fpr)
 # Scorers are NeSy-NIDS's own: per-class Mahalanobis on the hard rule activations, plus energy,
-# Hamming/Jaccard to the class centroid and the z-normalised Mahalanobis+energy average.
+# Hamming/Jaccard to the class centroid and the z-normalised Mahalanobis+energy average, whose
+# normalisation uses the mean and std of the known VALIDATION scores (frozen before testing;
+# auroc_comb); auroc_comb_testnorm keeps the earlier variant normalised on the known test scores.
 # Writes results/nesy/shared_eval_{ds}.json.
 #
 # usage: python -m nesy.run_shared_eval --datasets ctuk ctuko cicr --device cuda
@@ -82,6 +84,10 @@ def run(ds, dev):
     assert np.array_equal(a[0], Xtr_c) and np.array_equal(a[2], Xk_c) and np.array_equal(a[4], Xu_c), "row mismatch"
     Xtr, ytr, Xk, yk, Xu = rows(ds, nesy_feature_cols(ds) if is_ctu(ds) else v["feature_cols"])
     it, ik, iu, it2 = subsets(len(Xtr), len(Xk), len(Xu))
+    cols = nesy_feature_cols(ds) if is_ctu(ds) else v["feature_cols"]
+    known = v["known_ids"] if is_ctu(ds) else [v["label_to_id"][c] for c in v["known_classes"]]
+    vdf = pd.read_parquet(data_dir(ds) / "val.parquet"); vdf = vdf[vdf["label_id"].isin(known)]
+    Xval = vdf[cols].values.astype(np.float32)
     T = lambda X: torch.tensor(X, dtype=torch.float32, device=dev)
     out = []
     for model_name in ("nesy", "rule_only"):
@@ -93,17 +99,20 @@ def run(ds, dev):
                 m, _ = load_model(f, dev); m.eval()
                 with torch.no_grad():
                     H = lambda X: m.get_embedding(T(X), k=K_EVAL).cpu().numpy()
-                    htr, hk, hu = H(Xtr), H(Xk), H(Xu)
+                    htr, hk, hu, hv = H(Xtr), H(Xk), H(Xu), H(Xval)
                     lk = m(T(Xk[ik]), k=K_EVAL)[0].cpu().numpy(); lu = m(T(Xu[iu]), k=K_EVAL)[0].cpu().numpy()
+                    lv = m(T(Xval), k=K_EVAL)[0].cpu().numpy()
                 mk = _mahalanobis_scores_perclass(htr[it], ytr[it], hk[ik])
                 mu = _mahalanobis_scores_perclass(htr[it], ytr[it], hu[iu])
                 ek, eu = energy(lk), energy(lu)
+                mv, ev = _mahalanobis_scores_perclass(htr[it], ytr[it], hv), energy(lv)
                 z = lambda x, r: (x - r.mean()) / (r.std() + 1e-9)
                 tk = _mahalanobis_scores_perclass(htr[it2], ytr[it2], hk)
                 tu = _mahalanobis_scores_perclass(htr[it2], ytr[it2], hu)
                 r = {"model": model_name, "variant": label, "seed": s,
                      "auroc_mahal": auroc(mk, mu), "tpr5": float((tu > np.percentile(tk, 95)).mean()),
-                     "auroc_energy": auroc(ek, eu), "auroc_comb": auroc(z(mk, mk) + z(ek, ek), z(mu, mk) + z(eu, ek)),
+                     "auroc_energy": auroc(ek, eu), "auroc_comb": auroc(z(mk, mv) + z(ek, ev), z(mu, mv) + z(eu, ev)),
+                     "auroc_comb_testnorm": auroc(z(mk, mk) + z(ek, ek), z(mu, mk) + z(eu, ek)),
                      "auroc_hamming": auroc(_centroid_dists(htr[it], ytr[it], hk[ik], "hamming"),
                                             _centroid_dists(htr[it], ytr[it], hu[iu], "hamming")),
                      "auroc_jaccard": auroc(_centroid_dists(htr[it], ytr[it], hk[ik], "jaccard"),

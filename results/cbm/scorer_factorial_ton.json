@@ -6,7 +6,8 @@
     "interp": false,
     "auroc_mahal": 0.54052938,
     "auroc_energy": 0.68981536,
-    "auroc_comb": 0.74447014
+    "auroc_comb": 0.7357715800000001,
+    "auroc_comb_testnorm": 0.74447014
   },
   {
     "dataset": "ton",
@@ -15,7 +16,8 @@
     "interp": false,
     "auroc_mahal": 0.51076614,
     "auroc_energy": 0.62173196,
-    "auroc_comb": 0.6568006599999999
+    "auroc_comb": 0.65364742,
+    "auroc_comb_testnorm": 0.6568006599999999
   },
   {
     "dataset": "ton",
@@ -24,7 +26,8 @@
     "interp": false,
     "auroc_mahal": 0.53717602,
     "auroc_energy": 0.66658182,
-    "auroc_comb": 0.71985354
+    "auroc_comb": 0.7193291399999999,
+    "auroc_comb_testnorm": 0.71985354
   },
   {
     "dataset": "ton",
@@ -33,7 +36,8 @@
     "interp": false,
     "auroc_mahal": 0.58216406,
     "auroc_energy": 0.7393035800000001,
-    "auroc_comb": 0.73292074
+    "auroc_comb": 0.7320749,
+    "auroc_comb_testnorm": 0.73292074
   },
   {
     "dataset": "ton",
@@ -42,7 +46,8 @@
     "interp": false,
     "auroc_mahal": 0.579755,
     "auroc_energy": 0.59401432,
-    "auroc_comb": 0.61221188
+    "auroc_comb": 0.61116824,
+    "auroc_comb_testnorm": 0.61221188
   },
   {
     "dataset": "ton",
@@ -51,7 +56,8 @@
     "interp": true,
     "auroc_mahal": 0.68561976,
     "auroc_energy": 0.6658579,
-    "auroc_comb": 0.6586732000000001,
+    "auroc_comb": 0.65887504,
+    "auroc_comb_testnorm": 0.6586732000000001,
     "auroc_hamming": 0.65411808,
     "auroc_jaccard": 0.6088803400000001
   },
@@ -62,7 +68,8 @@
     "interp": true,
     "auroc_mahal": 0.5677589200000001,
     "auroc_energy": 0.77146312,
-    "auroc_comb": 0.72160252,
+    "auroc_comb": 0.71683744,
+    "auroc_comb_testnorm": 0.72160252,
     "auroc_hamming": 0.5874648200000001,
     "auroc_jaccard": 0.5628376
   },
@@ -73,7 +80,8 @@
     "interp": true,
     "auroc_mahal": 0.69602474,
     "auroc_energy": 0.76236284,
-    "auroc_comb": 0.8189701000000001,
+    "auroc_comb": 0.81803294,
+    "auroc_comb_testnorm": 0.8189701000000001,
     "auroc_hamming": 0.60495228,
     "auroc_jaccard": 0.60589008
   },
@@ -84,7 +92,8 @@
     "interp": true,
     "auroc_mahal": 0.6180949,
     "auroc_energy": 0.6423129000000001,
-    "auroc_comb": 0.67524714,
+    "auroc_comb": 0.6753121000000001,
+    "auroc_comb_testnorm": 0.67524714,
     "auroc_hamming": 0.6351046600000001,
     "auroc_jaccard": 0.6089709000000001
   },
@@ -95,7 +104,8 @@
     "interp": true,
     "auroc_mahal": 0.65170422,
     "auroc_energy": 0.7209891,
-    "auroc_comb": 0.70543918,
+    "auroc_comb": 0.7048145800000001,
+    "auroc_comb_testnorm": 0.70543918,
     "auroc_hamming": 0.67982398,
     "auroc_jaccard": 0.6989976800000001
   },
@@ -106,7 +116,8 @@
     "interp": true,
     "auroc_mahal": 0.6374493000000001,
     "auroc_energy": 0.76279204,
-    "auroc_comb": 0.7229609800000001,
+    "auroc_comb": 0.72203818,
+    "auroc_comb_testnorm": 0.7229609800000001,
     "auroc_hamming": 0.60515216,
     "auroc_jaccard": 0.5674715400000001
   },
@@ -117,7 +128,8 @@
     "interp": true,
     "auroc_mahal": 0.57425522,
     "auroc_energy": 0.78854008,
-    "auroc_comb": 0.7349367,
+    "auroc_comb": 0.72604954,
+    "auroc_comb_testnorm": 0.7349367,
     "auroc_hamming": 0.5371581000000001,
     "auroc_jaccard": 0.52151762
   },
@@ -128,7 +140,8 @@
     "interp": true,
     "auroc_mahal": 0.6928365400000001,
     "auroc_energy": 0.6831549,
-    "auroc_comb": 0.7481721,
+    "auroc_comb": 0.7469670599999999,
+    "auroc_comb_testnorm": 0.7481721,
     "auroc_hamming": 0.5742167000000001,
     "auroc_jaccard": 0.5710448000000001
   },
@@ -139,7 +152,8 @@
     "interp": true,
     "auroc_mahal": 0.65553062,
     "auroc_energy": 0.52688114,
-    "auroc_comb": 0.66552322,
+    "auroc_comb": 0.66492662,
+    "auroc_comb_testnorm": 0.66552322,
     "auroc_hamming": 0.60912802,
     "auroc_jaccard": 0.57599176
   },
@@ -150,7 +164,8 @@
     "interp": true,
     "auroc_mahal": 0.64009482,
     "auroc_energy": 0.60812124,
-    "auroc_comb": 0.69174326,
+    "auroc_comb": 0.69158646,
+    "auroc_comb_testnorm": 0.69174326,
     "auroc_hamming": 0.73979456,
     "auroc_jaccard": 0.73709386
   },
@@ -161,7 +176,8 @@
     "interp": true,
     "auroc_mahal": 0.5870471,
     "auroc_energy": 0.70509804,
-    "auroc_comb": 0.6618108199999999,
+    "auroc_comb": 0.6612491400000001,
+    "auroc_comb_testnorm": 0.6618108199999999,
     "auroc_hamming": 0.59322672,
     "auroc_jaccard": 0.58133912
   },
@@ -172,7 +188,8 @@
     "interp": true,
     "auroc_mahal": 0.6566688599999999,
     "auroc_energy": 0.64254778,
-    "auroc_comb": 0.64166198,
+    "auroc_comb": 0.64167906,
+    "auroc_comb_testnorm": 0.64166198,
     "auroc_hamming": 0.58245348,
     "auroc_jaccard": 0.5589710999999999
   },
@@ -183,7 +200,8 @@
     "interp": true,
     "auroc_mahal": 0.63830938,
     "auroc_energy": 0.76687752,
-    "auroc_comb": 0.7140097799999999,
+    "auroc_comb": 0.7132693800000001,
+    "auroc_comb_testnorm": 0.7140097799999999,
     "auroc_hamming": 0.5724465599999999,
     "auroc_jaccard": 0.57107946
   },
@@ -194,7 +212,8 @@
     "interp": true,
     "auroc_mahal": 0.6866209799999999,
     "auroc_energy": 0.5799663199999999,
-    "auroc_comb": 0.6901279400000001,
+    "auroc_comb": 0.6916501399999999,
+    "auroc_comb_testnorm": 0.6901279400000001,
     "auroc_hamming": 0.6358348,
     "auroc_jaccard": 0.63342746
   },
@@ -205,7 +224,8 @@
     "interp": true,
     "auroc_mahal": 0.6379559400000001,
     "auroc_energy": 0.77677696,
-    "auroc_comb": 0.7436253,
+    "auroc_comb": 0.7431856200000001,
+    "auroc_comb_testnorm": 0.7436253,
     "auroc_hamming": 0.6412340000000001,
     "auroc_jaccard": 0.6429899600000001
   },
@@ -216,7 +236,8 @@
     "interp": true,
     "auroc_mahal": 0.6396651799999999,
     "auroc_energy": 0.71234388,
-    "auroc_comb": 0.69210226,
+    "auroc_comb": 0.6905765399999999,
+    "auroc_comb_testnorm": 0.69210226,
     "auroc_hamming": 0.58166968,
     "auroc_jaccard": 0.5536348
   },
@@ -227,7 +248,8 @@
     "interp": true,
     "auroc_mahal": 0.64652476,
     "auroc_energy": 0.7114733799999999,
-    "auroc_comb": 0.6772969600000001,
+    "auroc_comb": 0.6762600799999999,
+    "auroc_comb_testnorm": 0.6772969600000001,
     "auroc_hamming": 0.6726235,
     "auroc_jaccard": 0.6525396800000001
   },
@@ -238,7 +260,8 @@
     "interp": true,
     "auroc_mahal": 0.66822942,
     "auroc_energy": 0.74543066,
-    "auroc_comb": 0.7376698199999999,
+    "auroc_comb": 0.7354668999999999,
+    "auroc_comb_testnorm": 0.7376698199999999,
     "auroc_hamming": 0.5908657800000001,
     "auroc_jaccard": 0.5671458800000001
   },
@@ -249,7 +272,8 @@
     "interp": true,
     "auroc_mahal": 0.61685286,
     "auroc_energy": 0.5679468599999999,
-    "auroc_comb": 0.63173862,
+    "auroc_comb": 0.63291426,
+    "auroc_comb_testnorm": 0.63173862,
     "auroc_hamming": 0.6129755400000001,
     "auroc_jaccard": 0.6078133400000001
   },
@@ -260,7 +284,8 @@
     "interp": true,
     "auroc_mahal": 0.6397892799999999,
     "auroc_energy": 0.7915581199999999,
-    "auroc_comb": 0.7453226,
+    "auroc_comb": 0.7394179999999999,
+    "auroc_comb_testnorm": 0.7453226,
     "auroc_hamming": 0.6216737800000001,
     "auroc_jaccard": 0.62028066
   },
@@ -271,7 +296,8 @@
     "interp": true,
     "auroc_mahal": 0.5937281,
     "auroc_energy": 0.6575952600000001,
-    "auroc_comb": 0.6451446200000001,
+    "auroc_comb": 0.6446233000000001,
+    "auroc_comb_testnorm": 0.6451446200000001,
     "auroc_hamming": 0.62852834,
     "auroc_jaccard": 0.58941368
   },
@@ -282,7 +308,8 @@
     "interp": true,
     "auroc_mahal": 0.60076522,
     "auroc_energy": 0.63566856,
-    "auroc_comb": 0.6405049399999999,
+    "auroc_comb": 0.6408477,
+    "auroc_comb_testnorm": 0.6405049399999999,
     "auroc_hamming": 0.63780164,
     "auroc_jaccard": 0.62398172
   },
@@ -293,7 +320,8 @@
     "interp": true,
     "auroc_mahal": 0.59792214,
     "auroc_energy": 0.6174211599999999,
-    "auroc_comb": 0.6410225,
+    "auroc_comb": 0.63998998,
+    "auroc_comb_testnorm": 0.6410225,
     "auroc_hamming": 0.68095884,
     "auroc_jaccard": 0.64234764
   },
@@ -304,7 +332,8 @@
     "interp": true,
     "auroc_mahal": 0.61646278,
     "auroc_energy": 0.6567883999999999,
-    "auroc_comb": 0.66069046,
+    "auroc_comb": 0.66442342,
+    "auroc_comb_testnorm": 0.66069046,
     "auroc_hamming": 0.6282384,
     "auroc_jaccard": 0.6081232799999999
   },
@@ -315,7 +344,8 @@
     "interp": true,
     "auroc_mahal": 0.60733114,
     "auroc_energy": 0.6329427000000001,
-    "auroc_comb": 0.5971112999999999,
+    "auroc_comb": 0.5962183400000001,
+    "auroc_comb_testnorm": 0.5971112999999999,
     "auroc_hamming": 0.6440079599999999,
     "auroc_jaccard": 0.6217883799999999
   },
@@ -326,7 +356,8 @@
     "interp": true,
     "auroc_mahal": 0.63731302,
     "auroc_energy": 0.63085716,
-    "auroc_comb": 0.69613574,
+    "auroc_comb": 0.69684062,
+    "auroc_comb_testnorm": 0.69613574,
     "auroc_hamming": 0.65857728,
     "auroc_jaccard": 0.63281474
   },
@@ -337,7 +368,8 @@
     "interp": true,
     "auroc_mahal": 0.60959502,
     "auroc_energy": 0.6203027799999999,
-    "auroc_comb": 0.64359434,
+    "auroc_comb": 0.6430934999999999,
+    "auroc_comb_testnorm": 0.64359434,
     "auroc_hamming": 0.6605574200000001,
     "auroc_jaccard": 0.6296602
   },
@@ -348,7 +380,8 @@
     "interp": true,
     "auroc_mahal": 0.58754586,
     "auroc_energy": 0.6363231800000001,
-    "auroc_comb": 0.6712308599999999,
+    "auroc_comb": 0.6865407000000001,
+    "auroc_comb_testnorm": 0.6712308599999999,
     "auroc_hamming": 0.67261004,
     "auroc_jaccard": 0.6557610800000001
   },
@@ -359,7 +392,8 @@
     "interp": true,
     "auroc_mahal": 0.6440704599999999,
     "auroc_energy": 0.61589788,
-    "auroc_comb": 0.7188019800000001,
+    "auroc_comb": 0.7185272600000001,
+    "auroc_comb_testnorm": 0.7188019800000001,
     "auroc_hamming": 0.66002344,
     "auroc_jaccard": 0.6349201200000001
   },
@@ -370,7 +404,8 @@
     "interp": true,
     "auroc_mahal": 0.59540182,
     "auroc_energy": 0.70284076,
-    "auroc_comb": 0.64516106,
+    "auroc_comb": 0.64281134,
+    "auroc_comb_testnorm": 0.64516106,
     "auroc_hamming": 0.6316967200000001,
     "auroc_jaccard": 0.6113016000000001
   }

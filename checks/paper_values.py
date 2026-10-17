@@ -128,13 +128,11 @@ def splits():
 
 
 def scorers():
-    head("tab:scorer: NeSy AUROC by scorer, mean (std)")
-    for ds, f in (("ctuk", "scorer_ablation_ctuk_ctuko.json"), ("cicr", "scorer_ablation_cicr.json")):
-        p = NESY / f
-        if not p.exists():
-            print(f"   {ds}: {f} missing"); continue
-        d = LOAD(p)[ds]
-        print(f"   {ds:5s} " + "  ".join(f"{k} {v['mean']:.3f} ({v['std']:.3f})" for k, v in d.items()))
+    head("tab:scorer: NeSy AUROC by scorer on the main-table flows, mean (std); combined uses validation normalisation")
+    for ds in ("ctuk", "cicr"):
+        rs = [r for r in LOAD(NESY / f"shared_eval_{ds}.json") if r["model"] == "nesy" and r["variant"] == "main"]
+        print(f"   {ds:5s} " + "  ".join(f"{k[6:]} {ms([r[k] for r in rs])}" for k in
+              ("auroc_mahal", "auroc_hamming", "auroc_jaccard", "auroc_energy", "auroc_comb")))
     head("tab:scorer_arch / tab:kfs_scorer: Mahal | Energy | Comb, mean (std)")
     for ds, f in (("ctuk", "scorer_factorial_ctuk_ctuko.json"), ("ctuko", "scorer_factorial_ctuk_ctuko.json"),
                   ("cicr", "scorer_factorial_cicr.json"), ("ton", "scorer_factorial_ton.json")):
@@ -142,10 +140,11 @@ def scorers():
         for v in ARCH:
             rs = [r for r in rows if r["variant"] == v]
             print(f"   {ds:5s} {v:14s} " + "  ".join(ms([r[k] for r in rs]) for k in ("auroc_mahal", "auroc_energy", "auroc_comb")))
-    head("tab:ood_baselines (seed-0 MLP)")
-    for f, ds in (("ood_baselines_ctuk_ctuko.json", "ctuk"), ("ood_baselines_cicr.json", "cicr")):
-        p = CBM / f
-        print(f"   {ds:5s} " + ("missing" if not p.exists() else "  ".join(f"{k} {v:.3f}" for k, v in LOAD(p)[ds].items())))
+    head("tab:ood_baselines: five MLP seeds on the main-table flows")
+    for ds in ("ctuk", "cicr"):
+        p = CBM / f"ood_baselines_{ds}_seeds.json"
+        print(f"   {ds:5s} " + ("missing" if not p.exists() else
+              "  ".join(f"{k} {v['mean']:.3f}±{v['std']:.3f}" for k, v in LOAD(p)["summary"].items())))
     head("tab:lofo")
     for k, v in LOAD(CBM / "lofo.json").items():
         print(f"   {k:22s} {v['held_out']:20s} Mahal {v['mahal']:.2f}  Energy {v['energy']:.2f}  M/E {v['winner_M']}/{v['winner_E']}")
@@ -188,12 +187,13 @@ def fidelity():
             print(f"   {g:14s} {r['f1_pred'][0]:.3f} ({r['f1_pred'][1]:.3f}) | {r['f1_gt'][0]:.3f} ({r['f1_gt'][1]:.3f}) | "
                   f"{ms(gap)} | {r['probe_gap'][0]:.3f} ({r['probe_gap'][1]:.3f})")
         n = LOAD(NESY / f"fidelity_{ds}.json")
-        head(f"tab:alpha / tab:headagree {ds}: lambda_a: alpha (std) | dep_neural | dep_rule (std) | hard_soft | crisp | AUROC (std)")
+        head(f"tab:alpha / tab:headagree {ds}: lambda_a: alpha (std) | dep_neural | dep_rule (std) | hard_soft | crisp | AUROC (std, main-table flows)")
+        sw = LOAD(NESY / "alpha_sweep_main.json")[{"ctuk": "ctu", "cicr": "cic"}[ds]]
         for la in LA:
-            s = n["sweep"][la]; rs = s["rows"]
+            s = n["sweep"][la]; rs = s["rows"]; a = sw[la if la in sw else f"{float(la):.1f}"]
             print(f"   {la:5s} {s['alpha']:.2f} ({np.std([r['alpha'] for r in rs]):.2f}) | {s['dep_neural']:.3f} | "
                   f"{s['dep_rule']:.2f} ({np.std([r['dep_rule'] for r in rs]):.2f}) | {s['hard_soft']:.4f} | "
-                  f"{s['crisp']:.3f} | {ms([r['auroc'] for r in rs])}")
+                  f"{s['crisp']:.3f} | {a['auroc']:.3f} ({a['auroc_std']:.3f})")
         head(f"tab:rulequality {ds}: cov | dominant | prec | target | target prec (std) | thr rel std")
         for name, r in n["rule_quality"].items():
             print(f"   {name:24s} {r['coverage']:.2f} | {r['dominant'][:14]:14s} | {r['precision']:.2f} | {r['target'][:14]:14s} | "
