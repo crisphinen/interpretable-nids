@@ -39,7 +39,9 @@ EMBED_DIM = 64
 # data
 
 # load test_known and test_unknown splits with concept labels.
-def load_test_data(dataset: str):
+def load_test_data(dataset: str, unknown_file: str = "test_unknown.parquet"):
+    # unknown_file: test_unknown_device.parquet on the device-disjoint splits (held-out host's own
+    # unknown-family flows)
     if is_ctu(dataset):
         data_dir = dataset_dir(dataset)
         vocab = json.loads((data_dir / "vocab.json").read_text())
@@ -58,7 +60,7 @@ def load_test_data(dataset: str):
 
         def _load_unknown(max_rows=10000):
             # ctu test_unknown is manageable; no subsampling needed
-            df = pd.read_parquet(data_dir / "test_unknown.parquet")
+            df = pd.read_parquet(data_dir / unknown_file)
             if len(df) > max_rows:
                 df = df.sample(n=max_rows, random_state=42).reset_index(drop=True)
             X = df[feature_cols].values.astype(np.float32)
@@ -92,7 +94,7 @@ def load_test_data(dataset: str):
         def _load_unknown(max_per_class=2000):
             # cic test_unknown has 40M rows - stratified subsample per class
             print("  Loading CIC test_unknown (stratified subsample)...")
-            df_ids = pd.read_parquet(data_dir / "test_unknown.parquet", columns=["label_id"])
+            df_ids = pd.read_parquet(data_dir / unknown_file, columns=["label_id"])
             rng = np.random.default_rng(42)
             parts = []
             for lid in df_ids["label_id"].unique():
@@ -101,7 +103,7 @@ def load_test_data(dataset: str):
                     idx = rng.choice(idx, max_per_class, replace=False)
                 parts.append(idx)
             selected = np.sort(np.concatenate(parts))
-            df_full = pd.read_parquet(data_dir / "test_unknown.parquet")
+            df_full = pd.read_parquet(data_dir / unknown_file)
             df = df_full.iloc[selected].reset_index(drop=True)
             X = df[feature_cols].values.astype(np.float32)
             print(f"  Loaded {len(X)} unknown samples ({len(df_ids['label_id'].unique())} classes)")

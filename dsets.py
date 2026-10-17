@@ -13,7 +13,8 @@ CTU_DIRS = {"ctu": "data", "ctuk": "data/ctuk", "ctuko": "data/ctuko"}
 CTU_DIRS.update({n: f"data/{n}" for n in ("ctualt", "ctualt_o", "ctut", "ctut_o")})
 # device-disjoint splits (06_make_kfs_splits.py --split device): every known-class flow of the held-out
 # host is test-only; _o = the main split's 31-feature list on the same rows
-CTU_DIRS.update({n: f"data/{n}" for n in ("ctud_h198", "ctud_o_h198", "ctud_h111", "ctud_o_h111")})
+CTU_DIRS.update({n: f"data/{n}" for n in ("ctud_h198", "ctud_o_h198", "ctud_h111", "ctud_o_h111",
+                                         "ctud_h108", "ctud_o_h108")})
 # restored-features control (08_make_ctuk_n.py): ctuk rows, MLP/CBM input = NeSy-NIDS's 33 columns
 CTU_DIRS.update({"ctuk_n": "data/ctuk_n"})
 # leave-family-out folds (cbm/run_lofo.py --make-folds): vocab variants over the base split's rows
@@ -24,6 +25,8 @@ CIC_DIRS = {"cic": "data/cic", "cicr": "data/cicr", "cicr_alt": "data/cicr_alt"}
 # ton - TON_IoT network subset (07_make_splits_ton.py); z-scored like CIC, so it shares the CIC
 # loader branch with its own concept rules
 TON_DIRS = {"ton": "data/ton"}
+# tond_* - TON_IoT device-disjoint splits (07_make_splits_ton.py --holdout-attacker/--holdout-normal)
+TON_DIRS.update({n: f"data/{n}" for n in ("tond_a30", "tond_a31")})
 CIC_DIRS.update(TON_DIRS)
 CIC_DIRS.update({f"cicr_lofo_{s}": f"data/cicr_lofo_{s}" for s in ("ddossyn", "mirai", "recon", "vuln")})
 DATASETS = [*CTU_DIRS, *CIC_DIRS]

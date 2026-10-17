@@ -21,7 +21,9 @@
 #        python 06_make_kfs_splits.py --split temporal  -> data/ctut,   data/ctut_o
 #        python 06_make_kfs_splits.py --split device --holdout-host 192.168.1.198 --tag _h198
 #            -> data/ctud_h198, data/ctud_o_h198: every known-class flow of the held-out host is
-#               test-only; train/val come from the other hosts
+#               test-only; train/val come from the other hosts. test_unknown.parquet is the main
+#               split's unknown pool; test_unknown_device.parquet keeps only the held-out host's
+#               unknown-family flows (device-disjoint open-set test)
 
 import argparse
 import json
@@ -116,7 +118,8 @@ def main():
         known_parts.append(part)
     unk_parts = []
     for cls in unknown_primary + UNKNOWN_RARE:
-        part = pull(con, cands, cls, None, args.sample_seed)
+        part = pull(con, cands, cls, None, args.sample_seed,
+                    extra=("src_ip",) if args.split == "device" else ())
         if len(part):
             print(f"  unknown {cls:28s} {len(part):>7,}")
             unk_parts.append(part)
@@ -227,6 +230,9 @@ def main():
         for split, df in (("train", train), ("val", val), ("test_known", test_known),
                           ("test_unknown", unknown)):
             df[keep_cols].to_parquet(os.path.join(out, f"{split}.parquet"), index=False)
+        if args.split == "device":
+            dev_unknown = unknown[unknown["src_ip"] == args.holdout_host]
+            dev_unknown[keep_cols].to_parquet(os.path.join(out, "test_unknown_device.parquet"), index=False)
         vocab = {**common, **extra, "n_features": len(extra["feature_cols"])}
         with open(os.path.join(out, "vocab.json"), "w") as f:
             json.dump(vocab, f, indent=2)

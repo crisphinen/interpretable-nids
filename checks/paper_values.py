@@ -286,14 +286,35 @@ def revision_controls():
     head("restored-features control (ctuk rows, NeSy-NIDS's 33 columns): AUROC")
     res = with_baselines("ctuk_n")
     print("   ctuk_n " + "  ".join(f"{m} {v[1]:.3f}±{v[2]:.3f}" for m, v in res.items()))
-    head("device-disjoint CTU splits: F1 | AUROC per model")
-    for ds in ("ctud_h198", "ctud_o_h198", "ctud_h111", "ctud_o_h111"):
+    head("device-disjoint splits (CTU hosts, TON_IoT machines): F1 | AUROC per model")
+    for ds in ("ctud_h198", "ctud_o_h198", "ctud_h111", "ctud_o_h111", "ctud_h108", "ctud_o_h108",
+               "tond_a30", "tond_a31"):
         res = with_baselines(ds)
         if res:
             print(f"   {ds:12s} " + "  ".join(f"{m} {v[0]:.3f}/{v[1]:.3f}" for m, v in res.items()))
 
 
+def device_followup():
+    head("train/test overlap: share of known test flows with an exact same-class training duplicate")
+    f = CBM / "split_overlap.json"
+    if f.exists():
+        for ds, v in LOAD(f).items():
+            print(f"   {ds:10s} mean {v['mean_share']:.2f}  " + "  ".join(
+                f"{k} {c['share_with_same_class_train_duplicate']:.2f} ({c['distinct_test_vectors']}/{c['n_test']})"
+                for k, c in v["per_class"].items()))
+    head("open-set test with the held-out device's own unknown flows: AUROC / TPR@5%FPR")
+    f = CBM / "device_openset.json"
+    if f.exists():
+        for ds, v in LOAD(f).items():
+            print(f"   {ds:12s} " + "  ".join(f"{m} {x['auroc'][0]:.3f}/{x['tpr5'][0]:.3f}" for m, x in v["summary"].items()))
+    head("95% bootstrap confidence intervals (seeds x evaluation flows)")
+    f = CBM / "bootstrap_ci.json"
+    if f.exists():
+        for c in LOAD(f):
+            print(f"   {c['comparison']:44s} {c['diff']:+.3f}  [{c['ci95'][0]:+.3f}, {c['ci95'][1]:+.3f}]")
+
+
 if __name__ == "__main__":
     for f in (protocol, table_main, splits, scorers, openset, fidelity, selectivity, geometry, transfer_and_selection,
-              revision_controls):
+              revision_controls, device_followup):
         f()
