@@ -36,10 +36,10 @@ numbering.
 \noindent\textbf{Feature set.} Following the known-class feature-selection control
 (Section~\ref{sec:features}), all CTU-IoT-23 results in the main article and in the
 finding-bearing supplementary tables (this control, the $\alpha$-gate sweep and head-agreement,
-the per-family open-set breakdown, the concept-accuracy and leakage probe, the per-class table and
-the temporal split, the $\lambda$ sensitivity and the $(\lambda,\gamma)$ grid) use the leak-free
+the per-family open-set breakdown, the concept-accuracy and leakage probe,
+the temporal split and the $(\lambda,\gamma)$ grid) use the leak-free
 known-class-only feature selection; the paired comparison with the originally submitted feature list
-is in Table~\ref{tab:kfs}. Every split is
+is the AUROC$^\S$ column of main Table~\ref{M-tab:main}. Every split is
 drawn deterministically by the released scripts, and the released code includes a script that
 prints every table value from the released results.
 
@@ -147,7 +147,7 @@ better detection.
 \renewcommand{\arraystretch}{1.0}
 \caption{Mean concept prediction accuracy (\%) on the known-class test split
 per CBM variant (mean over five seeds; $\lambda$ sensitivity in
-Table~\ref{tab:lambda}).}
+Table~\ref{tab:lambdagamma}).}
 \label{tab:cbm_concepts}
 \centering
 \small
@@ -181,87 +181,39 @@ disagree with the declared labels, the pattern of disagreement can itself carry 
 information. The predicate-replacement test of Section~\ref{sec:concept_intervention}
 therefore uses the declared predicates directly.
 
-\section{Sensitivity to the Concept-Supervision Weight \texorpdfstring{$\lambda$}{lambda}}
-\label{sec:lambda}
-
-Table~\ref{tab:lambda} varies the concept-supervision weight $\lambda$ for JointCBM ($\gamma{=}0$)
-on the main splits, with the training and evaluation flows of main Table~\ref{M-tab:main}; the
-$\lambda{=}0.5$ column consists of the Table~\ref{M-tab:main} models themselves. Known-class F1 is
-unchanged between $\lambda{=}0.1$ and $0.5$ (validation F1 within $0.0005$); at $\lambda{=}1.0$ one of
-five CTU seeds collapses (test F1 $0.734$), lowering the CTU mean to $0.893$. Raising $\lambda$ raises
-concept accuracy on both datasets and moves OOD AUROC in opposite directions, by $+0.020$ on
-CTU-IoT-23 and $-0.040$ on CIC-IoT-2023 from $\lambda{=}0.1$ to $1.0$.
-
-\begin{table}[t]
-\centering\small
-\caption{Sensitivity to the concept-supervision weight $\lambda$ (JointCBM, $\gamma{=}0$, main
-splits, mean over five seeds; AUROC $\pm$1 std). The $\lambda{=}0.5$ column is the JointCBM
-($\gamma{=}0$) row of main Table~\ref{M-tab:main}.}
-\label{tab:lambda}
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{lccc}
-\toprule
-& $\lambda{=}0.1$ & $\lambda{=}0.5$ & $\lambda{=}1.0$ \\
-\midrule
-CTU F1            & 0.9331 & 0.9330 & 0.8931 \\
-CTU concept-acc   & 0.700  & 0.874  & 0.935  \\
-CTU OOD AUROC     & 0.810$\pm$0.021 & 0.823$\pm$0.044 & 0.830$\pm$0.041 \\
-\midrule
-CIC F1            & 0.8196 & 0.8183 & 0.8184 \\
-CIC concept-acc   & 0.865  & 0.963  & 0.975  \\
-CIC OOD AUROC     & 0.743$\pm$0.018 & 0.717$\pm$0.017 & 0.703$\pm$0.013 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \section{Temporal (Timestamp-Ordered) Split on CTU-IoT-23}
 \label{sec:temporal}
 
-Random flow partitioning can leak device or session identity between train and test. The CTU
-attacks come from very few source addresses (Okiru: 4, DDoS: 7, C\&C-HeartBeat: 5);
-Section~\ref{sec:device} holds out source IP addresses, and here we build the known-class splits in time: we take the same per-class sample as the main
-split, order the flows of each known class by capture timestamp (timestamps are compared
-only within a class), and assign that class's earliest 70\% to training, the next 15\% to
-validation and the latest 15\% to test (five seeds; within each class, test strictly
-follows train; the held-out unknown families are unchanged). Timestamp ordering does not by itself guarantee a session- or
-capture-disjoint split, individual sessions or captures may straddle the train/test
-boundary, so we claim temporal ordering, not capture-, session- or device-disjointness.
-A capture-disjoint split needs the capture identifier, which our merged flow table does not
-keep, and remains untested. This protocol probes a property of the CTU-IoT-23 labelling:
-the \emph{DDoS} family is temporally bimodal, a high-rate flood capture (September 2018,
-median Rate ${\approx}9.3{\times}10^{5}$\,pps) and near-zero-rate captures (December 2018
-onward, median Rate ${<}1$), so a timestamp split can train on one DDoS regime and test on the
-other. This makes \emph{every} model score F1 $0.00$ on DDoS on every seed; with the main split's
-31-feature list on the same sample only two JointCBM $\gamma{=}0.5$ seeds keep DDoS (F1 $0.65$), so
-the collapse follows from the label's temporal structure rather than from feature selection
-(Section~\ref{sec:features}).
-
-Two effects separate. The \emph{absolute} deterioration is large but comes from one class:
-four-class weighted F1 falls from $0.933$ (random split) to $0.646$--$0.648$ for every model but SequentialCBM
-(F1$_4$, main Table~\ref{M-tab:temporal}) because DDoS is lost; C\&C-HeartBeat also falls, from
-$0.998$ to about $0.79$. This is a temporal-generalisation cost, not an interpretability one. The
-\emph{between-model} gap is negligible: on the three coherent families every JointCBM variant,
-HybridCBM and NeSy-NIDS match the MLP in aggregate (Coh-3 $0.862$--$0.863$) while redistributing
-errors across classes (e.g.\ $\gamma{=}0$: Benign $0.841$ vs.\ $0.958$, Okiru $0.961$ vs.\ $0.844$).
-SequentialCBM is the exception, losing Benign (F1$_4$ $0.330$, Coh-3 $0.441$). NeSy-NIDS gives the
-highest temporal-split AUROC ($0.888{\pm}0.025$; $0.901{\pm}0.030$ with the $\alpha$-gate penalty of
-Section~\ref{sec:alpha}), and the JointCBM $\gamma$ ordering shifts relative to the alternative split.
+The temporal split takes the main split's per-class sample, orders each known class by capture
+timestamp (compared only within a class) and assigns its earliest 70\% to training, the next 15\% to
+validation and the latest 15\% to test (five seeds; unknown families unchanged). Sessions or
+captures may straddle the boundary, so we claim temporal ordering, not capture-, session- or
+device-disjointness (Section~\ref{sec:device} holds out source addresses). The CTU \emph{DDoS} label
+is temporally bimodal: a high-rate flood capture (September 2018, median Rate
+${\approx}9.3{\times}10^{5}$\,pps) and near-zero-rate captures (December 2018 onward, median Rate
+${<}1$), so the split trains on one regime and tests on the other, and every model scores F1 $0.00$
+on DDoS on every seed; with the main 31-feature list only two JointCBM $\gamma{=}0.5$ seeds keep DDoS
+(F1 $0.65$), so the cause is the label, not feature selection. Four-class F1 falls from $0.933$ to
+$0.646$--$0.648$ for every model but SequentialCBM (C\&C-HeartBeat also falls, from $0.998$ to about
+$0.79$), a temporal-generalisation cost rather than an interpretability one. On the three coherent
+families the JointCBM variants, HybridCBM and NeSy-NIDS match the MLP (Coh-3 $0.862$--$0.863$) while
+redistributing errors (e.g.\ $\gamma{=}0$: Benign $0.841$ vs.\ $0.958$, Okiru $0.961$ vs.\ $0.844$);
+SequentialCBM loses Benign (F1$_4$ $0.330$, Coh-3 $0.441$). NeSy-NIDS gives the highest temporal-split
+AUROC ($0.888{\pm}0.025$; $0.901{\pm}0.030$ with the $\alpha$ penalty).
 
 \section{Source-IP Holdout}
 \label{sec:device}
 
 Flows are grouped by source IP address. Our merged flow tables keep the source IP but not the
-capture name, and an address can recur across captures, so a
-held-out address is not shown to be a single physical device; the experiment is a source-IP
-holdout, and its conclusions concern source addresses. Two CTU addresses, 192.168.1.198 and 192.168.100.111, have at least $3{,}450$ flows in each of the
-four known classes. For each, we take that address's flows as the known test set ($3{,}450$ per
-class) and draw the training and validation flows, in the usual numbers, from all other addresses; the unknown test flows are those of the main split. The feature list is
-re-selected on each split's training rows (36 features for address .198, 33 for address .111), and a
-control uses the main split's 31-feature list on the same rows. The MLP, the CBM variants (JointCBM, SequentialCBM, HybridCBM) and NeSy-NIDS (with the $\alpha$
-penalty and the rule-only head) are trained with five seeds and scored on the shared evaluation flows; for
-address .198 one class has only $14{,}699$ training flows instead of $16{,}100$, because C\&C-HeartBeat
-has fewer flows on the other addresses. \texttt{06\_make\_kfs\_splits.py --split device} builds the
-splits (\texttt{ctud\_h198}, \texttt{ctud\_h111} and the \texttt{\_o} controls).
+capture name, and an address can recur across captures, so a held-out address is not shown to be
+one physical device; the conclusions concern source addresses. CTU addresses 192.168.1.198 and
+192.168.100.111 have at least $3{,}450$ flows in every known class; each in turn supplies the known
+test set ($3{,}450$ per class), all other addresses supply the training and validation flows (for
+.198 C\&C-HeartBeat has $14{,}699$ training flows instead of $16{,}100$), and the unknown test flows
+are the main split's. Features are re-selected on each split's training rows (36 for .198, 33 for
+.111), with the main 31-feature list (31f) as a control. The MLP, the CBM variants and NeSy-NIDS
+(with the $\alpha$ penalty and the rule-only head) are trained with five seeds
+(\texttt{06\_make\_kfs\_splits.py --split device}).
 
 \begin{table}[h]
 \centering\footnotesize
@@ -292,32 +244,22 @@ Rule-only                  & $0.416$ & $0.770{\pm}.032$ & $0.770{\pm}.032$ & $0.
 \end{tabular}}
 \end{table}
 
-Known-class classification fails for every model. The held-out
-addresses' class traffic is unlike the other addresses': none of address .198's Benign or DDoS test
-flows, and none of address .111's test flows in any class, has an exact duplicate among the training
-flows of its class (Section~\ref{sec:device2}), and address .198's $3{,}450$ Benign test flows are
-three distinct feature vectors. With the re-selected features, every MLP, CBM and NeSy-NIDS run on address .198 scores F1
-$0.00$ on Benign and on one more class (DDoS, or C\&C-HeartBeat for SequentialCBM and rule-only),
-which fixes weighted F1 at $0.417$ (with the 31-feature list, two NeSy-NIDS ($\alpha$) seeds reach
-$0.67$ on Benign); the MLP (seed 0) classifies $3{,}448$ of the $3{,}450$ Benign flows as Okiru and all DDoS
-flows as Benign. On address .111 every MLP, CBM and NeSy-NIDS run with the re-selected features scores F1 below $0.03$ on DDoS
-and Okiru (with the 31-feature list SequentialCBM reaches $0.54$ on DDoS); the MLP (seed 0) classifies $3{,}407$ of the DDoS and $3{,}409$ of the Okiru flows as C\&C-HeartBeat. Because the known test flows are themselves unlike the
-training data, AUROC no longer isolates novel attack types. On address .111 it is below $0.5$ for
-every model and seed (all 100 runs): the held-out address's known flows score as more novel than the unknown flows, over $99.9\%$
-of which come from other addresses that also produce known-class flows ($89\%$ for address .198, where
-$3{,}516$ unknown flows come from the held-out address itself). On address .198 SequentialCBM and NeSy-NIDS score highest and
-the MLP lowest, but with every model losing two of the four known classes these
-values do not measure open-set detection on a new address.
+Known-class classification fails for every model. The held-out addresses' class traffic differs
+from the other addresses': no Benign or DDoS test flow of .198, and no test flow of .111, has an
+exact same-class duplicate in training (Section~\ref{sec:device2}), and .198's $3{,}450$ Benign test
+flows are three distinct feature vectors. With the re-selected features every MLP, CBM and NeSy-NIDS
+run scores F1 $0.00$ on .198's Benign (which the MLP labels Okiru) and on one more class, fixing
+weighted F1 at $0.417$, and below $0.03$ on .111's DDoS and Okiru (which the MLP labels
+C\&C-HeartBeat). AUROC then no longer isolates novel attack types: on .111 it is below $0.5$ in all
+100 runs, because the held-out known flows look more novel than the unknown flows, over $99.9\%$ of
+which come from addresses that also produce known traffic ($89\%$ for .198).
 
 \subsection{A Third CTU Address and TON\_IoT}
 \label{sec:device2}
-Address 192.168.100.108 has $3{,}450$ flows in each CTU attack class but only $3{,}051$ Benign
-flows, all of which form its Benign test set; it has no unknown-family flows. On TON\_IoT the attack
-flows of each known class come from a few source addresses; \texttt{07\_make\_splits\_ton.py --holdout-attacker} takes
-$7{,}500$ test flows per attack class from address 192.168.1.30 or 192.168.1.31 and
-$7{,}500$ normal flows from address 192.168.1.195 or 192.168.1.190, and draws training and validation
-flows from all other addresses (\texttt{tond\_a30}, \texttt{tond\_a31}; the fixed TON\_IoT feature list,
-scaler and vocabularies refit on the training rows). NeSy-NIDS has no TON\_IoT rule bank.
+Address 192.168.100.108 ($3{,}450$ flows per attack class, $3{,}051$ Benign, no unknown-family flows)
+gives a third CTU fold. On TON\_IoT, \texttt{07\_make\_splits\_ton.py --holdout-attacker} takes
+$7{,}500$ test flows per attack class from 192.168.1.30 or .31 and $7{,}500$ normal flows from .195 or
+.190, training on all other addresses; NeSy-NIDS has no TON\_IoT rule bank.
 
 \begin{table}[h]
 \centering\footnotesize
@@ -347,32 +289,22 @@ Rule-only                  & $0.475$ & $0.887{\pm}.011$ & $0.887{\pm}.011$ & -- 
 \end{tabular}}
 \end{table}
 
-On TON\_IoT the largest per-class losses are on the held-out normal address and on password
-(address .30, MLP: normal $0.68$ vs.\ $0.91$, password $0.59$ vs.\ $0.79$ on the main split);
-address .31 matches the main split. The share of known test flows with an exact duplicate (features
-rounded to four decimals) among the training flows of their class is $0.84$ on the CTU main split
-and $0.88$ on TON\_IoT, $0.42$, $0.00$ and $0.41$ on CTU addresses .198, .111 and .108, and $0.74$ and
-$0.77$ on TON\_IoT addresses .30 and .31.
+On TON\_IoT the largest losses are on normal and password (address .30, MLP: normal $0.68$ vs.\
+$0.91$, password $0.59$ vs.\ $0.79$); address .31 matches the main split. The share of known test
+flows with an exact same-class training duplicate (features rounded to four decimals) is $0.84$ on
+the CTU and $0.88$ on the TON\_IoT main split, $0.42$, $0.00$ and $0.41$ on CTU addresses .198, .111
+and .108, and $0.74$ and $0.77$ on TON\_IoT addresses .30 and .31.
 
 \subsection{Open-Set Test with Unknown Flows from the Held-Out Address}
-Table~\ref{tab:device} scores against the main split's unknown pool, most of which comes from
-addresses seen in training. \texttt{cbm/run\_device\_openset.py} instead scores each held-out
-address's known test flows against that address's own unknown-family flows, for the MLP, CBMs and
-NeSy-NIDS: address .198 ($3{,}516$: C\&C $3{,}499$, C\&C-FileDownload $14$, Okiru-Attack $3$) and the
-DoS flows of TON\_IoT address .30 (with normal address .195) and address .31 (with .190), $2{,}000$
-each, sampled as in the main split. The MITM flows of the two TON\_IoT addresses ($2$ and $510$) are
-scored separately and are not part of Tables~\ref{tab:devopen}--\ref{tab:devtau}. As a seen-address
-reference, the main-split models are scored the same way against the main split's own C\&C (CTU,
-$10{,}000$ of $21{,}995$ flows) or DoS (TON\_IoT, $2{,}000$) flows. Address .111 has 4 unknown-family
-flows and address .108 none, so neither is tested.
-
-Two operating points are reported. TPR@5\%FPR (Table~\ref{tab:devopen}), as in main
-Table~\ref{M-tab:main}, thresholds at the 95th percentile of the held-out address's own known test
-scores: it is a point on the test ROC curve, a diagnostic that is not available before deployment.
-Table~\ref{tab:devtau} uses the deployable threshold $\tau$ of main Section~\ref{M-sec:openset}, the
-95th percentile of the known validation scores, whose flows come from the training addresses, and
-reports the share of the held-out address's known test flows it rejects and the recall of the
-address's unknown flows.
+\texttt{cbm/run\_device\_openset.py} scores each held-out address's known test flows against that
+address's own unknown-family flows (MLP, CBMs, NeSy-NIDS): .198's $3{,}516$ ($3{,}499$ C\&C) and
+$2{,}000$ DoS flows each from TON\_IoT .30 and .31, sampled as in the main split (their $2$ and $510$
+MITM flows are scored separately). The seen-address reference scores the main-split models against
+the main split's C\&C ($10{,}000$ of $21{,}995$) or DoS ($2{,}000$) flows; .111 and .108 lack
+unknown-family flows. TPR@5\%FPR (Table~\ref{tab:devopen}), as in main Table~\ref{M-tab:main},
+thresholds at the 95th percentile of the held-out address's own known test scores, a diagnostic
+test-ROC point; Table~\ref{tab:devtau} uses the deployable threshold $\tau$ (main
+Section~\ref{M-sec:openset}) set on validation flows of the training addresses.
 
 \begin{table}[h]
 \centering\footnotesize
@@ -430,14 +362,13 @@ Rule-only                  & $0.039$ / $0.183$ & $0.177$ / $0.045$ & $0.177$ / $
 \end{table}
 
 On CTU the held-out address lowers C\&C AUROC from $0.82$--$0.88$ to $0.40$--$0.71$ and diagnostic
-TPR from $0.18$--$0.55$ to at most $0.162$. On TON\_IoT address .30 the change is small (AUROC
-$0.41$--$0.75$ vs.\ $0.44$--$0.75$), and TPR is low for every model on seen addresses too
-($\le0.022$). With the deployable threshold the known rejection rate stays near its target on seen
-addresses ($3.9$--$5.5\%$) but not on held-out ones ($0$--$50\%$ on address .198, $3.7$--$13.1\%$ on
-the TON\_IoT addresses), and unknown recall is at most $13.1\%$ (.198) and $7.0\%$ (TON\_IoT). The
-ordering of the models is not stable across addresses: the concept models are above the MLP on
-address .198 and address .30, and below it on address .31 (MLP $0.818$). On the $510$ MITM flows of
-address .31, AUROC is $0.63$--$0.85$ and diagnostic TPR at most $0.139$.
+TPR from $0.18$--$0.55$ to at most $0.162$; on TON\_IoT address .30 the change is small (AUROC
+$0.41$--$0.75$ vs.\ $0.44$--$0.75$), and TPR is low on seen addresses too ($\le0.022$). The deployable
+threshold keeps known rejection near target on seen addresses ($3.9$--$5.5\%$) but not on held-out
+ones ($0$--$50\%$ on .198, $3.7$--$13.1\%$ on TON\_IoT), with unknown recall at most $13.1\%$ (.198) and
+$7.0\%$ (TON\_IoT). The model ordering is not stable across addresses (the concept models are above
+the MLP on .198 and .30, below it on .31). On the $510$ MITM flows of .31, AUROC is $0.63$--$0.85$
+and diagnostic TPR at most $0.139$.
 
 \section{Confidence Intervals}
 \label{sec:ci}
@@ -621,98 +552,32 @@ fin/rst flag numbers, and HTTP, HTTPS, SSH, IRC, Telnet indicators; plus the fou
 ratios) and three Zeek categorical fields (conn\_state, history, service) integer-encoded, 37
 in total. Missing values are set to $-1$; features are not rescaled.
 
-\textbf{Feature-selection caveat.} The 34 numeric features were chosen before this study as
-those covering 99\% of cumulative random-forest importance, with a class-weighted forest trained on
-up to $10^6$ flows of every labelled CTU family. That sample included the nine
-families later held out as unknown, so the CTU feature set is not blind to the held-out
-labels. The choice is fixed and shared by every model compared, but it may favour
-separability of the CTU unknowns in raw-feature space. CIC-IoT-2023 and TON\_IoT use fixed
-feature lists (the 39 DPKT columns; 23 conn-log fields) without label-informed selection.
+\begin{sloppypar}\textbf{Feature-selection control.} The 34 numeric features were chosen before this study by a
+class-weighted random forest (99\% of cumulative importance) trained on up to $10^6$ flows of every
+labelled CTU family, including the nine later held out, so the submitted list is not blind to the
+held-out labels (CIC-IoT-2023 and TON\_IoT use fixed lists). We therefore re-ran the same selection
+on the known-class training rows only: the resulting list keeps 28 of the numeric features (it
+drops HTTP, HTTPS, SSH, IRC, \texttt{resp\_pkts}, \texttt{fin\_count}, Radius, Std, Variance,
+\texttt{resp\_ip\_bytes} and \texttt{rst\_flag\_number}, and adds TCP, Protocol\_Type, Time\_To\_Live
+and the \texttt{cwr} and \texttt{syn} flag numbers), 31 features with the three categorical fields
+(\texttt{ctuk}). The submitted list on the same rows (\texttt{ctuko}) isolates the selection source
+from the sample. NeSy-NIDS keeps its expert rule features, so the two rule counters the known-only
+forest drops are restored (\texttt{06\_make\_kfs\_splits.py}, \texttt{cbm/run\_kfs\_control.py},
+\texttt{nesy/run\_kfs\_control.sh}). Main Table~\ref{M-tab:main} reports the outcome over five seeds
+(F1; AUROC$^\S$ for \texttt{ctuko}). Known-class F1 is unchanged; per-class Mahalanobis remains the best
+CTU scorer for every architecture (Table~\ref{tab:kfs_scorer}); $\gamma$ still has no monotone
+effect. All OOD AUROC changes of $0.05$ or more are gains under known-class-only selection
+(SequentialCBM $0.782{\pm}.042{\to}0.872{\pm}.026$, HybridCBM $0.772{\pm}.073{\to}0.822{\pm}.055$,
+Post-hoc CBM $0.805{\to}0.871$); the MLP moves $-0.020$, NeSy-NIDS $+0.019$ ($0.885{\to}0.904$). The
+submitted list therefore did not flatter the CTU detection results.\end{sloppypar}
 
-\textbf{Known-class feature-selection control.} Disclosing this is not enough, so we ran the
-control. We re-selected the CTU numeric features with the same random-forest procedure but on
-the known-class \emph{training} rows only, with the nine held-out families excluded from
-selection. The known-only list keeps 28 numeric features (of 34): it drops the service and protocol
-indicators (HTTP, HTTPS, SSH, IRC), two counters (\texttt{resp\_pkts}, \texttt{fin\_count})
-and several statistical or derived features (Radius, Std, Variance, \texttt{resp\_ip\_bytes},
-\texttt{rst\_flag\_number}), and adds TCP, Protocol\_Type, Time\_To\_Live and two TCP-flag indicators (\texttt{cwr}, \texttt{syn} flag numbers), 31 features in total with the three categorical fields. We drew a class-balanced split and
-ran every CTU comparison with this list (\texttt{ctuk}); as a paired baseline we ran the
-submitted 37-feature list on the \emph{same} rows (\texttt{ctuko}), so
-\texttt{ctuko}\,vs\,\texttt{ctuk} isolates the selection source from the sample. The
-NeSy-NIDS rule features are expert-defined rather than RF-selected, so the two rule counters the
-known-only forest drops are restored and the rule indices remapped; only the neural branch and
-the CBM/MLP/DT/RF inputs change. The script \texttt{06\_make\_kfs\_splits.py} and the drivers \texttt{cbm/run\_kfs\_control.py}
-and \texttt{nesy/run\_kfs\_control.sh} reproduce the table.
-
-Table~\ref{tab:kfs} reports the outcome over five seeds. The accuracy and scorer findings
-hold. The JointCBM variants, HybridCBM and NeSy-NIDS still match the MLP on known-class F1
-(all $0.933$); the two low-capacity models are unchanged (SequentialCBM $0.57$,
-post-hoc CBM $0.58$). Per-class Mahalanobis is the best CTU scorer for every architecture under
-both lists (Table~\ref{tab:kfs_scorer}), with the logit-energy score below chance for the MLP
-($0.39$ vs.\ Mahalanobis $0.88$). Concept-fidelity regularisation $\gamma$ still has no
-monotone effect on OOD AUROC (JointCBM $0.82$--$0.83$ and $0.81$--$0.84$ across $\gamma$;
-Table~\ref{tab:kfs}). NeSy-NIDS, the strongest CTU detector, moves from $0.885$ to $0.904$.
-
-Three OOD AUROC changes reach the $0.05$ level read as material elsewhere, and all are gains under
-known-class-only selection. SequentialCBM rises from $0.782{\pm}.042$ to $0.872{\pm}.026$
-($\Delta{=}+0.090$, beyond its seed std), HybridCBM from $0.772{\pm}.073$ to $0.822{\pm}.055$
-($\Delta{=}+0.050$, below its own seed std) and Post-hoc CBM from $0.805$ to $0.871$; the MLP moves
-$-0.020$, the JointCBM variants by at most $0.03$, and the DT and RF baselines gain $0.12$ and
-$0.03$. Removing the held-out labels from feature selection therefore does not flatter the CTU
-detection results; if anything the submitted list hurt the concept-space detectors.
-
-The control also bears on the geometry reading. The CTU correlations of main
-Table~\ref{M-tab:signflip} are opposite in sign to CIC-IoT-2023 and TON\_IoT, and
-Section~\ref{sec:loco} traces the direction to SequentialCBM, the CBM configuration whose AUROC
-changes most with the feature list. Under the leak-free list no CTU association holds without that
-configuration, and Section~\ref{sec:transfer} shows that no statistic predicts detectability consistently
-on a held-out corpus.
-
-\textbf{Per-split selection for the robustness experiments.} The known-only selection above is
-fitted on the primary random split's known-class training rows, which is not automatically
-leak-free for the other CTU experiments. We therefore run the same random-forest selection
-separately on each: the alternative known set's training rows (excluding the now-held-out
-C\&C-HeartBeat), the earliest 70\% of the timestamp-ordered split, and each leave-one-family-out
-fold's reduced known set, so the family that experiment holds out, and any test-period flow, never
-informs its features. The alternative split draws its own class-balanced sample, the temporal
-split reorders the main split's sample by time, and the leave-one-family-out folds reuse the main
-split's rows. For the alternative and temporal splits, running the main split's 31-feature list on
-the same rows separates re-selection from the sample, and the accuracy,
-scorer and $\gamma$ conclusions hold under both. One consequence is visible in the temporal split
-(Section~\ref{sec:temporal}): the DDoS collapse occurs under both feature lists (bar two JointCBM
-seeds with the main-split list), so it is a property of the temporal split, not of feature
-selection.
-
-\begin{table}[t]
-\centering\footnotesize
-\caption{Known-class feature-selection control on CTU-IoT-23 (five seeds). \texttt{ctuko}:
-split with the submitted 37-feature list; \texttt{ctuk}: same split with features
-selected from known-class training rows only, so \texttt{ctuko}\,vs\,\texttt{ctuk} isolates the
-selection source from the sample. Known-class weighted F1 (mean) and per-class Mahalanobis OOD
-AUROC (mean${\pm}$std). Accuracy is unchanged; known-class-only selection raises the OOD AUROC of
-SequentialCBM ($+0.090$, beyond its seed std), HybridCBM ($+0.050$) and Post-hoc CBM ($+0.066$).}
-\label{tab:kfs}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lcccc}
-\toprule
- & \multicolumn{2}{c}{F1} & \multicolumn{2}{c}{OOD AUROC} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}
-Model & \texttt{ctuko} & \texttt{ctuk} & \texttt{ctuko} & \texttt{ctuk} \\
-\midrule
-MLP                 & 0.933 & 0.933 & $0.894{\pm}.005$ & $0.874{\pm}.002$ \\
-JointCBM ($\gamma{=}0$)   & 0.933 & 0.933 & $0.817{\pm}.031$ & $0.823{\pm}.044$ \\
-JointCBM ($\gamma{=}0.1$) & 0.933 & 0.933 & $0.821{\pm}.033$ & $0.805{\pm}.035$ \\
-JointCBM ($\gamma{=}0.5$) & 0.933 & 0.933 & $0.821{\pm}.030$ & $0.844{\pm}.036$ \\
-JointCBM ($\gamma{=}1$)   & 0.933 & 0.933 & $0.833{\pm}.029$ & $0.834{\pm}.050$ \\
-SequentialCBM       & 0.570 & 0.567 & $0.782{\pm}.042$ & $0.872{\pm}.026$ \\
-HybridCBM           & 0.933 & 0.933 & $0.772{\pm}.073$ & $0.822{\pm}.055$ \\
-NeSy-NIDS           & 0.933 & 0.933 & $0.885{\pm}.020$ & $0.904{\pm}.014$ \\
-Decision tree       & 0.934 & 0.934 & $0.557{\pm}.000$ & $0.679{\pm}.000$ \\
-Random forest       & 0.934 & 0.934 & $0.630{\pm}.002$ & $0.657{\pm}.034$ \\
-Post-hoc CBM        & 0.576 & 0.576 & $0.805{\pm}.030$ & $0.871{\pm}.024$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+\textbf{Per-split selection.} The same selection is re-run separately for each other CTU
+experiment: on the alternative known set's training rows, the earliest 70\% of the temporal split
+and each leave-one-family-out fold's reduced known set, so no held-out family or test-period flow
+informs its features. The alternative split draws its own class-balanced sample, the temporal split
+reorders the main split's sample by time, and the leave-one-family-out folds reuse the main split's
+rows; for the alternative and temporal splits, the main 31-feature list on the same rows is a
+control, and the accuracy, scorer and $\gamma$ conclusions hold under both.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -800,23 +665,6 @@ sign flips for less-than conditions. As $k(t)$ grows, $g_i^{>}(1{-}g_i^{>})$ van
 far from their threshold, so late in training only borderline conditions keep moving. The
 straight-through estimator is not used in training.
 
-\section{OOD AUROC versus Closed-Set F1}
-\label{sec:auroc_vs_f1}
-
-Figure~\ref{fig:auroc_vs_f1} plots every model of main Table~\ref{M-tab:main} in the
-F1--AUROC plane; main Section~\ref{M-sec:ksweep} discusses what it shows for the
-closed-set/open-set relationship.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/auroc_vs_f1.pdf}
-  \caption{OOD AUROC vs.\ known-class weighted F1 for all models on
-  CTU-IoT-23 (left) and CIC-IoT-2023 (right), using the values of main
-  Table~\ref{M-tab:main}. Error bars are $\pm$1 std over five seeds;
-  every model uses five seeds (DT's raw-feature score has no seed variance).}
-  \label{fig:auroc_vs_f1}
-\end{figure}
-
 \section{Scorer Settings}
 \label{sec:scorers}
 Table~\ref{tab:scorers} lists how each OOD score is computed. Every setting was fixed in advance
@@ -882,17 +730,13 @@ retraining, based on synthetic outliers, is evaluated in Section~\ref{sec:transf
 \section{Transfer and Selection Tests}
 \label{sec:transfer}
 
-\textbf{Do known-class statistics transfer across corpora?} Main Table~\ref{M-tab:signflip}
-reports within-corpus associations. To test prediction on an unseen corpus, we fit
-$\mathrm{AUROC}=a+b\,s$ by least squares on the 60 CBM concept-space models of two corpora, for
-each known-class statistic $s$, and apply it to the 30 models of the held-out third
-(Table~\ref{tab:transfer}). The prediction beats the training-corpora mean AUROC in $3$ of $21$
-cases, ranks the held-out models in the right direction (positive Spearman correlation) in $7$
-of $21$, and identifies the best configuration in $1$ of $21$. The fitted slope is dominated by
-the differences between corpora (the dataset means are non-monotone, main
-Section~\ref{M-sec:ksweep}), so it often has the wrong sign even for CIC-IoT-2023 and TON\_IoT,
-where the within-corpus direction agrees; statistics on different scales, such as ridge-LDA
-separability, also transfer poorly in absolute terms. Driver: \texttt{cbm/run\_geometry\_transfer.py}.
+\textbf{Transfer across corpora.} For each known-class statistic $s$ we fit
+$\mathrm{AUROC}=a+b\,s$ by least squares on the 60 CBM concept-space models of two corpora and apply
+it to the 30 models of the third (Table~\ref{tab:transfer}; \texttt{cbm/run\_geometry\_transfer.py}).
+The prediction beats the training-corpora mean AUROC in $3$ of $21$ cases, ranks the held-out models
+in the right direction in $7$ of $21$, and identifies the best configuration in $1$ of $21$. The
+slope is dominated by between-corpus differences (the dataset means are non-monotone), so it often
+has the wrong sign even for CIC-IoT-2023 and TON\_IoT, whose within-corpus directions agree.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -934,20 +778,15 @@ Closed-set F1 & $+0.128$ & $0.125$ & $+0.30$ & no \\
 \end{tabular}
 \end{table}
 
-\textbf{Scorer selection from synthetic outliers.} The leave-family-out proxy
-(Section~\ref{sec:lofo}) needs retraining. As a second rule that uses only known traffic, we build
-synthetic outliers from known validation flows and select the scorer, per-class Mahalanobis or
-logit energy, that better separates them from a disjoint set of validation flows. The primary
-construction, fixed before evaluation, permutes each feature independently across flows, keeping
-every marginal and breaking the joint structure of real traffic; a secondary construction uses
-midpoints of random pairs of validation flows. The choice is compared, per model and seed, with
-the scorer that is better on the true unknowns, on the same evaluation subsets as main
-Table~\ref{M-tab:scorer_arch} (Table~\ref{tab:selection}). The permutation rule is right for
-$25/35$ CTU, $26/35$ CIC and $9/35$ TON\_IoT models ($60/105$); the midpoint rule for $27/35$,
-$21/35$ and $9/35$ ($57/105$). Always choosing Mahalanobis is right for $62/105$ and always
-choosing energy for $43/105$, and the wrong choices of the permutation rule cost $0.066$ AUROC on
-average. Both rules prefer Mahalanobis on TON\_IoT, where energy is better for every
-architecture, so neither selects the scorer reliably. Driver: \texttt{cbm/run\_scorer\_selection.py}.
+\textbf{Scorer selection from synthetic outliers.} As a second known-traffic rule that needs no
+retraining, we select Mahalanobis or energy by which better separates validation flows from
+synthetic outliers: feature-wise permutations of validation flows (primary, fixed in advance) or
+midpoints of random pairs (Table~\ref{tab:selection}; \texttt{cbm/run\_scorer\_selection.py}). Against
+the scorer better on the true unknowns, the permutation rule is right for $25/35$ CTU, $26/35$ CIC
+and $9/35$ TON\_IoT models ($60/105$), the midpoint rule for $27/35$, $21/35$ and $9/35$ ($57/105$);
+always choosing Mahalanobis is right for $62/105$ and energy for $43/105$, and wrong permutation
+choices cost $0.066$ AUROC on average. Both rules prefer Mahalanobis on TON\_IoT, where energy is
+better for every architecture.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -995,42 +834,26 @@ HybridCBM & 0.615 & 0.641 & 0.747 & 0.548 & 2/5 & 2/5 \\
 \section{Open-Set (C+1) and Per-Family Evaluation}
 \label{sec:openset_supp}
 
-\textbf{Protocol.} We evaluate the deployed $(C{+}1)$-class detector at a reject threshold
-$\tau$ calibrated to 5\% FPR on the known validation split. The scorer is per-class
-Mahalanobis on the model's scoring space: the concept activations for CBM variants, the
-binary rule activations for NeSy-NIDS, and the penultimate embedding for the MLP. Ground
-truth has $C$ known classes plus a single ``unknown'' class into which \emph{all} held-out
-families are merged; a flow is predicted ``unknown'' if its score exceeds $\tau$, else the
-$\arg\max$ known-class logit. Evaluation uses $5{,}000$ known test flows (all seeds) and,
-per unknown family, up to $3{,}000$ flows: $9$ families merged into ``unknown'' on
-CTU-IoT-23 and $29$ on CIC-IoT-2023. Main Table~\ref{M-tab:openset_agg} reports, over five seeds,
-the known-class rejection rate (target $\approx5\%$), the open-set macro-F1 over the $C{+}1$
-classes, and the equal-family-weighted mean AUROC.
+\textbf{Protocol.} The deployed $(C{+}1)$-class detector rejects a flow as unknown if its
+per-class Mahalanobis score (concept activations for the CBMs, hard rule activations for NeSy-NIDS,
+the embedding for the MLP) exceeds $\tau$, the 95th percentile on known validation flows, and
+otherwise takes the $\arg\max$ known-class logit. It is evaluated on $5{,}000$ known test flows and
+up to $3{,}000$ flows per held-out family, all families merged into one unknown class (9 on CTU, 29
+on CIC; main Table~\ref{M-tab:openset_agg}).
 
-The known rejection rate is close to target ($4.2$--$5.8\%$). Across seeds the
-coefficient of variation of $\tau$ is at most $0.11$ for every model ($0.09$ and $0.11$ for
-NeSy-NIDS on CTU-IoT-23 and CIC-IoT-2023). Open-set macro-F1 is modest on CTU-IoT-23
-($0.49$--$0.79$) and low on CIC-IoT-2023 ($0.13$--$0.27$). The mixture is essential to
-reading this number. The evaluation pool is heavily unknown-skewed, for NeSy-NIDS on
-CIC-IoT-2023 (Table~\ref{tab:confusion}, seed~0) it is $5{,}000$ known against $84{,}514$
-unknown flows, about $16.9$ unknowns per known flow, and only $15{,}646$ ($18.5\%$) of the
-pooled unknown flows exceed $\tau$. Macro-F1 weights every class equally, so it is \emph{not} dominated by the
-unknown class; in that matrix the unknown class in fact has the \emph{highest} per-class
-F1 ($\approx0.31$). What pulls macro-F1 down is a prevalence effect on the \emph{known}
-classes: the ${\sim}81\%$ of unknown flows that are not rejected are absorbed into known
-classes (most often VulnerabilityScan, Mirai, and DDoS-SYN), and because unknowns outnumber
-knowns ${\sim}17{:}1$ these false positives collapse known-class \emph{precision} (Benign
-precision $\approx0.07$, so F1 $\approx0.13$) even though known \emph{recall} stays high
-for accepted flows. The low unknown recall is a genuine weakness, but the small macro-F1
-is as much a prevalence artefact as a detection failure: reweighting the same confusion
-matrix to equal known/unknown totals, with all conditional prediction rates unchanged,
-raises macro-F1 from $\approx0.14$ to $\approx0.51$, an arithmetic sensitivity check, not
-a better model. We therefore treat the operating-point macro-F1 as prevalence-sensitive
-and base the detection claim on the (prevalence-free) per-family AUROC of
-Table~\ref{tab:openset_perfam}.
+The known rejection rate is close to target ($4.2$--$5.8\%$; the coefficient of variation of $\tau$
+across seeds is at most $0.11$). Open-set macro-F1 is $0.49$--$0.79$ on CTU-IoT-23 and $0.13$--$0.27$
+on CIC-IoT-2023, largely a prevalence effect. For NeSy-NIDS on CIC-IoT-2023 (Table~\ref{tab:confusion},
+seed 0) the pool has $5{,}000$ known and $84{,}514$ unknown flows, of which $15{,}646$ ($18.5\%$)
+exceed $\tau$; the ${\sim}81\%$ not rejected are absorbed into known classes, and since unknowns
+outnumber knowns ${\sim}17{:}1$ they collapse known-class precision (Benign $\approx0.07$, F1
+$\approx0.13$), while the unknown class has the highest per-class F1 ($\approx0.31$). Reweighting the
+same matrix to equal known and unknown totals, with all conditional rates unchanged, raises macro-F1
+from $\approx0.14$ to $\approx0.51$, an arithmetic check rather than a better model. We therefore base
+the detection claim on the prevalence-free per-family AUROC (Table~\ref{tab:openset_perfam}).
 
-\begin{table}[t]
-\centering\small
+\begin{table}[!htb]
+\centering\footnotesize
 \caption{$(C{+}1)$ confusion matrix, NeSy-NIDS on CIC-IoT-2023 (seed 0; row $=$ true,
 column $=$ predicted). All 29 held-out families are merged into the single
 ``unknown/reject'' row. VulnSc.: VulnerabilityScan.}
@@ -1052,21 +875,17 @@ unknown       & 9633 & 13459 & 16918 & 6349 & 22509 & 15646 \\
 \end{tabular}}
 \end{table}
 
-Table~\ref{tab:openset_perfam} shows per-family AUROC and unknown recall at $\tau$ for
-JointCBM ($\gamma{=}0$) and NeSy-NIDS; averaging its recall column over families with equal
-weight gives the family-averaged recall of main Table~\ref{M-tab:openset_agg} ($0.51$/$0.36$ for
-JointCBM, $0.83$/$0.20$ for NeSy-NIDS on CTU/CIC). Pooled AUROC masks extreme per-family variation: for JointCBM detection is
-near-perfect for several volumetric DDoS families (AUROC $>0.97$, recall $>0.8$) but
-below chance for others (CIC Mirai-greip\_flood $0.15$; DDoS-UDP\_Fragmentation $0.24$; DDoS-SynonymousIP $0.48$) and weak
-for most injection/scan/web families ($0.58$--$0.71$, recall ${\le}0.22$), and NeSy-NIDS
-catches a different subset (Table~\ref{tab:openset_perfam}). The
-equal-family-weighted mean AUROC ($0.818$ CTU, $0.722$ CIC) is close to the pooled AUROC of
-main Table~\ref{M-tab:main} ($0.823$ CTU, $0.717$ CIC), but per-family detection ranges from
-near-perfect to near-chance for both models, so the pooled figure should not be read as a
-uniform per-family detection rate.
+Averaging the recall column of Table~\ref{tab:openset_perfam} over families gives the
+family-averaged recall of main Table~\ref{M-tab:openset_agg} ($0.51$/$0.36$ for JointCBM,
+$0.83$/$0.20$ for NeSy-NIDS on CTU/CIC). The equal-family mean AUROC ($0.818$ CTU, $0.722$ CIC for
+JointCBM) is close to the pooled AUROC of main Table~\ref{M-tab:main} ($0.823$, $0.717$), but
+its per-family detection ranges from near-perfect (several volumetric DDoS families, AUROC $>0.97$) to
+below chance (CIC Mirai-greip\_flood $0.15$, DDoS-UDP\_Fragmentation $0.24$), is weak for most
+injection, scan and web families ($0.58$--$0.71$, recall ${\le}0.22$), and differs between the two
+models.
 
-\begin{table}[t]
-\centering\small
+\begin{table}[!htb]
+\centering\footnotesize
 \caption{Per-family OOD AUROC and unknown recall at $\tau$ (5\% FPR) for JointCBM
 ($\gamma{=}0$) and NeSy-NIDS, mean over five seeds. $n$: evaluated flows of the family, the same
 for every seed (sampled without replacement, at most $3{,}000$; each a distinct dataset record), so
@@ -1126,40 +945,6 @@ Uploading\_Attack & 1{,}252 & 0.596 & 0.128 & 0.431 & 0.004 \\
 \end{tabular}}
 \end{table}
 
-\section{Per-Class F1 on the Random Split}
-\label{sec:perclass}
-
-A single weighted F1 can hide minority-class failure. Table~\ref{tab:perclass} gives
-per-class F1 on the known test split (random split, mean over five seeds) for the MLP and
-JointCBM ($\gamma{=}0$). The two agree within $0.002$ for every class, so under
-matched-distribution evaluation this model shows no measurable per-class difference from
-the MLP; the other variants are not tabulated here. The weighted F1 nonetheless masks real spread: CTU Okiru is $0.86$ and DDoS $0.90$ (vs
-$0.98$--$1.00$ for Benign and C\&C-HeartBeat) and CIC Recon-PortScan is only $0.64$, VulnerabilityScan $0.70$ and Benign $0.76$.
-
-\begin{table}[t]
-\centering\small
-\caption{Per-class known-test F1 on the random split (mean over five seeds). MLP vs
-JointCBM ($\gamma{=}0$); values agree to within $0.002$.}
-\label{tab:perclass}
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{llc}
-\toprule
-Dataset & Class & F1 (MLP / JointCBM) \\
-\midrule
-CTU & Benign & 0.977 / 0.976 \\
-CTU & C\&C-HeartBeat & 0.999 / 0.998 \\
-CTU & DDoS & 0.900 / 0.900 \\
-CTU & Okiru & 0.857 / 0.857 \\
-\midrule
-CIC & Benign & 0.760 / 0.759 \\
-CIC & DDoS-SYN\_Flood & 0.999 / 0.999 \\
-CIC & Mirai-greeth\_flood & 0.999 / 0.999 \\
-CIC & Recon-PortScan & 0.636 / 0.638 \\
-CIC & VulnerabilityScan & 0.699 / 0.697 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \section{Joint \texorpdfstring{$(\lambda,\gamma)$}{(lambda,gamma)} Sweep}
 \label{sec:lambdagamma}
 
@@ -1177,64 +962,53 @@ column, $+0.020$ on CTU, $-0.040$ on CIC). (iii) Known-class F1 is nearly consta
 \emph{included} in the cell means, and they show that strong concept supervision can destabilise
 training. No single tunable factor governs open-set detectability.
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering\small
 \caption{Joint $(\lambda,\gamma)$ sweep: JointCBM OOD AUROC on the main splits (mean over five
-seeds; std in parentheses). $\lambda$ down rows, $\gamma$ across columns.}
+seeds; std in parentheses), $\lambda$ down rows, $\gamma$ across columns; F1 and concept accuracy
+(Conc.) at $\gamma{=}0$. The $\gamma{=}0$ column is the $\lambda$ sensitivity, and the $\lambda{=}0.5$
+row is the JointCBM rows of main Table~\ref{M-tab:main}.}
 \label{tab:lambdagamma}
-\setlength{\tabcolsep}{6pt}
-\begin{tabular}{lccc}
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
 \toprule
-& $\gamma{=}0$ & $\gamma{=}0.5$ & $\gamma{=}1.0$ \\
+& $\gamma{=}0$ & $\gamma{=}0.5$ & $\gamma{=}1.0$ & F1 & Conc. \\
 \midrule
-\multicolumn{4}{@{}l}{\textbf{CTU-IoT-23}} \\
-$\lambda{=}0.1$ & 0.810 (.021) & 0.801 (.040) & 0.806 (.047) \\
-$\lambda{=}0.5$ & 0.823 (.044) & 0.844 (.036) & 0.834 (.050) \\
-$\lambda{=}1.0$ & 0.830 (.041) & 0.854 (.029) & 0.860 (.037) \\
+\multicolumn{6}{@{}l}{\textbf{CTU-IoT-23}} \\
+$\lambda{=}0.1$ & 0.810 (.021) & 0.801 (.040) & 0.806 (.047) & 0.9331 & 0.700 \\
+$\lambda{=}0.5$ & 0.823 (.044) & 0.844 (.036) & 0.834 (.050) & 0.9330 & 0.874 \\
+$\lambda{=}1.0$ & 0.830 (.041) & 0.854 (.029) & 0.860 (.037) & 0.8931 & 0.935 \\
 \midrule
-\multicolumn{4}{@{}l}{\textbf{CIC-IoT-2023}} \\
-$\lambda{=}0.1$ & 0.743 (.018) & 0.724 (.023) & 0.703 (.020) \\
-$\lambda{=}0.5$ & 0.717 (.017) & 0.702 (.007) & 0.699 (.013) \\
-$\lambda{=}1.0$ & 0.703 (.013) & 0.704 (.005) & 0.700 (.007) \\
+\multicolumn{6}{@{}l}{\textbf{CIC-IoT-2023}} \\
+$\lambda{=}0.1$ & 0.743 (.018) & 0.724 (.023) & 0.703 (.020) & 0.8196 & 0.865 \\
+$\lambda{=}0.5$ & 0.717 (.017) & 0.702 (.007) & 0.699 (.013) & 0.8183 & 0.963 \\
+$\lambda{=}1.0$ & 0.703 (.013) & 0.704 (.005) & 0.700 (.007) & 0.8184 & 0.975 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \section{Concept-Fidelity Intervention (CBM)}
 \label{sec:concept_intervention}
 
-Comparing soft concepts with their binarised values cannot establish semantic fidelity,
-since both can contain concept errors. Because our concepts are deterministic functions of
-the input, we test directly how much the JointCBM's accuracy depends on \emph{deviations}
-from the declared predicates. We (i) run the model normally (F1$_{\text{pred}}$), (ii)
-intervene by replacing the predicted concepts with the \emph{true} binary predicates
-$\mathbf{c}_{\text{gt}}$ and passing them through the model's own learned classifier head
-(F1$_{\text{gt}}$), and (iii) fit a fresh logistic regression on $\mathbf{c}_{\text{gt}}$
-alone (F1$_{\text{LR}}$, how well this linear classifier can classify from the declared
-predicates; it is not an upper bound on the information they contain).
+Because our concepts are deterministic functions of the input, we test how much JointCBM's
+accuracy depends on deviations from the declared predicates: we (i) run the model normally
+(F1$_{\text{pred}}$), (ii) replace the predicted concepts with the true binary predicates and pass
+them through the model's own classifier head (F1$_{\text{gt}}$), and (iii) fit a logistic regression
+on the true predicates alone (F1$_{\text{LR}}$; not an upper bound on their information). On
+CTU-IoT-23 the model scores $0.93$, its head on the true predicates $0.46$--$0.49$ and the logistic
+regression $0.58$; on CIC-IoT-2023, $0.82$, $0.62$--$0.65$ and $0.72$ (Table~\ref{tab:cintervene}). Under
+the evaluated linear classifiers the declared predicates therefore do not account for the CBM's
+accuracy; the learned concept values carry decision-relevant information that the declared labels do
+not. Because the intervention changes the head's input distribution, the gap is not a decomposition
+of accuracy. It shrinks only slightly with $\gamma$ (CTU $0.476\to0.441$, about one seed std).
 
-The gap is large (Table~\ref{tab:cintervene}). On CTU-IoT-23 the model scores F1 $0.93$ but
-its classifier on the true predicates scores only $0.46$--$0.49$, and a logistic
-regression on the declared predicates alone reaches $0.58$; on CIC-IoT-2023 the model
-scores $0.82$ versus $0.62$--$0.65$ from true predicates and $0.72$ from a logistic
-regression on the predicates alone. So the eight
-declared predicates do not, under the evaluated linear classifiers, account for the CBM's
-known-class accuracy. Because the intervention alters the classifier's input distribution,
-this gap tests decision fidelity under predicate replacement; it does not attribute a fixed
-fraction of accuracy to a source. What it shows is that the learned concept values, whether
-through their continuous magnitudes or through their disagreements with the declared labels,
-carry decision-relevant information that the declared predicates do not. On CTU-IoT-23 the
-soft-versus-thresholded probe difference is small for $\gamma{\le}0.5$ (Section~\ref{sec:leakage}), so
-there most of that information survives thresholding. The mean gap shrinks slightly with
-$\gamma$ (CTU $0.476\to0.441$), but by about one seed std ($0.02$--$0.04$).
-
-\begin{table}[!htbp]
-\centering\small
+\begin{table}[!htb]
+\centering\footnotesize
 \caption{Concept-fidelity intervention (JointCBM, five seeds). F1$_{\text{pred}}$: normal;
 F1$_{\text{gt}}$: true predicates through the learned classifier; F1$_{\text{LR}}$:
-logistic regression on true predicates alone (deterministic, so no seed std). Values are
-mean (std) over five seeds. The intervention changes the classifier's input distribution, so
-the gap tests decision fidelity under predicate replacement, not a decomposition of accuracy.}
+logistic regression on true predicates alone (deterministic, so no seed std). Mean (std) over
+five seeds.}
 \label{tab:cintervene}
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{llccc}
