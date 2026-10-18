@@ -857,7 +857,7 @@
          y="65"
          class="small"
          id="text54"
-         style="font-size:14px;font-family:Arial, Helvetica, sans-serif;text-anchor:middle;fill:#111111;stroke-width:1.27192">(2-layer MLP)</text>
+         style="font-size:14px;font-family:Arial, Helvetica, sans-serif;text-anchor:middle;fill:#111111;stroke-width:1.27192">(3-layer MLP)</text>
       <text
          x="62"
          y="83"
@@ -1088,7 +1088,7 @@
            sodipodi:role="line"
            id="tspan13"
            x="222.29832"
-           y="169.64746">binarised at inference</tspan></text>
+           y="169.64746">binarised for audit/OOD</tspan></text>
       <text
          x="233.00682"
          y="167.64746"
@@ -1391,21 +1391,31 @@
          sodipodi:role="line"
          x="685.98529"
          y="431.46521"
-         id="tspan57">Binary Rule </tspan><tspan
+         id="tspan57">Rule</tspan><tspan
          sodipodi:role="line"
          x="685.98529"
          y="448.13187"
-         id="tspan109"> Activation</tspan></text>
+         id="tspan109">Activations</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#072b06;stroke-width:2.591;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10.364, 2.591;stroke-dashoffset:0;stroke-opacity:0.0198238;paint-order:stroke fill markers"
        x="683.2193"
-       y="459.12372"
+       y="466.05158"
        id="text61"><tspan
          sodipodi:role="line"
          id="tspan61"
          x="683.2193"
-         y="459.12372">$a\in\{0,1\}^{R}$</tspan></text>
+         y="466.05158">$\mathbf{a}^{\mathrm{soft}},\mathbf{a}^{\mathrm{hard}}$</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#072b06;stroke-width:2.591;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10.364, 2.591;stroke-dashoffset:0;stroke-opacity:0.0198238;paint-order:stroke fill markers"
+       x="730.86208"
+       y="499.84774"
+       id="text_asoft"><tspan
+         sodipodi:role="line"
+         id="tspan_asoft"
+         x="730.86208"
+         y="499.84774">$\mathbf{a}^{\mathrm{soft}}$</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#072b06;stroke-width:2.591;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10.364, 2.591;stroke-dashoffset:0;stroke-opacity:0.0110132;paint-order:stroke fill markers"
@@ -1449,7 +1459,7 @@
          sodipodi:role="line"
          x="665.71606"
          y="560.12958"
-         id="tspan65">$\mathbf{W}\mathbf{a}^{\mathrm{hard}}$</tspan><tspan
+         id="tspan65">$\mathbf{W}\mathbf{a}^{\mathrm{soft}}$</tspan><tspan
          sodipodi:role="line"
          x="665.71606"
          y="570.12958"
@@ -1486,7 +1496,7 @@
          sodipodi:role="line"
          id="tspan68"
          x="858.85815"
-         y="563.25073">(interpretability dial)</tspan></text>
+         y="563.25073">(learned weight)</tspan></text>
     <ellipse
        style="fill:#000080;fill-opacity:1;stroke:#072b06;stroke-width:3.891;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
        id="path69"
