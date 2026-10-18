@@ -865,10 +865,10 @@ on CIC-IoT-2023). We repeat for every known attack family $\times$ five seeds
 (main Table~\ref{M-tab:lofo}).
 
 The proxy is only \emph{conditionally} reliable. On CTU-IoT-23 the family-majority vote
-recovers Mahalanobis (two of three families, $9/15$ folds); the C\&C-HeartBeat and DDoS
-folds favour it, and only Okiru misfires (Mahalanobis cannot detect held-out Okiru,
+recovers Mahalanobis (two of three families, $9/15$ runs); the C\&C-HeartBeat and DDoS
+held-out-family experiments favour it, and only Okiru misfires (Mahalanobis cannot detect held-out Okiru,
 $0.22$). On CIC-IoT-2023 the family-majority vote selects Mahalanobis for all four families
-($15/20$ individual folds, $5/20$ energy) and so never recovers energy: held-out known families
+($15/20$ runs, $5/20$ energy) and so never recovers energy: held-out known families
 remain separable in activation space (Mahalanobis $0.70$--$0.86$), so the proxy selects
 Mahalanobis, yet the true CIC unknowns overlap the known boundary and need energy. Held-out-known thus
 over-approximates activation-space detectability exactly on the corpus where the scorer
