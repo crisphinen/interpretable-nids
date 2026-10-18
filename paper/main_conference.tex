@@ -519,12 +519,13 @@ CIC & NeSy-NIDS     & 4.2 (0.6) & 0.145 (.017) & 0.641 & 0.20 \\
 \centering\footnotesize
 \caption{Post-hoc OOD detectors on the unconstrained MLP (AUROC, mean$\pm$std over five seeds, on the evaluation flows of Table~\ref{tab:main}).}
 \label{tab:ood_baselines}
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lccccc}
 \toprule
 Dataset & MSP & ODIN & Energy & kNN & Mahal. \\
 \midrule
-CTU-IoT-23   & $.302{\pm}.068$ & $.364{\pm}.067$ & $.377{\pm}.072$ & $\mathbf{.879{\pm}.003}$ & $.874{\pm}.002$ \\
-CIC-IoT-2023 & $.609{\pm}.012$ & $.698{\pm}.013$ & $.607{\pm}.019$ & $\mathbf{.828{\pm}.007}$ & $.807{\pm}.007$ \\
+CTU & $.302{\pm}.068$ & $.364{\pm}.067$ & $.377{\pm}.072$ & $\mathbf{.879{\pm}.003}$ & $.874{\pm}.002$ \\
+CIC & $.609{\pm}.012$ & $.698{\pm}.013$ & $.607{\pm}.019$ & $\mathbf{.828{\pm}.007}$ & $.807{\pm}.007$ \\
 \bottomrule
 \end{tabular}
 \end{table}
