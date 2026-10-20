@@ -1,7 +1,7 @@
 # Towards Trustworthy IoT Network Security: Interpretable Open-Set Intrusion Detection
 
-**Under review · 2026**  
-Crisphine Macharia Ngari, Ning Weng — Southern Illinois University Carbondale
+**Under review, 2026**  
+Crisphine Macharia Ngari and Ning Weng, Southern Illinois University Carbondale
 
 [![GitHub](https://img.shields.io/badge/GitHub-crisphinen%2Finterpretable--nids-blue?logo=github)](https://github.com/crisphinen/interpretable-nids)
 
@@ -11,8 +11,8 @@ Crisphine Macharia Ngari, Ning Weng — Southern Illinois University Carbondale
 
 This repository contains the code, data splits, trained models, results and manuscript for our study of two inherently interpretable architectures for IoT network intrusion detection and open-set (OOD) detection:
 
-- **Concept Bottleneck Models (CBMs)** — predictions routed through human-defined traffic concepts; supports test-time intervention
-- **Neuro-Symbolic NIDS (NeSy-NIDS)** — domain-expert threshold rules learned through *k*-annealed sigmoid gates; activations binarised for audit and OOD scoring
+- **Concept Bottleneck Models (CBMs)**: predictions routed through human-defined traffic concepts; supports test-time intervention
+- **Neuro-Symbolic NIDS (NeSy-NIDS)**: domain-expert threshold rules learned through *k*-annealed sigmoid gates; activations binarised for audit and OOD scoring
 
 Both are scored for OOD detection by per-class Mahalanobis distance in their own representation space, on **CTU-IoT-23** (4 known / 9 unknown families), **CIC-IoT-2023** (5 known / 29 unknown) and, for the concept-space geometry analysis, **TON_IoT** (5 known / 5 unknown).
 
@@ -20,7 +20,7 @@ Every result in the paper comes from this code, on splits the scripts draw deter
 
 ![CBM and NeSy-NIDS architectures](figures/architecture.png)
 
-*Fig. 1 — (A) a concept bottleneck with test-time intervention and (B) a differentiable rule bank with a neural fallback, both scored for OOD by per-class Mahalanobis distance.*
+*Fig. 1. (A) a concept bottleneck with test-time intervention and (B) a differentiable rule bank with a neural fallback, both scored for OOD by per-class Mahalanobis distance.*
 
 ---
 
@@ -79,15 +79,15 @@ Each split folder holds `train`, `val`, `test_known` and `test_unknown` parquet 
 | `data/cicr`, `data/cicr_alt`, `data/cicr_lofo_*` | CIC-IoT-2023 | `vocab.json` only; regenerate (below) |
 | `data/*.parquet`, `data/ctu`, `data/cic` | original-feature CTU split and vocabularies, used by the λ and (λ, γ) ablations | parquet and vocab files |
 
-**CTU-IoT-23** — [Stratosphere Laboratory](https://www.stratosphereips.org/datasets-iot23). To regenerate the splits, build `data/iot23_3.duckdb` with the scripts in `preprocess/` and run `python 06_make_kfs_splits.py` (see `REPRODUCE.md` for the alternative, temporal and control splits).
+**CTU-IoT-23**: [Stratosphere Laboratory](https://www.stratosphereips.org/datasets-iot23). To regenerate the splits, build `data/iot23_3.duckdb` with the scripts in `preprocess/` and run `python 06_make_kfs_splits.py` (see `REPRODUCE.md` for the alternative, temporal and control splits).
 
-**CIC-IoT-2023** — [CIC](https://www.unb.ca/cic/datasets/iotdataset-2023.html). The unknown pool (about 40M flows) is too large for GitHub, so generate the splits:
+**CIC-IoT-2023**: [CIC](https://www.unb.ca/cic/datasets/iotdataset-2023.html). The unknown pool (about 40M flows) is too large for GitHub, so generate the splits:
 
 1. `python preprocess/download_cciot23_csv.py` saves one folder per class under `downloads/csv/` and renames the server's `DDoS-PSHACK_FLOOD` / `DDoS-RSTFINFLOOD` folders to the names the config expects.
 2. `python preprocess/merge_ciciot23.py` builds `data/ciciot23.duckdb` (`--csv-dir` / `--out` to change paths).
 3. `python 04_make_splits_ciciot23.py --name cicr --order-by-rowid` writes `data/cicr` (about 60 GB RAM, 2 minutes); add `--alt` with `--name cicr_alt` for the alternative known set.
 
-**TON_IoT** — [UNSW](https://research.unsw.edu.au/projects/toniot-datasets). `python 07_make_splits_ton.py` builds `data/ton` from the `Processed_Network_dataset` CSVs under `downloads/TON_IoT/` (or the glob in `TON_CSV_GLOB`).
+**TON_IoT**: [UNSW](https://research.unsw.edu.au/projects/toniot-datasets). `python 07_make_splits_ton.py` builds `data/ton` from the `Processed_Network_dataset` CSVs under `downloads/TON_IoT/` (or the glob in `TON_CSV_GLOB`).
 
 ---
 

@@ -210,7 +210,7 @@ def run_shap_mlp(X_tr, y_tr, X_te, y_te, feature_cols, concept_names, dataset):
     explainer = shap.GradientExplainer(_Wrapper(model), X_bg)
     shap_values = explainer.shap_values(X_ex)  # list of (N, F) per class
 
-    # Mean absolute SHAP across classes and samples → global feature importance
+    # Mean absolute SHAP across classes and samples gives the global feature importance
     shap_arr = np.stack(shap_values, axis=0)       # (C, N, F)
     mean_abs_shap = np.abs(shap_arr).mean(axis=(0, 1))  # (F,)
 
@@ -300,7 +300,7 @@ def run_posthoc_cbm(X_tr, y_tr, C_tr,
     mean_concept_acc = np.mean(list(concept_accs.values()))
     print(f"\n  Per-concept probe accuracy:")
     for cname, acc in concept_accs.items():
-        flag = " ← unsafe (<0.97)" if acc < 0.97 else ""
+        flag = "  <- unsafe (<0.97)" if acc < 0.97 else ""
         print(f"    {cname:<28} {acc:.4f}{flag}")
     print(f"  Mean concept accuracy: {mean_concept_acc:.4f}")
 

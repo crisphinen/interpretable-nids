@@ -1,4 +1,4 @@
-"""Central config — change values here, everything else reads from here."""
+"""Central config: change values here, everything else reads from here."""
 import os
 
 # paths
@@ -30,13 +30,13 @@ NUMERIC_FEATURES = [
     'Min', 'SSH', 'fin_count', 'rst_count', 'HTTP', 'fin_flag_number',
     'rst_flag_number',
 ]
-CAT_FEATURES = ['conn_state', 'history', 'service']   # raw → integer-encoded
+CAT_FEATURES = ['conn_state', 'history', 'service']   # raw values integer-encoded
 ALL_FEATURES = NUMERIC_FEATURES + ['conn_state_id', 'history_id', 'service_id']
 N_FEATURES   = len(ALL_FEATURES)   # 37
 
 # model
 EMBED_DIM  = 64
-CURVATURE  = 1.0      # Poincaré ball curvature c; c→0 approaches Euclidean
+CURVATURE  = 1.0      # Poincaré ball curvature c; as c -> 0 it approaches Euclidean
 HIDDEN_DIM = 256
 TEMPERATURE = 0.1     # softmax temperature on distances
 
